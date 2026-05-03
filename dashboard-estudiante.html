@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Estudiante - Vocacional Monseñor Sanabria</title>
+    <link rel="icon" type="image/png" href="src/logo/VOCA%20Admisiones.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1.21.3/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-outfit { font-family: 'Outfit', sans-serif; }
+        .bg-voca-blue { background-color: #003366; }
+        .text-voca-blue { color: #003366; }
+        .bg-voca-red { background-color: #cc0000; }
+        .bg-voca-gold { background-color: #ffcc00; }
+    </style>
+</head>
+<body class="bg-gray-50 flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-voca-blue text-white flex flex-col hidden md:flex">
+        <div class="h-20 flex items-center px-6 border-b border-blue-800">
+            <img src="src/logo/VOCA%20Admisiones.png" alt="Logo" class="h-10 w-10 bg-white rounded-full p-1 mr-3">
+            <span class="font-outfit font-bold text-lg tracking-wide">Portal SVS</span>
+        </div>
+        
+        <nav class="flex-1 py-6 px-4 space-y-2">
+            <a href="#" id="tab-progreso" onclick="switchTab('progreso')" class="flex items-center gap-3 px-4 py-3 bg-blue-800 rounded-lg text-white font-medium transition">
+                <i class="fa-solid fa-chart-pie w-5 text-center"></i> Mi Progreso
+            </a>
+            <a href="#" id="tab-datos" onclick="switchTab('datos')" class="flex items-center gap-3 px-4 py-3 hover:bg-blue-800 rounded-lg text-blue-200 hover:text-white font-medium transition">
+                <i class="fa-regular fa-id-card w-5 text-center"></i> Mis Datos
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 hover:bg-blue-800 rounded-lg text-blue-200 hover:text-white font-medium transition">
+                <i class="fa-solid fa-file-arrow-up w-5 text-center"></i> Documentos
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 hover:bg-blue-800 rounded-lg text-blue-200 hover:text-white font-medium transition">
+                <i class="fa-regular fa-calendar-check w-5 text-center"></i> Examen de Admisión
+            </a>
+            <a href="#" onclick="toggleChatPanel()" class="flex items-center justify-between px-4 py-3 hover:bg-blue-800 rounded-lg text-blue-200 hover:text-white font-medium transition mt-4 border-t border-blue-800/50 pt-4">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-comments w-5 text-center"></i> Mensajes
+                </div>
+                <span id="sidebar-msg-badge" class="bg-voca-red text-white text-xs font-bold px-2 py-0.5 rounded-full hidden shadow-lg animate-pulse">0</span>
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-blue-800">
+            <a href="login.html" class="flex items-center gap-3 px-4 py-3 text-red-300 hover:text-red-100 hover:bg-blue-800 rounded-lg font-medium transition">
+                <i class="fa-solid fa-arrow-right-from-bracket w-5 text-center"></i> Cerrar Sesión
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main id="main-scroll" class="flex-1 flex flex-col h-screen overflow-y-auto relative">
+        <!-- Topbar -->
+        <header class="h-20 bg-white shadow-sm flex items-center justify-between px-8 z-10">
+            <div class="flex items-center md:hidden">
+                <button class="text-gray-500 hover:text-gray-700 text-xl" title="Menú"><i class="fa-solid fa-bars"></i></button>
+            </div>
+            
+            <h1 class="text-xl font-semibold text-gray-800 hidden md:block">Proceso de Admisión 2026</h1>
+            
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <button class="text-gray-400 hover:text-voca-blue transition relative" onclick="toggleNotificationsMenu()" title="Notificaciones">
+                        <i class="fa-regular fa-bell text-xl"></i>
+                        <span id="bell-badge" class="absolute top-0 right-0 w-2.5 h-2.5 bg-voca-red rounded-full hidden ring-2 ring-white"></span>
+                    </button>
+                    <!-- Menú de Notificaciones -->
+                    <div id="notifications-dropdown" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden">
+                        <div class="p-3 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                            <span class="font-bold text-gray-700 font-outfit text-sm">Notificaciones</span>
+                            <button onclick="markAllNotificationsAsRead()" class="text-xs text-voca-blue hover:underline">Marcar todo como leído</button>
+                        </div>
+                        <div id="notifications-list" class="max-h-80 overflow-y-auto bg-white">
+                            <!-- Lista generada dinámicamente -->
+                        </div>
+                        <div class="p-2 border-t border-gray-100 bg-gray-50 text-center">
+                            <button onclick="scrollToAvisos(); toggleNotificationsMenu();" class="text-xs text-gray-500 font-medium hover:text-voca-blue">Ver todos en el Muro</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="header-avatar-container" class="h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-bold font-outfit border-2 border-voca-blue overflow-hidden">
+                    <span id="header-initials">--</span>
+                    <img id="header-photo" src="" class="w-full h-full object-cover hidden" alt="Foto de perfil">
+                </div>
+                <div class="hidden md:block text-sm">
+                    <p class="font-semibold text-gray-700" id="header-name">Estudiante</p>
+                    <p class="text-gray-500 text-xs" id="header-email">estudiante@gmail.com</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="p-8 max-w-7xl mx-auto w-full">
+            
+            <div id="view-progreso">
+                <div class="mb-8">
+                    <h2 id="greeting" class="text-3xl font-bold font-outfit text-voca-blue mb-2">¡Hola, Estudiante!</h2>
+                    <p class="text-gray-600">Este es tu panel de control. Aquí podrás dar seguimiento a tu admisión.</p>
+                </div>
+                <!-- Stats/Progress -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <!-- Step 1 -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-start gap-4">
+                        <div class="h-12 w-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xl shrink-0">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 mb-1">Paso 1: Registro</h3>
+                            <p class="text-sm text-gray-500">Completado exitosamente. Tus datos han sido validados.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div id="step2-container" class="bg-white p-6 rounded-xl shadow-sm border border-voca-blue flex items-start gap-4 ring-2 ring-blue-50 transition-all duration-300">
+                        <div id="step2-icon" class="h-12 w-12 rounded-full bg-blue-100 text-voca-blue flex items-center justify-center text-xl shrink-0 transition-colors">
+                            <i class="fa-solid fa-spinner animate-spin-slow"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 mb-1">Paso 2: Examen</h3>
+                            <p id="step2-text" class="text-sm text-gray-500 transition-colors">Pendiente. Pronto se te asignará una fecha para el examen.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-start gap-4 opacity-60">
+                        <div class="h-12 w-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xl shrink-0">
+                            <i class="fa-solid fa-lock"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800 mb-1">Paso 3: Matrícula</h3>
+                            <p class="text-sm text-gray-500">Bloqueado. Se habilitará tras aprobar el examen de admisión.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progreso Alerts and Info -->
+                <div class="space-y-8 max-w-4xl mx-auto">
+                    <!-- Warning/Alert -->
+                    <div id="photo-warning" class="bg-yellow-50 border-l-4 border-voca-gold p-5 rounded-r-lg gap-4 items-start flex">
+                        <i class="fa-solid fa-triangle-exclamation text-yellow-600 text-xl mt-0.5"></i>
+                        <div>
+                            <h4 class="font-semibold text-yellow-800">Acción Requerida: Subir Fotografía</h4>
+                            <p class="text-yellow-700 text-sm mt-1">Aún no has subido tu fotografía tamaño pasaporte, requerida para tu carné de examen. Tienes hasta el 15 de Mayo.</p>
+                            <button class="mt-3 text-sm font-semibold text-voca-blue hover:underline" onclick="window.location.href='completar-registro.html'">Subir documento ahora &rarr;</button>
+                        </div>
+                    </div>
+
+                    <!-- Muro de Avisos -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="border-b border-gray-100 px-6 py-4 flex justify-between items-center bg-gray-50">
+                            <h3 class="font-bold text-gray-800"><i class="fa-solid fa-bullhorn mr-2 text-voca-blue"></i> Muro de Avisos</h3>
+                            <button onclick="loadAvisos()" class="text-voca-blue hover:text-blue-800 text-sm font-semibold transition" title="Refrescar">
+                                <i class="fa-solid fa-arrows-rotate mr-1"></i> Actualizar
+                            </button>
+                        </div>
+                        <div class="p-6 bg-gray-50/50">
+                            <div id="muro-container" class="space-y-4">
+                                <div class="text-center py-6">
+                                    <i class="fa-solid fa-spinner animate-spin text-2xl text-voca-blue mb-2"></i>
+                                    <p class="text-gray-500 text-sm">Cargando avisos...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View: Mis Datos -->
+            <div id="view-datos" class="hidden">
+                <div class="max-w-2xl mx-auto">
+                    <!-- Resumen de Perfil -->
+                    <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex flex-col items-center mb-8">
+                            <div class="w-32 h-40 bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200 mb-4 relative shadow-sm group">
+                                <img id="profile-photo" src="" class="w-full h-full object-cover hidden cursor-pointer transition-transform duration-300 group-hover:scale-110" alt="Foto Pasaporte" onclick="viewFullPhoto()" title="Ver foto completa">
+                                <div id="profile-photo-placeholder" class="absolute inset-0 flex items-center justify-center text-gray-300 text-5xl">
+                                    <i class="fa-solid fa-user"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-xl font-bold font-outfit text-gray-800 text-center">Información de Aspirante</h3>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 w-full mt-4">
+                            <div>
+                                <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Nombre Completo</span>
+                                <span class="font-semibold text-gray-800 text-lg" id="profile-name">Estudiante Prueba</span>
+                            </div>
+                            <div>
+                                <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Identificación</span>
+                                <span class="font-semibold text-gray-800 text-lg" id="profile-id">1-2345-6789</span>
+                            </div>
+                            <div>
+                                <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Correo Electrónico</span>
+                                <span class="font-semibold text-gray-800 text-lg break-all" id="profile-email">estudiante@gmail.com</span>
+                            </div>
+                            <div>
+                                <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Teléfono</span>
+                                <span class="font-semibold text-gray-800 text-lg" id="profile-phone">8888-8888</span>
+                            </div>
+                            <div class="md:col-span-2">
+                                <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Centro de Procedencia</span>
+                                <span class="font-semibold text-gray-800 text-lg" id="profile-school">No registrado</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 pt-6 border-t border-gray-100 w-full">
+                            <h4 class="text-voca-blue font-bold mb-6 uppercase tracking-wide text-sm flex items-center gap-2"><i class="fa-solid fa-user-shield"></i> Datos del Encargado Legal</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                <div class="md:col-span-2">
+                                    <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Nombre</span>
+                                    <span class="font-semibold text-gray-800 text-lg" id="profile-encargado-name">No registrado</span>
+                                </div>
+                                <div>
+                                    <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Teléfono</span>
+                                    <span class="font-semibold text-gray-800 text-lg" id="profile-encargado-phone">No registrado</span>
+                                </div>
+                                <div>
+                                    <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Correo Electrónico</span>
+                                    <span class="font-semibold text-gray-800 text-lg break-all" id="profile-encargado-email">No registrado</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </main>
+
+    <!-- Chat Offcanvas -->
+    <div id="chat-offcanvas" class="fixed inset-y-0 right-0 w-full md:w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50 flex flex-col">
+        <div class="bg-voca-blue text-white p-4 flex justify-between items-center shadow-md z-10">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center"><i class="fa-solid fa-headset text-xl"></i></div>
+                <div>
+                    <h3 class="font-bold leading-tight">Bandeja de Mensajes</h3>
+                    <p class="text-[10px] text-blue-200 uppercase tracking-wider font-semibold">Administración VOCA</p>
+                </div>
+            </div>
+            <button onclick="toggleChatPanel()" class="text-white hover:text-gray-200 transition text-2xl p-1" title="Cerrar chat"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <div id="student-chat-messages" class="flex-1 overflow-y-auto p-4 bg-[#f8f9fa] flex flex-col gap-1 relative">
+            <div class="absolute inset-0 opacity-5 pointer-events-none bg-[radial-gradient(#003366_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+            <!-- Mensajes se inyectan aquí -->
+        </div>
+        
+        <div class="bg-white border-t border-gray-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] relative z-10 flex flex-col">
+            <div id="student-quill-toolbar" class="border-b border-gray-200 bg-gray-50 p-1 flex items-center justify-between">
+                <span class="ql-formats m-0">
+                    <select class="ql-color" aria-label="Color de texto" title="Color de texto"></select>
+                    <select class="ql-size" aria-label="Tamaño de texto" title="Tamaño de texto"></select>
+                    <button class="ql-bold" aria-label="Negrita" title="Negrita"></button>
+                    <button class="ql-italic" aria-label="Cursiva" title="Cursiva"></button>
+                </span>
+                <div class="flex items-center">
+                    <button type="button" class="p-1 hover:text-voca-blue text-gray-500 transition relative" onclick="toggleEmojiPickerStudent()" title="Emojis">
+                        <i class="fa-regular fa-face-smile"></i>
+                        <div id="emoji-picker-container-student" class="absolute bottom-full right-0 z-50 hidden">
+                            <emoji-picker class="shadow-2xl"></emoji-picker>
+                        </div>
+                    </button>
+                    <input type="file" id="student-chat-attachment" class="hidden" onchange="updateAttachmentLabelStudent()" title="Adjuntar archivo" aria-label="Adjuntar archivo">
+                    <button type="button" class="p-1 hover:text-voca-blue text-gray-500 transition" title="Adjuntar archivo" onclick="document.getElementById('student-chat-attachment').click()">
+                        <i class="fa-solid fa-paperclip"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="relative">
+                <div id="student-chat-input" class="h-16 text-sm text-left border-none"></div>
+                <button id="send-student-btn" onclick="sendStudentMessage()" class="absolute right-2 top-2 bottom-2 bg-voca-blue hover:bg-blue-800 text-white rounded p-2 transition shadow" title="Enviar mensaje">
+                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                </button>
+            </div>
+            <div id="attachment-preview-student" class="hidden px-2 py-1 bg-blue-50 text-xs text-voca-blue flex items-center justify-between border-t border-blue-100">
+                <span id="attachment-name-student" class="truncate"></span>
+                <button class="text-red-500 hover:text-red-700" onclick="clearAttachmentStudent()" title="Quitar adjunto"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Backdrop para el chat -->
+    <div id="chat-backdrop" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden z-40 transition-opacity" onclick="toggleChatPanel()"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+    <!-- Botón flotante para volver arriba -->
+    <button id="back-to-top" onclick="scrollToTop()" class="fixed bottom-6 right-6 bg-voca-blue text-white w-12 h-12 rounded-full shadow-xl flex items-center justify-center text-xl transition-all duration-300 transform translate-y-20 opacity-0 z-50 hover:bg-blue-800 hover:scale-110" title="Volver arriba">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const studentName = localStorage.getItem('studentName');
+            const studentLastName = localStorage.getItem('studentLastName');
+            const studentEmail = localStorage.getItem('studentEmail');
+            const studentId = localStorage.getItem('studentId');
+            const studentPhone = localStorage.getItem('studentPhone');
+
+            if (!studentEmail) {
+                // Redirigir si no hay sesión
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Validar que el estudiante tenga su información obligatoria completa
+            let studentRecord = null;
+            try {
+                const { data: checkData, error: fetchError } = await supabaseClient
+                    .from('aspirantes')
+                    .select('*')
+                    .eq('email', studentEmail)
+                    .single();
+                
+                studentRecord = checkData;
+
+                if (checkData && (!checkData.registro_completado || !checkData.centro_procedencia)) {
+                    window.location.href = 'completar-registro.html';
+                    return;
+                }
+
+                // Poblar datos adicionales del perfil en el dashboard
+                if (checkData) {
+                    if (checkData.foto_url) {
+                        const img = document.getElementById('profile-photo');
+                        img.src = checkData.foto_url;
+                        img.classList.remove('hidden');
+                        document.getElementById('profile-photo-placeholder').classList.add('hidden');
+                        
+                        // Small navbar photo
+                        const headerPhoto = document.getElementById('header-photo');
+                        if (headerPhoto) {
+                            headerPhoto.src = checkData.foto_url;
+                            headerPhoto.classList.remove('hidden');
+                            const initialsElement = document.getElementById('header-initials');
+                            if (initialsElement) initialsElement.classList.add('hidden');
+                        }
+                        
+                        // Ocultar advertencia de foto
+                        const warning = document.getElementById('photo-warning');
+                        if(warning) warning.style.display = 'none';
+                    }
+                    if (checkData.centro_procedencia) document.getElementById('profile-school').innerText = checkData.centro_procedencia;
+                    if (checkData.encargado_nombre) document.getElementById('profile-encargado-name').innerText = checkData.encargado_nombre;
+                    if (checkData.encargado_telefono) document.getElementById('profile-encargado-phone').innerText = checkData.encargado_telefono;
+                    if (checkData.encargado_correo) document.getElementById('profile-encargado-email').innerText = checkData.encargado_correo;
+                }
+            } catch (e) {
+                console.error("Error validando perfil del estudiante:", e);
+            }
+
+            if (studentName) {
+                document.getElementById('greeting').innerText = `¡Hola, ${studentName}!`;
+                document.getElementById('header-name').innerText = studentName;
+                document.getElementById('header-email').innerText = studentEmail || '';
+                
+                const initials = studentName.charAt(0).toUpperCase() + (studentLastName ? studentLastName.charAt(0).toUpperCase() : '');
+                document.getElementById('header-initials').innerText = initials;
+                
+                document.getElementById('profile-name').innerText = `${studentName} ${studentLastName || ''}`.trim();
+                document.getElementById('profile-id').innerText = studentId || '';
+                document.getElementById('profile-email').innerText = studentEmail || '';
+                document.getElementById('profile-phone').innerText = studentPhone || '';
+            }
+            
+            // Inicializar Quill con tecla Enter fija
+            const studentBindings = {
+                customEnter: {
+                    key: 13,
+                    shiftKey: false,
+                    handler: function() {
+                        sendStudentMessage();
+                        return false;
+                    }
+                }
+            };
+            
+            window.studentChatEditor = new Quill('#student-chat-input', {
+                theme: 'snow',
+                modules: { 
+                    toolbar: '#student-quill-toolbar',
+                    keyboard: { bindings: studentBindings }
+                },
+                placeholder: 'Escribe tu mensaje...'
+            });
+            
+            document.querySelector('#emoji-picker-container-student emoji-picker').addEventListener('emoji-click', event => {
+                const emoji = event.detail.unicode;
+                const range = window.studentChatEditor.getSelection(true);
+                window.studentChatEditor.insertText(range.index, emoji);
+                toggleEmojiPickerStudent();
+            });
+
+            if (studentRecord) {
+                window.currentStudentId = studentRecord.id;
+                window.currentStudentData = studentRecord;
+                
+                // Cargar avisos inmediatamente al iniciar
+                loadAvisos();
+                
+                checkUnreadMessages();
+                
+                // Suscripción a Tiempo Real
+                supabaseClient
+                    .channel('mensajes_estudiante')
+                    .on('postgres_changes', { 
+                        event: 'INSERT', 
+                        schema: 'public', 
+                        table: 'mensajes',
+                        filter: `aspirante_id=eq.${window.currentStudentId}`
+                    }, payload => {
+                        if (payload.new.remitente === 'admin') {
+                            if (chatOpen) {
+                                loadStudentMessages();
+                            } else {
+                                checkUnreadMessages();
+                            }
+                        }
+                    })
+                    .on('postgres_changes', {
+                        event: 'UPDATE',
+                        schema: 'public',
+                        table: 'aspirantes',
+                        filter: `id=eq.${window.currentStudentId}`
+                    }, payload => {
+                        const newData = payload.new;
+                        // Notificar si se modificó la cita
+                        if (newData.cita_fecha !== window.currentStudentData.cita_fecha || 
+                            newData.cita_hora !== window.currentStudentData.cita_hora) {
+                            
+                            window.currentStudentData = newData;
+                            
+                            // Reproducir sonido
+                            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                            audio.play().catch(e => console.log('Audio error:', e));
+                            
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Cita de Examen Asignada',
+                                text: 'Se ha programado la fecha para tu prueba de admisión. Revisa tu Muro de Avisos o Mi Progreso.',
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 6000,
+                                timerProgressBar: true
+                            });
+
+                            updateExamCard(newData);
+                            loadAvisos();
+                        }
+                    })
+                    .subscribe();
+            }
+
+            updateExamCard(studentRecord);
+        });
+
+        function updateExamCard(data) {
+            const examContent = document.getElementById('exam-card-content');
+            if (!examContent) return;
+            
+            const step2Container = document.getElementById('step2-container');
+            const step2Icon = document.getElementById('step2-icon');
+            const step2Text = document.getElementById('step2-text');
+            
+            if (!data || !data.cita_fecha) {
+                if (step2Container) {
+                    step2Container.className = "bg-white p-6 rounded-xl shadow-sm border border-voca-blue flex items-start gap-4 ring-2 ring-blue-50 transition-all duration-300";
+                    step2Icon.className = "h-12 w-12 rounded-full bg-blue-100 text-voca-blue flex items-center justify-center text-xl shrink-0 transition-colors";
+                    step2Icon.innerHTML = '<i class="fa-solid fa-spinner animate-spin-slow"></i>';
+                    step2Text.innerText = "Pendiente. Pronto se te asignará una fecha para el examen.";
+                }
+
+                examContent.innerHTML = `
+                    <div class="text-center w-full py-4">
+                        <i class="fa-solid fa-hourglass-half text-gray-300 text-4xl mb-3"></i>
+                        <h4 class="text-lg font-bold text-gray-700">Cita por asignar</h4>
+                        <p class="text-gray-500 mt-1">El departamento de admisiones aún no te ha asignado la fecha de tu examen. Te notificaremos pronto.</p>
+                    </div>
+                `;
+            } else {
+                if (step2Container) {
+                    if (data.cita_confirmada) {
+                        step2Container.className = "bg-white p-6 rounded-xl shadow-sm border border-green-500 flex items-start gap-4 ring-2 ring-green-50 transition-all duration-300";
+                        step2Icon.className = "h-12 w-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xl shrink-0 transition-colors";
+                        step2Icon.innerHTML = '<i class="fa-solid fa-check-double"></i>';
+                        step2Text.innerHTML = "<strong class='text-green-700'>Confirmado.</strong> Asistencia registrada para la prueba.";
+                    } else {
+                        step2Container.className = "bg-white p-6 rounded-xl shadow-sm border border-voca-gold flex items-start gap-4 ring-2 ring-yellow-50 transition-all duration-300";
+                        step2Icon.className = "h-12 w-12 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center text-xl shrink-0 transition-colors";
+                        step2Icon.innerHTML = '<i class="fa-solid fa-bell animate-pulse"></i>';
+                        step2Text.innerHTML = "<strong class='text-yellow-700'>Acción Requerida.</strong> Revisa tu Muro de Avisos y confirma tu asistencia al examen.";
+                    }
+                }
+
+                // Formatear la fecha
+                const [year, month, day] = data.cita_fecha.split('-');
+                const dateObj = new Date(year, month - 1, day);
+                const monthName = dateObj.toLocaleString('es-ES', { month: 'short' });
+                
+                examContent.innerHTML = `
+                    <div class="bg-blue-50 p-4 rounded-lg text-center min-w-[120px]">
+                        <span class="block text-sm font-bold text-voca-blue uppercase mb-1">${monthName}</span>
+                        <span class="block text-4xl font-bold text-gray-800 font-outfit">${day}</span>
+                        <span class="block text-sm text-gray-500 mt-1">${year}</span>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-bold text-gray-800 mb-2">Examen de Admisión Confirmado</h4>
+                        <p class="text-gray-600 mb-4 text-sm">Debes presentarte en las instalaciones del colegio 30 minutos antes con tu cédula de identidad original.</p>
+                        <div class="flex items-center gap-4 text-sm font-medium text-gray-700">
+                            <span><i class="fa-regular fa-clock text-voca-red"></i> ${data.cita_hora}</span>
+                            <span><i class="fa-solid fa-location-dot text-voca-red"></i> ${data.cita_aula}</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        async function confirmCita() {
+            if (!window.currentStudentId) return;
+
+            const result = await Swal.fire({
+                title: 'Confirmar Asistencia',
+                text: '¿Confirmas que asistirás a tu prueba de admisión en la fecha y hora indicadas?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#003366',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, confirmo',
+                cancelButtonText: 'Aún no'
+            });
+
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Confirmando...', didOpen: () => Swal.showLoading() });
+                
+                const { error } = await supabaseClient
+                    .from('aspirantes')
+                    .update({ cita_confirmada: true })
+                    .eq('id', window.currentStudentId);
+
+                if (error) {
+                    Swal.fire('Error', 'No se pudo confirmar la cita. Inténtalo de nuevo.', 'error');
+                } else {
+                    window.currentStudentData.cita_confirmada = true;
+                    Swal.fire('¡Confirmado!', 'Tu asistencia al examen ha sido registrada exitosamente. Recuerda ser puntual el día de la prueba.', 'success');
+                    updateExamCard(window.currentStudentData);
+                    loadAvisos();
+                }
+            }
+        }
+
+        function viewFullPhoto() {
+            const photoUrl = document.getElementById('profile-photo').src;
+            if (!photoUrl || photoUrl === window.location.href) return;
+            
+            let viewer = document.getElementById('student-image-viewer');
+            if (!viewer) {
+                viewer = document.createElement('div');
+                viewer.id = 'student-image-viewer';
+                viewer.className = 'fixed inset-0 z-[9999] bg-black/90 hidden flex flex-col items-center justify-center cursor-zoom-out backdrop-blur-sm transition-opacity duration-300';
+                viewer.innerHTML = `
+                    <div class="absolute top-4 right-4 text-white text-3xl opacity-70 hover:opacity-100 transition"><i class="fa-solid fa-xmark"></i></div>
+                    <img id="student-image-viewer-img" src="" class="max-w-[90vw] max-h-[90vh] rounded-xl shadow-2xl object-contain border-4 border-white bg-white">
+                `;
+                viewer.onclick = () => {
+                    viewer.classList.add('opacity-0');
+                    setTimeout(() => viewer.classList.add('hidden'), 300);
+                };
+                document.body.appendChild(viewer);
+            }
+            
+            document.getElementById('student-image-viewer-img').src = photoUrl;
+            viewer.classList.remove('hidden');
+            setTimeout(() => viewer.classList.remove('opacity-0'), 10);
+        }
+
+        // --- Lógica del Chat ---
+        let chatOpen = false;
+        
+        function toggleChatPanel() {
+            chatOpen = !chatOpen;
+            const panel = document.getElementById('chat-offcanvas');
+            const backdrop = document.getElementById('chat-backdrop');
+            if(chatOpen) {
+                panel.classList.remove('translate-x-full');
+                backdrop.classList.remove('hidden');
+                loadStudentMessages();
+            } else {
+                panel.classList.add('translate-x-full');
+                backdrop.classList.add('hidden');
+            }
+        }
+
+        async function checkUnreadMessages() {
+            if(!window.currentStudentId) return;
+            const { count } = await supabaseClient
+                .from('mensajes')
+                .select('*', { count: 'exact', head: true })
+                .eq('aspirante_id', window.currentStudentId)
+                .eq('remitente', 'admin')
+                .eq('leido', false);
+                
+            const badge = document.getElementById('sidebar-msg-badge');
+            const bellBadge = document.getElementById('bell-badge');
+            
+            if(count > 0) {
+                badge.innerText = count;
+                badge.classList.remove('hidden');
+                bellBadge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+                bellBadge.classList.add('hidden');
+            }
+        }
+
+        async function loadStudentMessages() {
+            if(!window.currentStudentId) return;
+            
+            const { data: mensajes } = await supabaseClient
+                .from('mensajes')
+                .select('*')
+                .eq('aspirante_id', window.currentStudentId)
+                .order('fecha_hora', { ascending: true });
+                
+            // Marcar como leídos
+            await supabaseClient
+                .from('mensajes')
+                .update({ leido: true })
+                .eq('aspirante_id', window.currentStudentId)
+                .eq('remitente', 'admin')
+                .eq('leido', false);
+                
+            checkUnreadMessages();
+
+            const container = document.getElementById('student-chat-messages');
+            if(!mensajes || mensajes.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-400 mt-16 z-10 relative">
+                        <div class="w-20 h-20 bg-white rounded-full mx-auto flex items-center justify-center shadow-sm mb-4">
+                            <i class="fa-solid fa-comments text-4xl text-blue-100"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-700 mb-1">Tu Bandeja de Entrada</h4>
+                        <p class="text-xs px-6">Aquí recibirás notificaciones importantes de la administración.</p>
+                        <p class="text-xs px-6 mt-2">También puedes escribir tus consultas abajo.</p>
+                    </div>`;
+                return;
+            }
+            
+            container.innerHTML = mensajes.map(m => {
+                const isAdmin = m.remitente === 'admin';
+                const alignment = isAdmin ? 'justify-start' : 'justify-end';
+                const bgColor = isAdmin ? 'bg-white text-gray-800 border border-gray-200 shadow-sm' : 'bg-voca-blue text-white shadow-md';
+                const time = new Date(m.fecha_hora).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                let adjuntoHtml = '';
+                if (m.adjunto_url) {
+                    if (m.adjunto_url.match(/\.(jpeg|jpg|gif|png)$/i)) {
+                        adjuntoHtml = `<img src="${m.adjunto_url}" class="max-w-full h-auto mt-2 rounded-lg shadow-sm cursor-zoom-in" onclick="viewFullPhotoStudent('${m.adjunto_url}')">`;
+                    } else {
+                        adjuntoHtml = `
+                        <a href="${m.adjunto_url}" target="_blank" class="flex items-center gap-2 mt-2 bg-black/10 p-2 rounded hover:bg-black/20 transition text-sm">
+                            <i class="fa-solid fa-file-arrow-down text-xl"></i>
+                            <span class="truncate font-medium">${m.adjunto_nombre || 'Archivo Adjunto'}</span>
+                        </a>`;
+                    }
+                }
+
+                return `
+                    <div class="flex w-full ${alignment} mb-3 z-10 relative">
+                        <div class="max-w-[85%] rounded-2xl px-4 py-2.5 ${bgColor} ${isAdmin ? 'rounded-tl-sm' : 'rounded-tr-sm'} flex flex-col">
+                            <div class="text-sm ql-editor p-0 [&>p]:m-0 [&>p]:leading-relaxed font-inter break-words">${m.mensaje}</div>
+                            ${adjuntoHtml}
+                            <span class="text-[10px] opacity-75 mt-1.5 ${isAdmin ? 'text-left' : 'text-right'} font-semibold block">${time}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function toggleEmojiPickerStudent() {
+            const picker = document.getElementById('emoji-picker-container-student');
+            picker.classList.toggle('hidden');
+        }
+
+        function updateAttachmentLabelStudent() {
+            const input = document.getElementById('student-chat-attachment');
+            const preview = document.getElementById('attachment-preview-student');
+            const nameSpan = document.getElementById('attachment-name-student');
+            
+            if (input.files && input.files.length > 0) {
+                const file = input.files[0];
+                const maxSize = 5 * 1024 * 1024; // 5MB limit
+                
+                if (file.size > maxSize) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Archivo muy grande',
+                        text: 'El archivo excede el límite de 5MB.',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                    input.value = '';
+                    preview.classList.add('hidden');
+                    return;
+                }
+                
+                nameSpan.innerHTML = `<i class="fa-solid fa-file-circle-check mr-1"></i> ${file.name}`;
+                preview.classList.remove('hidden');
+            } else {
+                preview.classList.add('hidden');
+            }
+        }
+
+        function clearAttachmentStudent() {
+            document.getElementById('student-chat-attachment').value = '';
+            document.getElementById('attachment-preview-student').classList.add('hidden');
+        }
+
+        function viewFullPhotoStudent(url) {
+            Swal.fire({
+                imageUrl: url,
+                showConfirmButton: false,
+                showCloseButton: true,
+                background: 'transparent',
+                customClass: {
+                    image: 'rounded-xl shadow-2xl object-contain max-h-[80vh] border-4 border-white bg-white',
+                    popup: 'bg-transparent shadow-none'
+                }
+            });
+        }
+
+        async function sendStudentMessage() {
+            const text = window.studentChatEditor.root.innerHTML;
+            const plainText = window.studentChatEditor.getText().trim();
+            const file = document.getElementById('student-chat-attachment').files[0];
+            
+            if((!plainText && !file && text === '<p><br></p>') || !window.currentStudentId) return;
+            
+            const btn = document.getElementById('send-student-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-xs"></i>';
+            
+            let adjuntoUrl = null;
+            let adjuntoNombre = null;
+            
+            if (file) {
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${window.currentStudentId}/${Date.now()}_student.${fileExt}`;
+                const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                    .from('chat_adjuntos')
+                    .upload(fileName, file);
+                    
+                if (uploadError) {
+                    console.error("Error subiendo adjunto:", uploadError);
+                    Swal.fire('Error', 'No se pudo subir el archivo adjunto.', 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-paper-plane text-xs"></i>';
+                    return;
+                }
+                
+                const { data: publicUrlData } = supabaseClient.storage
+                    .from('chat_adjuntos')
+                    .getPublicUrl(fileName);
+                    
+                adjuntoUrl = publicUrlData.publicUrl;
+                adjuntoNombre = file.name;
+            }
+            
+            const { error } = await supabaseClient
+                .from('mensajes')
+                .insert([{
+                    aspirante_id: window.currentStudentId,
+                    remitente: 'estudiante',
+                    mensaje: text,
+                    adjunto_url: adjuntoUrl,
+                    adjunto_nombre: adjuntoNombre
+                }]);
+                
+            if(!error) {
+                window.studentChatEditor.setText('');
+                clearAttachmentStudent();
+                loadStudentMessages();
+            } else {
+                console.error(error);
+                Swal.fire('Error', 'No se pudo enviar el mensaje: ' + error.message, 'error');
+            }
+            
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane text-xs"></i>';
+        }
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            // Hide all views
+            ['progreso', 'datos'].forEach(t => {
+                const view = document.getElementById('view-' + t);
+                if (view) view.classList.add('hidden');
+            });
+            
+            // Show selected view
+            const selectedView = document.getElementById('view-' + tabId);
+            if (selectedView) selectedView.classList.remove('hidden');
+            
+            // Update tabs styling
+            const tabs = ['progreso', 'datos'];
+            tabs.forEach(t => {
+                const el = document.getElementById('tab-' + t);
+                if (!el) return;
+                
+                if (t === tabId) {
+                    el.classList.add('bg-blue-800', 'text-white');
+                    el.classList.remove('text-blue-200');
+                } else {
+                    el.classList.remove('bg-blue-800', 'text-white');
+                    el.classList.add('text-blue-200');
+                }
+            });
+        }
+
+        function toggleNotificationsMenu() {
+            const dropdown = document.getElementById('notifications-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('notifications-dropdown');
+            const bellButton = document.querySelector('button[title="Notificaciones"]');
+            if (dropdown && !dropdown.classList.contains('hidden')) {
+                if (!dropdown.contains(event.target) && bellButton && !bellButton.contains(event.target)) {
+                    dropdown.classList.add('hidden');
+                }
+            }
+        });
+
+        function getReadNotifications() {
+            if (!window.currentStudentId) return [];
+            const key = 'read_avisos_' + window.currentStudentId;
+            return JSON.parse(localStorage.getItem(key) || '[]');
+        }
+
+        function markNotificationAsRead(id) {
+            if (!window.currentStudentId) return;
+            const key = 'read_avisos_' + window.currentStudentId;
+            let readIds = getReadNotifications();
+            if (!readIds.includes(id)) {
+                readIds.push(id);
+                localStorage.setItem(key, JSON.stringify(readIds));
+                renderNotificationsDropdown(); // Actualiza visualmente
+            }
+        }
+
+        function markAllNotificationsAsRead() {
+            if (!window.currentStudentId || !window.currentAvisosData) return;
+            const key = 'read_avisos_' + window.currentStudentId;
+            const allIds = window.currentAvisosData.map(a => a.id);
+            localStorage.setItem(key, JSON.stringify(allIds));
+            renderNotificationsDropdown();
+        }
+
+        function renderNotificationsDropdown() {
+            if (!window.currentAvisosData) return;
+            
+            const listContainer = document.getElementById('notifications-list');
+            const readIds = getReadNotifications();
+            let unreadCount = 0;
+            let html = '';
+
+            const recentAvisos = window.currentAvisosData.slice(0, 10); // Mostrar max 10
+            
+            if (recentAvisos.length === 0) {
+                listContainer.innerHTML = '<div class="p-6 text-center text-gray-500 text-sm">No hay notificaciones</div>';
+                document.getElementById('bell-badge').classList.add('hidden');
+                return;
+            }
+
+            recentAvisos.forEach(aviso => {
+                const isRead = readIds.includes(aviso.id);
+                if (!isRead) unreadCount++;
+                
+                const date = new Date(aviso.fecha_publicacion || aviso.created_at).toLocaleString('es-CR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                const bgClass = isRead ? 'bg-white' : 'bg-blue-50';
+                const dotClass = isRead ? 'hidden' : 'inline-block';
+                const textColor = isRead ? 'text-gray-500' : 'text-gray-800 font-semibold';
+                
+                html += `
+                    <div onclick="openNotification('${aviso.id}')" class="p-3 border-b border-gray-100 ${bgClass} hover:bg-gray-50 cursor-pointer transition">
+                        <div class="flex gap-3">
+                            <div class="mt-1 flex-shrink-0 text-voca-blue"><i class="fa-solid fa-bullhorn"></i></div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm ${textColor} truncate pr-4 relative">
+                                    ${aviso.titulo}
+                                    <span class="absolute right-0 top-1.5 w-2 h-2 bg-voca-blue rounded-full ${dotClass}"></span>
+                                </p>
+                                <p class="text-xs text-gray-400 mt-1">${date}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            listContainer.innerHTML = html;
+            
+            const badge = document.getElementById('bell-badge');
+            if (unreadCount > 0) {
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+                badge.classList.remove('animate-pulse');
+            }
+        }
+
+        function openNotification(id) {
+            markNotificationAsRead(id);
+            toggleNotificationsMenu();
+            scrollToAvisos();
+            
+            setTimeout(() => {
+                const avisoElement = document.getElementById('aviso-card-' + id);
+                if (avisoElement) {
+                    avisoElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    avisoElement.classList.add('ring-4', 'ring-blue-300', 'transition-all', 'duration-500');
+                    setTimeout(() => avisoElement.classList.remove('ring-4', 'ring-blue-300'), 2500);
+                }
+            }, 300);
+        }
+
+        function scrollToAvisos() {
+            switchTab('progreso');
+            setTimeout(() => {
+                const muro = document.getElementById('muro-container');
+                if (muro) {
+                    muro.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100); // Pequeño retraso para asegurar que el tab se renderizó
+        }
+
+        async function loadAvisos() {
+            const container = document.getElementById('muro-container');
+            container.innerHTML = '<div class="text-center py-10"><i class="fa-solid fa-spinner animate-spin text-3xl text-voca-blue mb-3"></i><p class="text-gray-500">Cargando avisos...</p></div>';
+
+            // Limpiar timeouts previos
+            if (window.avisoTimeouts) {
+                window.avisoTimeouts.forEach(clearTimeout);
+            }
+            window.avisoTimeouts = [];
+
+            const { data: allData, error } = await supabaseClient
+                .from('avisos')
+                .select('*')
+                .eq('is_hidden', false)
+                .order('is_pinned', { ascending: false, nullsFirst: false })
+                .order('fecha_publicacion', { ascending: false });
+                
+            let data = [];
+            if (allData) {
+                const now = new Date();
+                allData.forEach(aviso => {
+                    const pubDate = new Date(aviso.fecha_publicacion || aviso.created_at);
+                    if (pubDate <= now) {
+                        data.push(aviso); // Ya es visible
+                    } else {
+                        // Programado para el futuro
+                        const delay = pubDate.getTime() - now.getTime();
+                        if (delay > 0 && delay < 24 * 60 * 60 * 1000) { // Si ocurre en las próximas 24 hrs
+                            const t = setTimeout(() => {
+                                loadAvisos();
+                            }, delay + 500); // 500ms de margen
+                            window.avisoTimeouts.push(t);
+                        }
+                    }
+                });
+            }
+            
+            // Insertar la cita personal como un "Aviso Virtual" para que aparezca en el Muro y active notificaciones
+            if (window.currentStudentData && window.currentStudentData.cita_fecha) {
+                const [year, month, day] = window.currentStudentData.cita_fecha.split('-');
+                const fechaFormat = `${day}/${month}/${year}`;
+                const creationDate = window.currentStudentData.created_at || new Date().toISOString();
+                
+                const isConfirmed = window.currentStudentData.cita_confirmada;
+                const confirmButtonHtml = isConfirmed 
+                    ? `<div class="mt-4"><button disabled class="bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm font-bold border border-green-200 cursor-default opacity-80"><i class="fa-solid fa-check-circle mr-2"></i> Asistencia Confirmada</button></div>`
+                    : `<div class="mt-4"><button onclick="confirmCita()" class="bg-voca-blue hover:bg-blue-800 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition transform hover:-translate-y-0.5"><i class="fa-solid fa-clipboard-check mr-2"></i> Confirmar Asistencia al Examen</button></div>`;
+
+                const virtualAviso = {
+                    id: `cita-${window.currentStudentData.cita_fecha}-${window.currentStudentData.cita_hora}`,
+                    titulo: '¡Tu cita de examen ha sido asignada!',
+                    mensaje: `Debes presentarte el día <strong>${fechaFormat}</strong> a las <strong>${window.currentStudentData.cita_hora}</strong> en <strong>${window.currentStudentData.cita_aula}</strong> para realizar tu prueba de admisión. Revisa la pestaña de "Mi Progreso" para más detalles.` + confirmButtonHtml,
+                    tipo: 'cita_personal',
+                    is_pinned: true,
+                    created_at: creationDate,
+                    fecha_publicacion: creationDate,
+                    liked_by: []
+                };
+                
+                data.unshift(virtualAviso);
+            }
+            
+            // Guardamos los datos visibles globalmente para el modal de imágenes y notificaciones
+            window.currentAvisosData = data;
+            
+            // Renderizar notificaciones DESPUES de inyectar la cita personal
+            renderNotificationsDropdown();
+                
+            let html = '';
+
+            if (error) {
+                console.error("Error cargando avisos:", error);
+                if (html === '') {
+                    container.innerHTML = '<div class="bg-red-50 text-red-600 p-4 rounded-lg text-center">No se pudieron cargar los comunicados.</div>';
+                    return;
+                }
+            }
+
+            if ((!data || data.length === 0) && html === '') {
+                container.innerHTML = '<div class="text-center py-10 border-2 border-dashed border-gray-200 rounded-xl"><i class="fa-solid fa-inbox text-gray-300 text-4xl mb-3"></i><p class="text-gray-500 font-medium">No hay avisos por el momento.</p></div>';
+                return;
+            }
+
+            if (data && data.length > 0) {
+                data.forEach(aviso => {
+                    const date = new Date(aviso.created_at).toLocaleString('es-CR');
+                    
+                    let icon = 'fa-bullhorn';
+                    let bgColor = 'bg-white';
+                    let borderClass = 'border border-gray-100';
+                    let iconBg = 'bg-gray-100 text-gray-500';
+                    let badge = '';
+                    
+                    if (aviso.tipo === 'urgente') {
+                        icon = 'fa-triangle-exclamation';
+                        borderClass = 'border border-voca-red ring-1 ring-red-50';
+                        iconBg = 'bg-red-100 text-voca-red';
+                        badge = '<div class="absolute top-0 right-0 bg-voca-red text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg rounded-tr-xl uppercase tracking-wider">Urgente</div>';
+                    } else if (aviso.tipo === 'cita') {
+                        icon = 'fa-calendar-day';
+                        borderClass = 'border border-voca-gold ring-1 ring-yellow-50';
+                        iconBg = 'bg-yellow-100 text-yellow-700';
+                    } else if (aviso.tipo === 'cita_personal') {
+                        icon = 'fa-calendar-check';
+                        borderClass = 'border-l-4 border-voca-blue bg-blue-50 ring-1 ring-blue-100';
+                        iconBg = 'bg-white text-voca-blue shadow-sm';
+                        badge = '<div class="absolute top-0 right-0 bg-voca-blue text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider">Cita Personal</div>';
+                        pinBadge = ''; // Don't show pin badge for this one, it has its own styling
+                    }
+
+                    let attachmentHtml = '';
+                    if (aviso.adjunto_url) {
+                        const isImage = aviso.adjunto_nombre && /\.(jpg|jpeg|png|gif|webp)$/i.test(aviso.adjunto_nombre);
+                        if (isImage) {
+                            attachmentHtml = `
+                                <div class="mt-4 rounded-xl overflow-hidden border border-gray-100 max-w-lg shadow-sm bg-gray-50 flex justify-center cursor-pointer" onclick="showImagePreview('${aviso.id}')">
+                                    <img src="${aviso.adjunto_url}" alt="${aviso.adjunto_nombre}" class="w-full h-auto max-h-[400px] object-contain hover:opacity-95 transition" title="Ver imagen en grande">
+                                </div>
+                            `;
+                        } else {
+                            attachmentHtml = `
+                                <div class="mt-4">
+                                    <a href="${aviso.adjunto_url}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-voca-blue border border-blue-100 rounded-lg text-sm font-medium hover:bg-blue-100 transition shadow-sm">
+                                        <i class="fa-solid fa-paperclip"></i> ${aviso.adjunto_nombre || 'Ver archivo adjunto'}
+                                    </a>
+                                </div>
+                            `;
+                        }
+                    }
+
+                    const isVirtual = aviso.id.toString().startsWith('cita-');
+                    const likesList = Array.isArray(aviso.liked_by) ? aviso.liked_by : [];
+                    const likesCount = likesList.length;
+                    const hasLiked = window.currentStudentId && likesList.includes(window.currentStudentId);
+                    
+                    const likeButton = isVirtual ? '' : `
+                        <button id="like-btn-${aviso.id}" onclick="toggleLike('${aviso.id}', ${hasLiked})" class="flex items-center gap-1.5 transition ${hasLiked ? 'text-voca-red hover:text-red-600 scale-110' : 'text-gray-400 hover:text-voca-red'} transform active:scale-125">
+                            <i class="fa-${hasLiked ? 'solid' : 'regular'} fa-heart text-xl"></i>
+                            <span class="font-medium text-base">${likesCount > 0 ? likesCount : ''}</span>
+                        </button>
+                    `;
+
+                    html += `
+                        <div id="aviso-card-${aviso.id}" class="bg-white border border-gray-100 p-5 rounded-xl shadow-sm relative transition hover:shadow-md">
+                            ${badge}
+                            ${pinBadge}
+                            <div class="flex gap-4 items-start ${(aviso.is_pinned || badge) ? 'mt-4' : ''}">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${iconBg}">
+                                    <i class="fa-solid ${icon}"></i>
+                                </div>
+                                <div class="w-full">
+                                    <h3 class="font-bold text-gray-800 text-lg pr-16">${aviso.titulo}</h3>
+                                    <div class="text-gray-600 mt-3 text-sm leading-relaxed ql-editor p-0">${aviso.mensaje}</div>
+                                    ${attachmentHtml}
+                                    <p class="text-xs text-gray-400 mt-4 pt-3 border-t border-gray-50 flex items-center justify-between">
+                                        <span class="flex items-center gap-4">
+                                            <span><i class="fa-solid fa-building-user mr-1"></i> Administración VOCA</span>
+                                            ${likeButton}
+                                        </span>
+                                        <span><i class="fa-regular fa-clock mr-1"></i> ${date}</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            container.innerHTML = html;
+        }
+
+        function showImagePreview(avisoId) {
+            const aviso = window.currentAvisosData.find(a => a.id === avisoId);
+            if(!aviso) return;
+
+            Swal.fire({
+                imageUrl: aviso.adjunto_url,
+                imageAlt: 'Imagen adjunta',
+                title: aviso.titulo,
+                html: `<div class="text-left text-sm text-gray-600 ql-editor p-0">${aviso.mensaje}</div>`,
+                width: 'auto',
+                padding: '2em',
+                color: '#333',
+                background: '#fff',
+                showConfirmButton: false,
+                showCloseButton: true,
+                customClass: {
+                    image: 'max-w-full h-auto rounded-xl max-h-[60vh] object-contain shadow-md mb-4',
+                    title: 'text-2xl font-bold font-outfit text-voca-blue mb-4 text-left border-b border-gray-100 pb-2'
+                }
+            });
+        }
+
+        async function toggleLike(avisoId, currentlyLiked) {
+            if (!window.currentStudentId) return;
+
+            // Actualización visual instantánea (Optimistic UI) sin recargar la página
+            const btn = document.getElementById(`like-btn-${avisoId}`);
+            if (btn) {
+                const icon = btn.querySelector('i');
+                const span = btn.querySelector('span');
+                let count = parseInt(span.innerText) || 0;
+                
+                if (currentlyLiked) {
+                    count = Math.max(0, count - 1);
+                    icon.classList.remove('fa-solid');
+                    icon.classList.add('fa-regular');
+                    btn.classList.remove('text-voca-red', 'hover:text-red-600', 'scale-110');
+                    btn.classList.add('text-gray-400', 'hover:text-voca-red');
+                    btn.setAttribute('onclick', `toggleLike('${avisoId}', false)`);
+                } else {
+                    count++;
+                    icon.classList.remove('fa-regular');
+                    icon.classList.add('fa-solid');
+                    btn.classList.remove('text-gray-400', 'hover:text-voca-red');
+                    btn.classList.add('text-voca-red', 'hover:text-red-600', 'scale-110');
+                    btn.setAttribute('onclick', `toggleLike('${avisoId}', true)`);
+                }
+                span.innerText = count > 0 ? count : '';
+            }
+
+            const { data: currentAviso, error: fetchError } = await supabaseClient
+                .from('avisos')
+                .select('liked_by')
+                .eq('id', avisoId)
+                .single();
+
+            if (fetchError) return;
+
+            let likedBy = currentAviso.liked_by || [];
+            
+            if (currentlyLiked) {
+                likedBy = likedBy.filter(id => id !== window.currentStudentId);
+            } else {
+                if (!likedBy.includes(window.currentStudentId)) {
+                    likedBy.push(window.currentStudentId);
+                }
+            }
+
+            await supabaseClient
+                .from('avisos')
+                .update({ liked_by: likedBy })
+                .eq('id', avisoId);
+        }
+
+        // Configurar Realtime para el muro de avisos
+        const avisosSubscription = supabaseClient
+            .channel('public:avisos')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'avisos' }, payload => {
+                if (payload.eventType === 'INSERT') {
+                    const aviso = payload.new;
+                    const nowIso = new Date().toISOString();
+                    if (!aviso.is_hidden) {
+                        if (!aviso.fecha_publicacion || aviso.fecha_publicacion <= nowIso) {
+                            renderNotificationsDropdown();
+                            
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'info',
+                                title: '¡Nuevo Comunicado Global!',
+                                text: aviso.titulo,
+                                showConfirmButton: false,
+                                timer: 6000,
+                                timerProgressBar: true,
+                                didOpen: (toast) => {
+                                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                                }
+                            });
+                        }
+                        // Recargamos los avisos para que se muestre ahora o se le asigne el timer si es para el futuro
+                        loadAvisos();
+                    }
+                } else if (payload.eventType === 'DELETE') {
+                    loadAvisos();
+                } else if (payload.eventType === 'UPDATE') {
+                    // Ignoramos los updates en Realtime para evitar parpadeos y saltos 
+                    // en la pantalla cuando otras personas dan Like
+                }
+            })
+            .subscribe();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Lógica del botón flotante para volver arriba
+            const mainScroll = document.getElementById('main-scroll');
+            const backToTopBtn = document.getElementById('back-to-top');
+
+            if (mainScroll && backToTopBtn) {
+                mainScroll.addEventListener('scroll', () => {
+                    if (mainScroll.scrollTop > 300) {
+                        backToTopBtn.classList.remove('translate-y-20', 'opacity-0');
+                    } else {
+                        backToTopBtn.classList.add('translate-y-20', 'opacity-0');
+                    }
+                });
+            }
+        });
+
+        function scrollToTop() {
+            const mainScroll = document.getElementById('main-scroll');
+            if (mainScroll) {
+                mainScroll.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
+        }
+    </script>
+
+</body>
+</html>

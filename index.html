@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admisiones 2026 - Vocacional Monseñor Sanabria</title>
+    <meta name="description"
+        content="Sitio oficial de admisiones del Vocacional Monseñor Sanabria. Inicia tu proceso de registro ahora.">
+    <link rel="icon" type="image/png" href="src/logo/VOCA%20Admisiones.png">
+    <link rel="stylesheet" href="styles.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&amp;family=Inter:wght@400;500&amp;display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- EmailJS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() {
+            emailjs.init("UequXZgxbq7hbQ48O");
+        })();
+    </script>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">
+                <img src="src/logo/VOCA%20Admisiones.png" alt="VOCA Logo" class="logo-img">
+                <span class="logo-text">Vocacional Monseñor Sanabria</span>
+            </a>
+            <div class="nav-links">
+                <a href="#inicio">Inicio</a>
+                <a href="#proceso">El Proceso</a>
+                <a href="#requisitos">Requisitos</a>
+                <a href="#contacto">Contacto</a>
+            </div>
+            <div class="nav-buttons-container">
+                <a href="login.html" class="btn btn-blue nav-btn">Iniciar Sesión</a>
+                <a href="#registro" class="btn btn-primary nav-btn">Regístrate Ahora</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header id="inicio" class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <span class="badge">Admisiones Abiertas 2026</span>
+            <h1>Construye tu futuro con la mejor educación técnica</h1>
+            <p>Únete al Vocacional Monseñor Sanabria y adquiere las herramientas para destacar en el mundo profesional.
+                El proceso de admisión ya está disponible.</p>
+            <div class="hero-buttons">
+                <a href="#registro" class="btn btn-primary btn-large">
+                    Iniciar Primer Paso <i class="fa-solid fa-arrow-right"></i>
+                </a>
+                <a href="#proceso" class="btn btn-secondary btn-large">
+                    Conocer Más
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Proceso Section -->
+    <section id="proceso" class="features-section">
+        <div class="section-container">
+            <div class="section-header text-center">
+                <h2>¿Cómo funciona el proceso?</h2>
+                <p>Tres simples pasos para ser parte de nuestra institución.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon bg-blue">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+                    <h3>1. Registro Inicial</h3>
+                    <p>Completa el formulario en esta página con tus datos personales. Requerirás un correo de Gmail
+                        activo.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon bg-red">
+                        <i class="fa-solid fa-file-signature"></i>
+                    </div>
+                    <h3>2. Examen de Admisión</h3>
+                    <p>Realiza la prueba de aptitud en las fechas establecidas. Se te notificará por correo electrónico.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon bg-gold">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <h3>3. Matrícula Oficial</h3>
+                    <p>Una vez aprobado el examen, podrás seleccionar tu especialidad técnica y formalizar la matrícula.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Registro Section -->
+    <section id="registro" class="registration-section">
+        <div class="section-container">
+            <div class="registration-wrapper">
+                <div class="registration-info">
+                    <h2>Comienza tu historia aquí</h2>
+                    <p>Este es el primer paso oficial de tu proceso de admisión. Asegúrate de tener a mano tu
+                        identificación.</p>
+
+                    <ul class="info-list">
+                        <li>
+                            <i class="fa-solid fa-check-circle text-blue"></i>
+                            <div>
+                                <strong>Solo correos Gmail</strong>
+                                <span>Por lineamientos institucionales, solo aceptamos direcciones @gmail.com</span>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-check-circle text-blue"></i>
+                            <div>
+                                <strong>Datos reales</strong>
+                                <span>La información se validará con el Registro Civil</span>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-check-circle text-blue"></i>
+                            <div>
+                                <strong>Soporte</strong>
+                                <span>Si tienes problemas, contáctanos al final de la página</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="registration-form-container">
+                    <div class="form-header">
+                        <h3>Formulario de Registro</h3>
+                        <p>Paso 1 de 3</p>
+                    </div>
+
+                    <form id="registrationForm" novalidate>
+                        <div class="form-grid">
+                            <!-- Correo Electrónico -->
+                            <div class="form-group full-width">
+                                <label for="email">Correo Electrónico (Solo Gmail) <span
+                                        class="required">*</span></label>
+                                <div class="input-icon">
+                                    <i class="fa-solid fa-envelope"></i>
+                                    <input type="email" id="email" name="email" placeholder="estudiante@gmail.com"
+                                        required>
+                                </div>
+                                <span class="error-message" id="emailError">Debe ser un correo válido terminado en
+                                    @gmail.com</span>
+                            </div>
+
+                            <!-- Contraseña -->
+                            <div class="form-group full-width">
+                                <label for="password">Contraseña <span class="required">*</span></label>
+                                <div class="input-icon">
+                                    <i class="fa-solid fa-lock"></i>
+                                    <input type="password" id="password" name="password"
+                                        placeholder="Mínimo 8 caracteres" required minlength="8">
+                                </div>
+                                <span class="error-message" id="passwordError">La contraseña debe tener al menos 8
+                                    caracteres</span>
+                            </div>
+
+                            <!-- Identificación -->
+                            <div class="form-group full-width">
+                                <label for="identification">Identificación <span class="required">*</span></label>
+                                <div class="input-icon">
+                                    <i class="fa-solid fa-id-card"></i>
+                                    <input type="text" id="identification" name="identification"
+                                        placeholder="Cédula nacional o pasaporte" required>
+                                </div>
+                                <span class="error-message" id="idError">La identificación es obligatoria</span>
+                            </div>
+
+                            <!-- Nombre -->
+                            <div class="form-group">
+                                <label for="firstName">Nombre <span class="required">*</span></label>
+                                <div class="input-icon">
+                                    <i class="fa-solid fa-user"></i>
+                                    <input type="text" id="firstName" name="firstName" placeholder="Tu nombre" required>
+                                </div>
+                                <span class="error-message" id="firstNameError">El nombre es obligatorio</span>
+                            </div>
+
+                            <!-- Primer Apellido -->
+                            <div class="form-group">
+                                <label for="lastName1">Primer Apellido <span class="required">*</span></label>
+                                <div class="input-icon">
+                                    <i class="fa-regular fa-user"></i>
+                                    <input type="text" id="lastName1" name="lastName1" placeholder="Primer apellido"
+                                        required>
+                                </div>
+                                <span class="error-message" id="lastName1Error">Requerido</span>
+                            </div>
+
+                            <!-- Segundo Apellido -->
+                            <div class="form-group">
+                                <label for="lastName2">Segundo Apellido</label>
+                                <div class="input-icon">
+                                    <i class="fa-regular fa-user"></i>
+                                    <input type="text" id="lastName2" name="lastName2" placeholder="(Opcional)">
+                                </div>
+                            </div>
+
+                            <!-- Fecha de Nacimiento -->
+                            <div class="form-group">
+                                <label for="birthDate">Fecha de Nacimiento <span class="required">*</span></label>
+                                <div class="input-icon">
+                                    <i class="fa-solid fa-calendar-days"></i>
+                                    <input type="date" id="birthDate" name="birthDate" required>
+                                </div>
+                                <span class="error-message" id="birthDateError">Selecciona una fecha</span>
+                            </div>
+
+                            <!-- Teléfono -->
+                            <div class="form-group full-width">
+                                <label for="phone">Teléfono Móvil <span class="required">*</span></label>
+                                <div class="input-icon">
+                                    <i class="fa-solid fa-mobile-screen-button"></i>
+                                    <input type="tel" id="phone" name="phone" placeholder="Ej. 8888-8888" required>
+                                </div>
+                                <span class="error-message" id="phoneError">El teléfono es obligatorio</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary submit-btn">
+                            <span>Completar Registro</span>
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contacto" class="main-footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <img src="src/logo/VOCA%20Admisiones.png" alt="VOCA">
+                    <span>Vocacional Monseñor Sanabria</span>
+                </div>
+                <p>Formando profesionales técnicos con excelencia y valores para el futuro del país.</p>
+                <div class="social-links">
+                    <a href="#" aria-label="Facebook" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Instagram" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" aria-label="YouTube" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-links">
+                <h4>Enlaces Rápidos</h4>
+                <ul>
+                    <li><a href="#inicio">Inicio</a></li>
+                    <li><a href="#proceso">Admisiones</a></li>
+                    <li><a href="#">Especialidades</a></li>
+                    <li><a href="#">Noticias</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-contact">
+                <h4>Contacto</h4>
+                <p><i class="fa-solid fa-location-dot"></i> Desamparados, San José, Costa Rica</p>
+                <p><i class="fa-solid fa-phone"></i> +506 2259-0000</p>
+                <p><i class="fa-solid fa-envelope"></i> admisiones@vocacional.ed.cr</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Vocacional Monseñor Sanabria. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <!-- Botón flotante Volver Arriba -->
+    <button id="backToTopBtn" class="floating-btn" aria-label="Volver arriba" title="Volver arriba">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

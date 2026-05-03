@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrativo - Vocacional Monseñor Sanabria</title>
+    <link rel="icon" type="image/png" href="src/logo/VOCA%20Admisiones.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1.21.3/index.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-outfit { font-family: 'Outfit', sans-serif; }
+        .bg-voca-blue { background-color: #003366; }
+        .text-voca-blue { color: #003366; }
+        .bg-voca-red { background-color: #cc0000; }
+        .text-voca-red { color: #cc0000; }
+        .bg-voca-gold { background-color: #ffcc00; }
+    </style>
+    
+    <!-- jsPDF & AutoTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    
+    <!-- EmailJS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() {
+            emailjs.init("UequXZgxbq7hbQ48O");
+        })();
+    </script>
+</head>
+<body class="bg-gray-100 flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gray-900 text-gray-300 flex flex-col hidden md:flex shrink-0">
+        <div class="h-20 bg-gray-950 flex items-center px-6 border-b border-gray-800 shadow-md">
+            <img src="src/logo/VOCA%20Admisiones.png" alt="Logo" class="h-10 w-10 bg-white rounded-full p-1 mr-3">
+            <span class="font-outfit font-bold text-white text-lg tracking-wide">Admin SVS</span>
+        </div>
+        
+        <div class="p-4">
+            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 mt-2">Principal</p>
+            <nav class="space-y-1">
+                <a href="#" id="tab-resumen" class="flex items-center gap-3 px-4 py-2.5 bg-voca-blue text-white rounded-lg font-medium transition" onclick="switchTabAdmin('resumen')">
+                    <i class="fa-solid fa-chart-line w-5 text-center"></i> Resumen
+                </a>
+
+                <a href="#" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-800 rounded-lg hover:text-white transition">
+                    <i class="fa-solid fa-file-contract w-5 text-center"></i> Exámenes
+                </a>
+                <a href="#" id="tab-avisos" onclick="switchTabAdmin('avisos')" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-800 rounded-lg hover:text-white transition">
+                    <i class="fa-solid fa-bullhorn w-5 text-center"></i> Comunicados Globales
+                </a>
+            </nav>
+
+            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 mt-8">Configuración</p>
+            <nav class="space-y-1">
+                <a href="#" onclick="showHistory()" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-800 rounded-lg hover:text-white transition">
+                    <i class="fa-solid fa-clock-rotate-left w-5 text-center"></i> Historial de Actividades
+                </a>
+                <a href="#" onclick="createAdmin()" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-800 rounded-lg hover:text-white transition">
+                    <i class="fa-solid fa-user-shield w-5 text-center"></i> Nuevo Administrador
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-800 rounded-lg hover:text-white transition">
+                    <i class="fa-solid fa-gear w-5 text-center"></i> Ajustes del Sistema
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-800 rounded-lg hover:text-white transition">
+                    <i class="fa-solid fa-shield-halved w-5 text-center"></i> Seguridad
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-gray-800 mt-auto">
+            <div class="flex items-center gap-3 mb-4 px-2">
+                <div class="w-8 h-8 rounded-full bg-voca-red flex items-center justify-center text-white font-bold text-xs" id="sidebar-admin-initials">
+                    AD
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-white leading-tight" id="sidebar-admin-name">Admin Principal</p>
+                    <p class="text-xs text-gray-500">Administrador</p>
+                </div>
+            </div>
+            <a href="login.html" class="flex items-center gap-3 px-4 py-2 text-red-400 hover:text-red-300 hover:bg-gray-800 rounded-lg text-sm transition">
+                <i class="fa-solid fa-arrow-right-from-bracket w-5 text-center"></i> Salir del Sistema
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <!-- Topbar -->
+        <header class="h-20 bg-white shadow-sm flex items-center justify-between px-8 shrink-0 z-10">
+            <div class="flex items-center gap-4">
+                <button class="text-gray-500 hover:text-gray-700 text-xl md:hidden" title="Menú"><i class="fa-solid fa-bars"></i></button>
+                <div class="relative hidden sm:block">
+                    <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" placeholder="Buscar aspirante por cédula..." class="pl-10 pr-4 py-2 bg-gray-100 border-transparent rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition w-64 md:w-80 text-sm">
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <button class="text-gray-400 hover:text-voca-blue transition" title="Exportar Reporte">
+                    <i class="fa-solid fa-download text-lg"></i>
+                </button>
+                <button class="text-gray-400 hover:text-voca-blue transition relative" title="Notificaciones">
+                    <i class="fa-regular fa-bell text-xl"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="p-8 w-full overflow-y-auto relative">
+            
+            <div id="view-resumen">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold font-outfit text-gray-800">Panel General</h2>
+                    <p class="text-gray-500 text-sm">Resumen del proceso de admisiones 2026</p>
+                </div>
+                <div class="flex gap-2">
+                    <button id="btn-assign-date" class="bg-voca-gold hover:bg-yellow-500 text-voca-blue px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm hidden" onclick="assignAppointment()">
+                        <i class="fa-regular fa-calendar-check mr-2"></i> Asignar Cita (<span id="selected-count">0</span>)
+                    </button>
+                    <button class="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition shadow-sm">
+                        <i class="fa-regular fa-calendar mr-2"></i> Filtrar Fechas
+                    </button>
+                    <button class="bg-voca-blue hover:bg-blue-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm" onclick="showCreateAlert()">
+                        <i class="fa-solid fa-plus mr-2"></i> Nueva Solicitud
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium">Total Registros</p>
+                            <h3 id="stat-total" class="text-3xl font-bold text-gray-800 font-outfit mt-1">0</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-lg bg-blue-50 text-voca-blue flex items-center justify-center">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                    </div>
+                    <p class="text-sm text-green-600 font-medium"><i class="fa-solid fa-arrow-trend-up mr-1"></i> Actualizado hoy</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium">Pendientes de Registro</p>
+                            <h3 id="stat-pending" class="text-3xl font-bold text-gray-800 font-outfit mt-1">0</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-lg bg-yellow-50 text-yellow-600 flex items-center justify-center">
+                            <i class="fa-solid fa-file-circle-exclamation"></i>
+                        </div>
+                    </div>
+                    <p class="text-sm text-yellow-600 font-medium">Requieren completar datos</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium">Citas Confirmadas</p>
+                            <h3 id="stat-appointments" class="text-3xl font-bold text-gray-800 font-outfit mt-1">0</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+                            <i class="fa-solid fa-clipboard-check"></i>
+                        </div>
+                    </div>
+                    <p id="stat-conversion" class="text-sm text-gray-500 font-medium">0 pendientes de confirmar</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium">Aspirantes Verificados</p>
+                            <h3 id="stat-verified" class="text-3xl font-bold text-gray-800 font-outfit mt-1">0</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-lg bg-blue-50 text-voca-blue flex items-center justify-center">
+                            <i class="fa-solid fa-user-check"></i>
+                        </div>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-1.5 mt-3">
+                        <div id="stat-progress" class="bg-voca-blue h-1.5 rounded-full w-0 transition-all duration-500"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100 flex flex-col md:flex-row justify-between md:items-center gap-4 bg-gray-50">
+                    <h3 class="font-bold text-gray-800">Directorio de Estudiantes</h3>
+                    <div class="flex items-center gap-3">
+                        <label for="filter-students" class="text-sm font-medium text-gray-600"><i class="fa-solid fa-filter mr-1 text-gray-400"></i> Filtrar:</label>
+                        <select id="filter-students" title="Filtrar estudiantes" aria-label="Filtrar estudiantes" class="border border-gray-300 rounded-lg text-sm px-3 py-1.5 focus:outline-none focus:border-voca-blue focus:ring-1 focus:ring-voca-blue text-gray-700 bg-white shadow-sm font-medium cursor-pointer" onchange="applyStudentFilter()">
+                            <option value="all">Todos los Estudiantes</option>
+                            <option value="verificados">Aspirantes Verificados</option>
+                            <option value="pendientes_registro">Pendientes de Registro</option>
+                            <option value="citas_confirmadas">Citas Confirmadas</option>
+                            <option value="citas_sin_confirmar">Citas sin Confirmar</option>
+                            <option value="citas_sin_asignar">Sin Cita Asignada</option>
+                        </select>
+                        <button onclick="exportStudentsPDF()" class="bg-voca-blue hover:bg-blue-800 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition shadow-sm flex items-center gap-2" title="Exportar a PDF">
+                            <i class="fa-solid fa-file-pdf"></i> <span class="hidden md:inline">Exportar</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-white border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500">
+                                <th class="px-6 py-4 font-semibold w-12"><input type="checkbox" id="selectAll" class="rounded text-voca-blue border-gray-300" onchange="toggleSelectAll(this)" title="Seleccionar todos"></th>
+                                <th class="px-6 py-4 font-semibold">Aspirante</th>
+                                <th class="px-6 py-4 font-semibold">Identificación</th>
+                                <th class="px-6 py-4 font-semibold">Estado</th>
+                                <th class="px-6 py-4 font-semibold">Cita Asignada</th>
+                                <th class="px-6 py-4 font-semibold text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="student-table-body" class="text-sm divide-y divide-gray-100">
+                            <!-- Filas dinámicas generadas con JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </div> <!-- Fin view-resumen -->
+
+            <div id="view-avisos" class="hidden max-w-5xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b border-gray-200 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold font-outfit text-gray-800">Gestión de Muro de Avisos</h2>
+                        <p class="text-gray-500 text-sm mt-1">Publica, edita y programa comunicados para todos los estudiantes.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="loadAdminAvisos()" class="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition shadow-sm">
+                            <i class="fa-solid fa-arrows-rotate mr-2"></i> Actualizar
+                        </button>
+                        <button class="bg-voca-blue hover:bg-blue-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm" onclick="showAvisosModal()">
+                            <i class="fa-solid fa-plus mr-2"></i> Nuevo Comunicado
+                        </button>
+                    </div>
+                </div>
+
+                <div id="admin-muro-container" class="space-y-4">
+                    <div class="text-center py-10">
+                        <i class="fa-solid fa-spinner animate-spin text-3xl text-voca-blue mb-3"></i>
+                        <p class="text-gray-500">Cargando avisos...</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-client.js"></script>
+    <script>
+        let aspirantesData = [];
+        let currentFilteredData = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const adminName = localStorage.getItem('adminName') || 'Admin Principal';
+            const adminInitials = adminName.substring(0, 2).toUpperCase();
+            
+            const sidebarName = document.getElementById('sidebar-admin-name');
+            const sidebarInitials = document.getElementById('sidebar-admin-initials');
+            
+            if (sidebarName) sidebarName.innerText = adminName;
+            if (sidebarInitials) sidebarInitials.innerText = adminInitials;
+
+            loadAspirantes();
+            // loadAdminAvisos is called when switching to its tab
+        });
+
+        function switchTabAdmin(tabId) {
+            ['resumen', 'avisos'].forEach(t => {
+                const view = document.getElementById('view-' + t);
+                if (view) view.classList.add('hidden');
+            });
+            const selectedView = document.getElementById('view-' + tabId);
+            if (selectedView) selectedView.classList.remove('hidden');
+
+            ['resumen', 'avisos'].forEach(t => {
+                const el = document.getElementById('tab-' + t);
+                if (!el) return;
+                if (t === tabId) {
+                    el.classList.add('bg-voca-blue', 'text-white');
+                    el.classList.remove('hover:bg-gray-800', 'text-gray-300');
+                } else {
+                    el.classList.remove('bg-voca-blue', 'text-white');
+                    el.classList.add('hover:bg-gray-800', 'text-gray-300');
+                }
+            });
+
+            if (tabId === 'avisos') {
+                loadAdminAvisos();
+            }
+        }
+
+        async function loadAspirantes() {
+            const tbody = document.getElementById('student-table-body');
+            tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Cargando aspirantes...</td></tr>';
+            
+            const { data, error } = await supabaseClient
+                .from('aspirantes')
+                .select('*')
+                .order('id', { ascending: false });
+
+            if (error) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Error al cargar datos</td></tr>';
+                console.error(error);
+                return;
+            }
+
+            aspirantesData = data;
+            
+            // Retain filter state after reloading data
+            applyStudentFilter();
+            updateDashboardStats(data);
+        }
+
+        function applyStudentFilter() {
+            const filterValue = document.getElementById('filter-students').value;
+            let filteredData = aspirantesData;
+
+            switch (filterValue) {
+                case 'verificados':
+                    filteredData = aspirantesData.filter(a => a.estado === 'Verificado');
+                    break;
+                case 'pendientes_registro':
+                    filteredData = aspirantesData.filter(a => !a.registro_completado || a.estado === 'Pendiente');
+                    break;
+                case 'citas_confirmadas':
+                    filteredData = aspirantesData.filter(a => a.cita_confirmada);
+                    break;
+                case 'citas_sin_confirmar':
+                    filteredData = aspirantesData.filter(a => a.cita_fecha && !a.cita_confirmada);
+                    break;
+                case 'citas_sin_asignar':
+                    filteredData = aspirantesData.filter(a => !a.cita_fecha);
+                    break;
+            }
+            
+            currentFilteredData = filteredData;
+            renderTable(filteredData);
+            
+            // Update selection buttons state just in case
+            updateSelection();
+        }
+
+        async function exportStudentsPDF() {
+            if (currentFilteredData.length === 0) {
+                Swal.fire('Atención', 'No hay datos para exportar con el filtro actual.', 'info');
+                return;
+            }
+
+            Swal.fire({ title: 'Generando PDF...', didOpen: () => Swal.showLoading() });
+
+            // Small delay to allow UI to show loader
+            await new Promise(r => setTimeout(r, 100));
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape'); // Landscape is better for wide tables
+            
+            // Título
+            doc.setFontSize(18);
+            doc.setTextColor(0, 51, 102); // voca-blue
+            doc.text('Vocacional Monseñor Sanabria', 14, 20);
+            
+            doc.setFontSize(14);
+            doc.setTextColor(50, 50, 50);
+            const filterDropdown = document.getElementById('filter-students');
+            const filterText = filterDropdown.options[filterDropdown.selectedIndex].text;
+            doc.text(`Directorio de Estudiantes - ${filterText}`, 14, 28);
+            
+            // Fecha y conteo
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Generado: ${new Date().toLocaleString('es-CR')} | Total: ${currentFilteredData.length} registros`, 14, 36);
+
+            // Tabla
+            const tableColumn = ["Nombre", "Apellidos", "Identificación", "Correo Electrónico", "Estado", "Cita / Confirmación"];
+            const tableRows = [];
+
+            currentFilteredData.forEach(est => {
+                let citaInfo = "Sin asignar";
+                if (est.cita_fecha) {
+                    citaInfo = `${est.cita_fecha} ${est.cita_hora}\nAula: ${est.cita_aula}\n${est.cita_confirmada ? 'CONFIRMADA' : 'SIN CONFIRMAR'}`;
+                }
+                
+                const rowData = [
+                    est.nombre || '',
+                    est.apellido || '',
+                    est.identificacion || '',
+                    est.email || '',
+                    est.estado || 'Pendiente',
+                    citaInfo
+                ];
+                tableRows.push(rowData);
+            });
+
+            doc.autoTable({
+                head: [tableColumn],
+                body: tableRows,
+                startY: 42,
+                styles: { fontSize: 9, cellPadding: 3 },
+                headStyles: { fillColor: [0, 51, 102], textColor: 255, fontStyle: 'bold' }, // voca-blue
+                alternateRowStyles: { fillColor: [245, 247, 250] },
+                columnStyles: {
+                    0: { cellWidth: 35 },
+                    1: { cellWidth: 45 },
+                    2: { cellWidth: 30 },
+                    3: { cellWidth: 60 },
+                    4: { cellWidth: 25 },
+                    5: { cellWidth: 50 }
+                }
+            });
+
+            const fileName = `Estudiantes_${filterText.replace(/\\s+/g, '_')}_${new Date().getTime()}.pdf`;
+            doc.save(fileName);
+            
+            logAction('Exportación de Datos', `Se exportó en PDF el listado de estudiantes (Filtro: ${filterText}) con ${currentFilteredData.length} registros.`);
+            
+            Swal.close();
+        }
+
+        function updateDashboardStats(data) {
+            const totalRegistros = data.length;
+            const pendientes = data.filter(a => !a.registro_completado || a.estado === 'Pendiente').length;
+            const conCita = data.filter(a => a.cita_fecha).length;
+            const confirmadas = data.filter(a => a.cita_confirmada).length;
+            const verificados = data.filter(a => a.estado === 'Verificado').length;
+            
+            const sinConfirmar = conCita - confirmadas;
+            const porcentajeVerificados = totalRegistros > 0 ? Math.round((verificados / totalRegistros) * 100) : 0;
+
+            document.getElementById('stat-total').innerText = totalRegistros;
+            document.getElementById('stat-pending').innerText = pendientes;
+            document.getElementById('stat-appointments').innerText = confirmadas;
+            document.getElementById('stat-conversion').innerText = `${sinConfirmar} pendientes de confirmar`;
+            document.getElementById('stat-verified').innerText = verificados;
+            
+            // Actualizar la barra de progreso de verificados
+            const progressBar = document.getElementById('stat-progress');
+            progressBar.style.width = `${porcentajeVerificados}%`;
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('student-table-body');
+            tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No hay solicitudes registradas</td></tr>';
+                return;
+            }
+
+            data.forEach(aspirante => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 transition';
+                
+                const initial = aspirante.nombre.charAt(0).toUpperCase() + aspirante.apellido.charAt(0).toUpperCase();
+                const avatarHtml = aspirante.foto_url 
+                    ? `<img src="${aspirante.foto_url}" class="w-8 h-8 rounded-full object-cover shadow-sm">`
+                    : `<div class="w-8 h-8 rounded-full bg-blue-100 text-voca-blue flex items-center justify-center font-bold text-xs">${initial}</div>`;
+                
+                let citaHtml = '<span class="text-xs text-gray-400 font-medium"><i class="fa-regular fa-calendar-xmark mr-1"></i> Sin asignar</span>';
+                if (aspirante.cita_fecha) {
+                    if (aspirante.cita_confirmada) {
+                        citaHtml = `<span class="text-xs font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded border border-green-200 block w-max mb-1"><i class="fa-solid fa-check-double mr-1"></i> Confirmada</span>
+                                    <span class="text-xs text-gray-600 font-medium"><i class="fa-regular fa-clock mr-1"></i> ${aspirante.cita_fecha} ${aspirante.cita_hora}</span><br>
+                                    <span class="text-[10px] text-gray-400 mt-0.5 block">Aula: ${aspirante.cita_aula}</span>`;
+                    } else {
+                        citaHtml = `<span class="text-xs font-bold text-yellow-700 bg-yellow-50 px-2 py-0.5 rounded border border-yellow-200 block w-max mb-1"><i class="fa-solid fa-clock-rotate-left mr-1 animate-pulse"></i> Sin confirmar</span>
+                                    <span class="text-xs text-gray-600 font-medium"><i class="fa-regular fa-clock mr-1"></i> ${aspirante.cita_fecha} ${aspirante.cita_hora}</span><br>
+                                    <span class="text-[10px] text-gray-400 mt-0.5 block">Aula: ${aspirante.cita_aula}</span>`;
+                    }
+                }
+                
+                let badgeClass = aspirante.estado === 'Verificado' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4">
+                        <input type="checkbox" class="student-checkbox rounded text-voca-blue border-gray-300" value="${aspirante.id}" onchange="updateSelection()" title="Seleccionar aspirante">
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            ${avatarHtml}
+                            <div>
+                                <p class="font-semibold text-gray-800">${aspirante.nombre} ${aspirante.apellido}</p>
+                                <p class="text-xs text-gray-500">${aspirante.email}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-gray-600">${aspirante.identificacion}</td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badgeClass}">
+                            ${aspirante.estado}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">${citaHtml}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button class="text-gray-400 hover:text-green-500 transition p-1 mr-2" title="Mensajes" onclick="openChat('${aspirante.id}', '${aspirante.nombre} ${aspirante.apellido}')"><i class="fa-solid fa-comments"></i></button>
+                        <button class="text-gray-400 hover:text-voca-blue transition p-1 mr-2" title="Ver Expediente" onclick="viewProfile('${aspirante.id}')"><i class="fa-solid fa-address-card"></i></button>
+                        <button class="text-gray-400 hover:text-voca-gold transition p-1 mr-2" title="Resetear Clave Temporal" onclick="resetPassword('${aspirante.id}', '${aspirante.email}')"><i class="fa-solid fa-key"></i></button>
+                        <button class="text-gray-400 hover:text-voca-red transition p-1" title="Eliminar Aspirante" onclick="deleteUser('${aspirante.id}', '${aspirante.nombre} ${aspirante.apellido}')"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            updateSelection();
+        }
+
+        function toggleSelectAll(source) {
+            const checkboxes = document.querySelectorAll('.student-checkbox');
+            checkboxes.forEach(cb => cb.checked = source.checked);
+            updateSelection();
+        }
+
+        function updateSelection() {
+            const selected = document.querySelectorAll('.student-checkbox:checked').length;
+            const btnAssign = document.getElementById('btn-assign-date');
+            document.getElementById('selected-count').innerText = selected;
+            
+            if (selected > 0) {
+                btnAssign.classList.remove('hidden');
+            } else {
+                btnAssign.classList.add('hidden');
+                document.getElementById('selectAll').checked = false;
+            }
+        }
+
+        async function assignAppointment() {
+            const checkboxes = document.querySelectorAll('.student-checkbox:checked');
+            if (checkboxes.length === 0) return;
+
+            const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+
+            const { value: formValues } = await Swal.fire({
+                title: 'Asignar Cita de Admisión',
+                html:
+                    `<label class="block text-left text-sm font-semibold mt-2">Fecha:</label>` +
+                    `<input id="swal-fecha" type="date" class="swal2-input" style="width: 80%;" required>` +
+                    `<label class="block text-left text-sm font-semibold mt-4">Hora:</label>` +
+                    `<input id="swal-hora" type="time" class="swal2-input" style="width: 80%;" required>` +
+                    `<label class="block text-left text-sm font-semibold mt-4">Aula o Gimnasio:</label>` +
+                    `<input id="swal-aula" type="text" class="swal2-input" style="width: 80%;" placeholder="Ej. Aula 15" required>`,
+                focusConfirm: false,
+                confirmButtonColor: '#003366',
+                confirmButtonText: 'Asignar a ' + selectedIds.length + ' estudiante(s)',
+                showCancelButton: true,
+                cancelButtonText: 'Cancelar',
+                preConfirm: () => {
+                    const fecha = document.getElementById('swal-fecha').value;
+                    const hora = document.getElementById('swal-hora').value;
+                    const aula = document.getElementById('swal-aula').value;
+                    
+                    if (!fecha || !hora || !aula) {
+                        Swal.showValidationMessage('Todos los campos son obligatorios');
+                        return false;
+                    }
+                    return { fecha, hora, aula };
+                }
+            });
+
+            if (formValues) {
+                Swal.fire({ title: 'Guardando citas...', didOpen: () => Swal.showLoading() });
+
+                const { error } = await supabaseClient
+                    .from('aspirantes')
+                    .update({ 
+                        cita_fecha: formValues.fecha,
+                        cita_hora: formValues.hora,
+                        cita_aula: formValues.aula
+                    })
+                    .in('id', selectedIds);
+
+                if (error) {
+                    Swal.fire('Error', 'No se pudieron asignar las citas. Verifica la base de datos.', 'error');
+                } else {
+                    await logAction('Asignación de Citas', `Se asignó cita masiva para ${selectedIds.length} estudiante(s). Fecha: ${formValues.fecha}, Hora: ${formValues.hora}, Aula: ${formValues.aula}`);
+                    Swal.fire('¡Éxito!', 'Las citas fueron asignadas correctamente.', 'success');
+                    loadAspirantes();
+                }
+            }
+        }
+
+        async function resetPassword(id, email) {
+            const tempPass = 'Temp' + Math.floor(1000 + Math.random() * 9000);
+            
+            const result = await Swal.fire({
+                title: 'Generar Clave Temporal',
+                text: `¿Seguro que deseas generar una clave temporal para ${email}? Al aceptar, su clave actual dejará de funcionar y el estudiante deberá cambiarla al iniciar sesión.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#cc0000',
+                confirmButtonText: 'Sí, generar y enviar correo'
+            });
+
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Generando y enviando correo...', didOpen: () => Swal.showLoading() });
+                
+                const { error } = await supabaseClient
+                    .from('aspirantes')
+                    .update({ 
+                        password: tempPass,
+                        cambio_clave_requerido: true
+                    })
+                    .eq('id', id);
+
+                if (error) {
+                    Swal.fire('Error', 'Hubo un problema al generar la clave temporal.', 'error');
+                } else {
+                    const templateParams = {
+                        to_email: email,
+                        subject: 'Recuperación de Contraseña - Vocacional Monseñor Sanabria',
+                        message: `Estimado/a estudiante,\n\nSe ha generado una nueva contraseña temporal para tu cuenta de admisiones.\n\nContraseña Temporal: ${tempPass}\n\nIngresa al portal con esta clave. Por tu seguridad, el sistema te pedirá que crees una nueva inmediatamente.\n\nSaludos cordiales,\nDepartamento de Admisiones\nVocacional Monseñor Sanabria`
+                    };
+
+                    try {
+                        await emailjs.send('service_ykdsgde', 'template_wml65va', templateParams);
+                        await logAction('Generación de Clave Temporal', `Se generó clave y se envió correo exitosamente a ${email}`);
+                        Swal.fire({
+                            title: '¡Correo Enviado!',
+                            html: `La clave temporal <b>${tempPass}</b> fue generada y enviada automáticamente a <b>${email}</b>.`,
+                            icon: 'success',
+                            confirmButtonColor: '#003366'
+                        });
+                    } catch (emailErr) {
+                        console.error('Error enviando email:', emailErr);
+                        await logAction('Generación de Clave Temporal', `Se generó clave para ${email} pero falló el envío de correo automático`);
+                        Swal.fire({
+                            title: 'Atención',
+                            html: `La clave se generó correctamente (<b>${tempPass}</b>), pero falló el envío del correo automático. Deberás enviársela manualmente.`,
+                            icon: 'warning',
+                            confirmButtonColor: '#003366'
+                        });
+                    }
+                }
+            }
+        }
+
+        async function viewProfile(id) {
+            Swal.fire({ title: 'Cargando expediente...', didOpen: () => Swal.showLoading() });
+            
+            const { data, error } = await supabaseClient
+                .from('aspirantes')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (error) {
+                console.error("Error obteniendo datos:", error);
+                return;
+            }
+            
+            initAdminRealtime();
+
+            const fotoHtml = data.foto_url 
+                ? `<img src="${data.foto_url}" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-white shadow-lg mb-4 cursor-pointer transition-transform duration-300 hover:scale-105" onclick="viewFullPhotoAdmin('${data.foto_url}')" title="Ver foto completa">`
+                : `<div class="w-32 h-32 rounded-full mx-auto bg-gray-200 flex items-center justify-center border-4 border-white shadow-lg mb-4 text-4xl text-gray-400"><i class="fa-solid fa-user"></i></div>`;
+            
+            const completionBadge = data.registro_completado 
+                ? '<span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold"><i class="fa-solid fa-check"></i> Perfil Completo</span>'
+                : '<span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold"><i class="fa-solid fa-xmark"></i> Perfil Incompleto</span>';
+
+            const html = `
+                <div class="bg-gray-100 -mt-6 -mx-6 p-6 rounded-t-lg mb-6 relative">
+                    ${fotoHtml}
+                    <h3 class="text-xl font-bold font-outfit text-gray-800">${data.nombre} ${data.apellido}</h3>
+                    <p class="text-gray-500 text-sm mb-2">${data.identificacion}</p>
+                    ${completionBadge}
+                </div>
+                
+                <div class="text-left space-y-4 px-2">
+                    <div>
+                        <h4 class="font-bold text-voca-blue border-b pb-1 mb-2 text-sm uppercase">Datos del Estudiante</h4>
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <div><span class="text-gray-500">Correo:</span><br>${data.email}</div>
+                            <div><span class="text-gray-500">Teléfono:</span><br>${data.telefono || 'N/A'}</div>
+                            <div class="col-span-2"><span class="text-gray-500">Centro Educativo de Procedencia:</span><br>${data.centro_procedencia || '<span class="text-red-500 italic">No registrado</span>'}</div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-bold text-voca-blue border-b pb-1 mb-2 text-sm uppercase">Encargado Legal</h4>
+                        <div class="space-y-2 text-sm">
+                            <div><span class="text-gray-500">Nombre:</span> ${data.encargado_nombre || '<span class="text-red-500 italic">Pendiente</span>'}</div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div><span class="text-gray-500">Teléfono:</span><br>${data.encargado_telefono || 'N/A'}</div>
+                                <div><span class="text-gray-500">Correo:</span><br>${data.encargado_correo || 'N/A'}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                ${data.foto_url ? `
+                <div class="mt-6 pt-4 border-t flex justify-center">
+                    <button class="bg-voca-red hover:bg-red-800 text-white px-4 py-2 rounded shadow text-sm font-bold transition flex items-center gap-2" onclick="requireNewPhoto('${data.id}', '${data.nombre} ${data.apellido}')">
+                        <i class="fa-solid fa-camera-rotate"></i> Solicitar Nueva Fotografía
+                    </button>
+                </div>` : ''}
+            `;
+
+            Swal.fire({
+                html: html,
+                showConfirmButton: false,
+                showCloseButton: true,
+                width: '500px'
+            });
+        }
+
+        function viewFullPhotoAdmin(url) {
+            let viewer = document.getElementById('admin-image-viewer');
+            if (!viewer) {
+                viewer = document.createElement('div');
+                viewer.id = 'admin-image-viewer';
+                viewer.className = 'fixed inset-0 z-[9999] bg-black/90 hidden flex flex-col items-center justify-center cursor-zoom-out backdrop-blur-sm transition-opacity duration-300';
+                viewer.innerHTML = `
+                    <div class="absolute top-4 right-4 text-white text-3xl opacity-70 hover:opacity-100 transition"><i class="fa-solid fa-xmark"></i></div>
+                    <img id="admin-image-viewer-img" src="" class="max-w-[90vw] max-h-[90vh] rounded-xl shadow-2xl object-contain border-4 border-white bg-white">
+                `;
+                viewer.onclick = () => {
+                    viewer.classList.add('opacity-0');
+                    setTimeout(() => viewer.classList.add('hidden'), 300);
+                };
+                document.body.appendChild(viewer);
+            }
+            
+            document.getElementById('admin-image-viewer-img').src = url;
+            viewer.classList.remove('hidden');
+            // Timeout to allow browser to render block before fading in
+            setTimeout(() => viewer.classList.remove('opacity-0'), 10);
+        }
+
+        let adminRealtimeChannel = null;
+        
+        function initAdminRealtime() {
+            if(adminRealtimeChannel) return;
+            adminRealtimeChannel = supabaseClient
+                .channel('mensajes_admin')
+                .on('postgres_changes', { 
+                    event: 'INSERT', 
+                    schema: 'public', 
+                    table: 'mensajes'
+                }, payload => {
+                    if (payload.new.remitente === 'estudiante') {
+                        // Check if we have a chat open with this student
+                        if (window.currentAdminChatId === payload.new.aspirante_id && Swal.isVisible()) {
+                            // Reload the chat smoothly
+                            const name = document.querySelector('h3.font-outfit.text-gray-800').innerText;
+                            openChat(window.currentAdminChatId, name);
+                        } else {
+                            // Show a toast notification
+                            const Toast = Swal.mixin({
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 4000,
+                                timerProgressBar: true,
+                                didOpen: (toast) => {
+                                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                                }
+                            });
+                            Toast.fire({
+                                icon: 'info',
+                                title: 'Nuevo mensaje recibido',
+                                text: 'Revisa la tabla de aspirantes.'
+                            });
+                        }
+                    }
+                })
+                .subscribe();
+        }
+
+        async function openChat(id, name) {
+            Swal.fire({ title: 'Cargando mensajes...', didOpen: () => Swal.showLoading() });
+            
+            const { data: mensajes, error } = await supabaseClient
+                .from('mensajes')
+                .select('*')
+                .eq('aspirante_id', id)
+                .order('fecha_hora', { ascending: true });
+
+            if (error) {
+                console.error(error);
+                Swal.fire('Error', 'No se pudieron cargar los mensajes: ' + error.message, 'error');
+                return;
+            }
+
+            // Marcar leídos
+            await supabaseClient
+                .from('mensajes')
+                .update({ leido: true })
+                .eq('aspirante_id', id)
+                .eq('remitente', 'estudiante')
+                .eq('leido', false);
+
+            let messagesHtml = mensajes.map(m => {
+                const isEstudiante = m.remitente === 'estudiante';
+                const alignment = isEstudiante ? 'justify-start' : 'justify-end';
+                const bgColor = isEstudiante ? 'bg-gray-100 text-gray-800' : 'bg-voca-blue text-white';
+                const time = new Date(m.fecha_hora).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                let adjuntoHtml = '';
+                if (m.adjunto_url) {
+                    if (m.adjunto_url.match(/\.(jpeg|jpg|gif|png)$/i)) {
+                        adjuntoHtml = `<img src="${m.adjunto_url}" class="max-w-full h-auto mt-2 rounded-lg shadow-sm cursor-zoom-in" onclick="viewFullPhotoAdmin('${m.adjunto_url}')">`;
+                    } else {
+                        adjuntoHtml = `
+                        <a href="${m.adjunto_url}" target="_blank" class="flex items-center gap-2 mt-2 bg-white/20 p-2 rounded hover:bg-white/30 transition text-sm">
+                            <i class="fa-solid fa-file-arrow-down text-xl"></i>
+                            <span class="truncate">${m.adjunto_nombre || 'Archivo Adjunto'}</span>
+                        </a>`;
+                    }
+                }
+
+                return `
+                    <div class="flex w-full ${alignment} mb-3 z-10 relative">
+                        <div class="max-w-[80%] rounded-2xl px-4 py-2.5 shadow-sm ${bgColor} ${isEstudiante ? 'rounded-tl-sm' : 'rounded-tr-sm'} flex flex-col">
+                            <div class="text-sm ql-editor p-0 [&>p]:m-0 [&>p]:leading-relaxed font-inter break-words">${m.mensaje}</div>
+                            ${adjuntoHtml}
+                            <span class="text-[10px] opacity-75 mt-1.5 text-right font-semibold block">${time}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            if(mensajes.length === 0) {
+                messagesHtml = `<div class="text-center text-gray-400 my-8 italic text-sm">No hay mensajes previos con este estudiante.</div>`;
+            }
+
+            const html = `
+                <div class="bg-gray-100 -mt-6 -mx-6 p-4 rounded-t-lg mb-4 flex items-center gap-3 border-b">
+                    <div class="w-10 h-10 bg-voca-blue text-white rounded-full flex items-center justify-center shadow-inner"><i class="fa-solid fa-user"></i></div>
+                    <div class="text-left">
+                        <h3 class="font-bold font-outfit text-gray-800 leading-tight">${name}</h3>
+                        <span class="text-xs text-gray-500 font-medium">Bandeja de Mensajes</span>
+                    </div>
+                </div>
+                
+                <div id="chat-messages-container" class="h-80 overflow-y-auto px-2 mb-4 bg-white flex flex-col">
+                    ${messagesHtml}
+                </div>
+                
+                <div class="relative bg-white border border-gray-300 rounded-lg shadow-inner overflow-hidden">
+                    <div id="quill-toolbar" class="border-b border-gray-200 bg-gray-50 p-1 flex items-center justify-between">
+                        <span class="ql-formats m-0">
+                            <select class="ql-color" aria-label="Color de texto" title="Color de texto"></select>
+                            <select class="ql-size" aria-label="Tamaño de texto" title="Tamaño de texto"></select>
+                            <button class="ql-bold" aria-label="Negrita" title="Negrita"></button>
+                            <button class="ql-italic" aria-label="Cursiva" title="Cursiva"></button>
+                        </span>
+                        <div class="flex items-center">
+                            <button type="button" class="p-1 hover:text-voca-blue text-gray-500 transition relative" id="emoji-button" onclick="toggleEmojiPickerAdmin()" title="Emojis">
+                                <i class="fa-regular fa-face-smile"></i>
+                                <div id="emoji-picker-container-admin" class="absolute bottom-full right-0 z-50 hidden">
+                                    <emoji-picker class="shadow-2xl"></emoji-picker>
+                                </div>
+                            </button>
+                            <input type="file" id="chat-attachment" class="hidden" onchange="updateAttachmentLabelAdmin()" title="Adjuntar archivo" aria-label="Adjuntar archivo">
+                            <button type="button" class="p-1 hover:text-voca-blue text-gray-500 transition" title="Adjuntar archivo" onclick="document.getElementById('chat-attachment').click()">
+                                <i class="fa-solid fa-paperclip"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="chat-input" class="h-16 text-sm text-left"></div>
+                    
+                    <div id="attachment-preview-admin" class="hidden px-2 py-1 bg-blue-50 text-xs text-voca-blue flex items-center justify-between border-t border-blue-100">
+                        <span id="attachment-name-admin" class="truncate"></span>
+                        <button class="text-red-500 hover:text-red-700" onclick="clearAttachmentAdmin()" title="Quitar adjunto"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+
+                    <button id="send-chat-btn" class="absolute bottom-2 right-2 bg-voca-blue hover:bg-blue-800 text-white rounded p-1.5 transition shadow" onclick="sendAdminMessage('${id}', '${name}')" title="Enviar mensaje">
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                    </button>
+                </div>
+            `;
+
+            window.currentAdminChatId = id; // Store for emoji picker
+            
+            Swal.fire({
+                html: html,
+                showConfirmButton: false,
+                showCloseButton: true,
+                width: '600px',
+                didOpen: () => {
+                    const container = document.getElementById('chat-messages-container');
+                    container.scrollTop = container.scrollHeight;
+                    
+                    window.chatEditor = new Quill('#chat-input', {
+                        theme: 'snow',
+                        modules: { 
+                            toolbar: '#quill-toolbar',
+                            keyboard: {
+                                bindings: {
+                                    customEnter: {
+                                        key: 13,
+                                        shiftKey: false,
+                                        handler: function() {
+                                            sendAdminMessage(id, name);
+                                            return false;
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        placeholder: 'Escribe un mensaje...'
+                    });
+                    
+                    window.chatEditor.focus();
+                    
+                    document.querySelector('emoji-picker').addEventListener('emoji-click', event => {
+                        const emoji = event.detail.unicode;
+                        const range = window.chatEditor.getSelection(true);
+                        window.chatEditor.insertText(range.index, emoji);
+                        toggleEmojiPickerAdmin();
+                    });
+                }
+            });
+        }
+
+        function toggleEmojiPickerAdmin() {
+            const picker = document.getElementById('emoji-picker-container-admin');
+            picker.classList.toggle('hidden');
+        }
+
+        function updateAttachmentLabelAdmin() {
+            const file = document.getElementById('chat-attachment').files[0];
+            const preview = document.getElementById('attachment-preview-admin');
+            const nameSpan = document.getElementById('attachment-name-admin');
+            if (file) {
+                nameSpan.innerText = file.name;
+                preview.classList.remove('hidden');
+            }
+        }
+
+        function clearAttachmentAdmin() {
+            document.getElementById('chat-attachment').value = '';
+            document.getElementById('attachment-preview-admin').classList.add('hidden');
+        }
+
+        async function sendAdminMessage(id, name) {
+            const text = window.chatEditor.root.innerHTML;
+            const plainText = window.chatEditor.getText().trim();
+            const file = document.getElementById('chat-attachment').files[0];
+            
+            if(!plainText && !file && text === '<p><br></p>') return;
+            
+            const btn = document.getElementById('send-chat-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-xs"></i>';
+            
+            let adjuntoUrl = null;
+            let adjuntoNombre = null;
+            
+            if (file) {
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${id}/${Date.now()}.${fileExt}`;
+                const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                    .from('chat_adjuntos')
+                    .upload(fileName, file);
+                    
+                if (uploadError) {
+                    console.error("Error subiendo adjunto:", uploadError);
+                    Swal.fire('Error', 'No se pudo subir el archivo adjunto.', 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-paper-plane text-xs"></i>';
+                    return;
+                }
+                
+                const { data: publicUrlData } = supabaseClient.storage
+                    .from('chat_adjuntos')
+                    .getPublicUrl(fileName);
+                    
+                adjuntoUrl = publicUrlData.publicUrl;
+                adjuntoNombre = file.name;
+            }
+            
+            const { error } = await supabaseClient
+                .from('mensajes')
+                .insert([{
+                    aspirante_id: id,
+                    remitente: 'admin',
+                    mensaje: text,
+                    adjunto_url: adjuntoUrl,
+                    adjunto_nombre: adjuntoNombre
+                }]);
+                
+            if(!error) {
+                openChat(id, name); // Recargar chat
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane text-xs"></i>';
+                console.error("Error enviando mensaje:", error);
+                Swal.fire('Error', 'No se pudo enviar el mensaje: ' + error.message, 'error');
+            }
+        }
+
+        async function requireNewPhoto(id, name) {
+            Swal.close();
+            const result = await Swal.fire({
+                title: '¿Rechazar Fotografía?',
+                text: `Se borrará la foto actual de ${name} y se le obligará a subir una nueva la próxima vez que inicie sesión.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#cc0000',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, rechazar foto',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Actualizando...', didOpen: () => Swal.showLoading() });
+                
+                const { error } = await supabaseClient
+                    .from('aspirantes')
+                    .update({ foto_url: null, registro_completado: false })
+                    .eq('id', id);
+
+                if (error) {
+                    Swal.fire('Error', 'No se pudo actualizar.', 'error');
+                } else {
+                    await logAction('Solicitud Nueva Foto', `Se rechazó la foto de ${name}.`);
+                    Swal.fire('Actualizado', `Se ha requerido una nueva fotografía para ${name}.`, 'success');
+                    fetchDashboardData();
+                }
+            }
+        }
+
+        async function deleteUser(id, name) {
+            const result = await Swal.fire({
+                title: '¿Eliminar Aspirante?',
+                html: `Estás a punto de eliminar permanentemente a <b>${name}</b>.<br>Esta acción no se puede deshacer.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#cc0000',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (result.isConfirmed) {
+                Swal.fire({ title: 'Eliminando...', didOpen: () => Swal.showLoading() });
+                
+                const { error } = await supabaseClient
+                    .from('aspirantes')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) {
+                    Swal.fire('Error', 'No se pudo eliminar al aspirante.', 'error');
+                } else {
+                    await logAction('Eliminación de Estudiante', `Se eliminó permanentemente al estudiante ${name}`);
+                    Swal.fire('¡Eliminado!', 'El aspirante ha sido borrado del sistema.', 'success');
+                    loadAspirantes();
+                }
+            }
+        }
+
+        async function createAdmin() {
+            const { value: formValues } = await Swal.fire({
+                title: 'Nuevo Administrador',
+                html:
+                    `<label class="block text-left text-sm font-semibold mt-2">Nombre y Apellido:</label>` +
+                    `<input id="swal-admin-name" type="text" class="swal2-input" style="width: 80%;" required placeholder="Ej. Juan Pérez">` +
+                    `<label class="block text-left text-sm font-semibold mt-4">Usuario / Correo:</label>` +
+                    `<input id="swal-admin-email" type="text" class="swal2-input" style="width: 80%;" required placeholder="Ej. admin.juan">` +
+                    `<label class="block text-left text-sm font-semibold mt-4">Contraseña:</label>` +
+                    `<input id="swal-admin-pass" type="password" class="swal2-input" style="width: 80%;" required>`,
+                focusConfirm: false,
+                confirmButtonColor: '#003366',
+                confirmButtonText: 'Crear Administrador',
+                showCancelButton: true,
+                cancelButtonText: 'Cancelar',
+                preConfirm: () => {
+                    const nombre = document.getElementById('swal-admin-name').value;
+                    const correo = document.getElementById('swal-admin-email').value;
+                    const password = document.getElementById('swal-admin-pass').value;
+                    
+                    if (!nombre || !correo || !password) {
+                        Swal.showValidationMessage('Todos los campos son obligatorios');
+                        return false;
+                    }
+                    if (password.length < 6) {
+                        Swal.showValidationMessage('La contraseña debe tener al menos 6 caracteres');
+                        return false;
+                    }
+                    return { nombre, correo, password };
+                }
+            });
+
+            if (formValues) {
+                Swal.fire({ title: 'Creando administrador...', didOpen: () => Swal.showLoading() });
+
+                const { error } = await supabaseClient
+                    .from('administradores')
+                    .insert([{
+                        nombre: formValues.nombre,
+                        correo: formValues.correo.toLowerCase(),
+                        password: formValues.password
+                    }]);
+
+                if (error) {
+                    if (error.code === '23505') {
+                        Swal.fire('Error', 'Ya existe un administrador con ese correo o usuario.', 'error');
+                    } else if (error.code === '42P01') {
+                        Swal.fire('Error', 'Falta crear la tabla "administradores". Por favor ejecuta el script SQL provisto.', 'error');
+                    } else {
+                        Swal.fire('Error', 'No se pudo crear el administrador: ' + error.message, 'error');
+                    }
+                } else {
+                    await logAction('Creación de Administrador', `Se creó el administrador: ${formValues.correo}`);
+                    Swal.fire('¡Éxito!', 'El administrador fue creado correctamente.', 'success');
+                }
+            }
+        }
+
+        async function logAction(accion, detalle) {
+            const adminName = localStorage.getItem('adminName') || 'Admin Principal';
+            const { error } = await supabaseClient
+                .from('historial_admin')
+                .insert([{ accion: accion, detalle: detalle, admin_nombre: adminName }]);
+            if (error) console.error("Error guardando historial:", error);
+        }
+
+        let currentHistoryData = [];
+
+        async function showHistory(startDate = null, endDate = null) {
+            Swal.fire({ title: 'Cargando historial...', didOpen: () => Swal.showLoading() });
+            
+            let query = supabaseClient
+                .from('historial_admin')
+                .select('*')
+                .order('fecha_hora', { ascending: false });
+
+            if (startDate) {
+                query = query.gte('fecha_hora', startDate + 'T00:00:00.000Z');
+            }
+            if (endDate) {
+                query = query.lte('fecha_hora', endDate + 'T23:59:59.999Z');
+            }
+            if (!startDate && !endDate) {
+                query = query.limit(50);
+            }
+
+            const { data, error } = await query;
+
+            if (error) {
+                Swal.fire('Error', 'No se pudo cargar el historial. Verifica que creaste la tabla historial_admin.', 'error');
+                return;
+            }
+
+            currentHistoryData = data;
+
+            let historyHtml = `
+                <div class="flex gap-2 mb-4 bg-gray-50 p-3 rounded-lg border border-gray-200 items-end">
+                    <div class="flex-1 text-left">
+                        <label class="text-xs font-bold text-gray-500 uppercase mb-1 block">Desde fecha:</label>
+                        <input type="date" id="hist-desde" class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm outline-none focus:border-voca-blue" value="${startDate || ''}">
+                    </div>
+                    <div class="flex-1 text-left">
+                        <label class="text-xs font-bold text-gray-500 uppercase mb-1 block">Hasta fecha:</label>
+                        <input type="date" id="hist-hasta" class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm outline-none focus:border-voca-blue" value="${endDate || ''}">
+                    </div>
+                    <div>
+                        <button onclick="applyHistoryFilter()" class="bg-voca-blue hover:bg-blue-800 text-white px-4 py-1.5 rounded transition shadow-sm h-8" title="Filtrar"><i class="fa-solid fa-search"></i></button>
+                    </div>
+                    <div>
+                        <button onclick="showHistory()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded transition shadow-sm h-8" title="Limpiar"><i class="fa-solid fa-rotate-right"></i></button>
+                    </div>
+                </div>
+                <div class="text-left mt-2 max-h-80 overflow-y-auto"><ul class="space-y-3">`;
+                
+            if (data.length === 0) {
+                historyHtml += '<p class="text-gray-500 text-center py-6">No hay registros en este periodo.</p>';
+            } else {
+                data.forEach(log => {
+                    const date = new Date(log.fecha_hora);
+                    const formattedDate = date.toLocaleString('es-CR');
+                    const adminLabel = log.admin_nombre ? `<span class="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded ml-2"><i class="fa-solid fa-user-shield text-[10px] mr-1"></i>${log.admin_nombre}</span>` : '';
+                    historyHtml += `
+                        <li class="p-3 bg-white rounded border border-gray-200 text-sm shadow-sm relative">
+                            <span class="font-bold text-voca-blue flex items-center mb-1">${log.accion} ${adminLabel} <span class="text-xs text-gray-400 font-normal absolute right-3 top-3"><i class="fa-regular fa-clock mr-1"></i> ${formattedDate}</span></span>
+                            <span class="text-gray-700">${log.detalle}</span>
+                        </li>
+                    `;
+                });
+            }
+            historyHtml += '</ul></div>';
+
+            Swal.fire({
+                title: 'Historial de Actividades',
+                html: historyHtml,
+                width: '650px',
+                showCancelButton: true,
+                confirmButtonColor: '#003366',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: '<i class="fa-solid fa-file-pdf"></i> Descargar PDF',
+                cancelButtonText: 'Cerrar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    downloadHistoryPDF(currentHistoryData);
+                }
+            });
+        }
+
+        function applyHistoryFilter() {
+            const desde = document.getElementById('hist-desde').value;
+            const hasta = document.getElementById('hist-hasta').value;
+            if (!desde && !hasta) return;
+            showHistory(desde, hasta);
+        }
+
+        function downloadHistoryPDF(data) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Título
+            doc.setFontSize(18);
+            doc.text('Vocacional Monseñor Sanabria', 14, 20);
+            doc.setFontSize(14);
+            doc.text('Historial de Auditoría Administrativa', 14, 28);
+            
+            // Fecha
+            doc.setFontSize(10);
+            doc.text('Generado: ' + new Date().toLocaleString('es-CR'), 14, 36);
+
+            // Tabla
+            const tableColumn = ["Fecha y Hora", "Administrador", "Acción", "Detalles"];
+            const tableRows = [];
+
+            data.forEach(log => {
+                const date = new Date(log.fecha_hora).toLocaleString('es-CR');
+                const adminName = log.admin_nombre || 'Desconocido';
+                const rowData = [
+                    date,
+                    adminName,
+                    log.accion,
+                    log.detalle
+                ];
+                tableRows.push(rowData);
+            });
+
+            doc.autoTable({
+                head: [tableColumn],
+                body: tableRows,
+                startY: 42,
+                styles: { fontSize: 9 },
+                headStyles: { fillColor: [0, 51, 102] }
+            });
+
+            doc.save(`Historial_Auditoria_${new Date().getTime()}.pdf`);
+        }
+
+        function showCreateAlert() {
+            Swal.fire({
+                title: 'Crear Solicitud Manual',
+                text: 'En desarrollo...',
+                icon: 'info',
+                confirmButtonColor: '#003366',
+                confirmButtonText: 'Cerrar'
+            });
+        }
+
+        async function showAvisosModal() {
+            let quillEditor;
+            const { value: formValues } = await Swal.fire({
+                title: 'Redactar Comunicado',
+                width: '600px',
+                html: `
+                    <div class="text-left mb-3 mt-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Título del Aviso</label>
+                        <input id="swal-aviso-titulo" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-voca-blue outline-none" placeholder="Ej. Fecha de Exámenes Publicada">
+                    </div>
+                    <div class="text-left mb-3">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Mensaje (Formato Avanzado)</label>
+                        <div id="swal-aviso-mensaje" class="bg-white border-gray-300 rounded-b-lg" style="height: 150px;"></div>
+                    </div>
+                    <div class="text-left mb-3 mt-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1">Archivo Adjunto (Opcional)</label>
+                        <input type="file" id="swal-aviso-adjunto" class="w-full border border-gray-300 rounded-lg p-2 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-voca-blue hover:file:bg-blue-100 transition">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div class="text-left">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Nivel de Importancia</label>
+                            <select id="swal-aviso-tipo" class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-voca-blue">
+                                <option value="general">Informativo (General)</option>
+                                <option value="urgente">Urgente (Destacado)</option>
+                                <option value="cita">Relacionado a Citas</option>
+                            </select>
+                        </div>
+                        <div class="text-left">
+                            <label class="block text-sm font-semibold text-gray-700 mb-1">Publicar el...</label>
+                            <input type="datetime-local" id="swal-aviso-fecha" class="w-full border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-voca-blue" title="Dejar vacío para publicar ahora mismo">
+                        </div>
+                    </div>
+                    <div class="text-left flex items-center gap-2 bg-blue-50 p-3 rounded-lg border border-blue-100">
+                        <input type="checkbox" id="swal-aviso-pinned" class="w-4 h-4 text-voca-blue rounded border-gray-300 focus:ring-voca-blue">
+                        <label for="swal-aviso-pinned" class="text-sm font-semibold text-voca-blue"><i class="fa-solid fa-thumbtack mr-1"></i> Anclar mensaje (mantener siempre arriba)</label>
+                    </div>
+                `,
+                didOpen: () => {
+                    quillEditor = new Quill('#swal-aviso-mensaje', {
+                        theme: 'snow',
+                        placeholder: 'Escribe el comunicado aquí...',
+                        modules: {
+                            toolbar: [
+                                [{'header': [1, 2, 3, false]}],
+                                ['bold', 'italic', 'underline', 'strike'],
+                                [{'color': []}, {'background': []}],
+                                [{'list': 'ordered'}, {'list': 'bullet'}],
+                                ['link']
+                            ]
+                        }
+                    });
+                },
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fa-solid fa-eye mr-2"></i> Vista Previa',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#003366',
+                preConfirm: () => {
+                    const titulo = document.getElementById('swal-aviso-titulo').value;
+                    const mensaje = quillEditor.root.innerHTML;
+                    const plainText = quillEditor.getText().trim();
+                    const tipo = document.getElementById('swal-aviso-tipo').value;
+                    const fechaInput = document.getElementById('swal-aviso-fecha').value;
+                    const isPinned = document.getElementById('swal-aviso-pinned').checked;
+                    const fileInput = document.getElementById('swal-aviso-adjunto');
+                    const file = fileInput.files.length > 0 ? fileInput.files[0] : null;
+
+                    if (!titulo || (!plainText && plainText !== '')) {
+                        Swal.showValidationMessage('El título y el mensaje son obligatorios');
+                        return false;
+                    }
+
+                    if (file) {
+                        const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name);
+                        if (isImage && file.size > 2 * 1024 * 1024) {
+                            Swal.showValidationMessage('La imagen no puede superar los 2MB de peso.');
+                            return false;
+                        }
+                    }
+
+                    return { titulo, mensaje, tipo, isPinned, file, fechaInput };
+                }
+            });
+
+            if (formValues) {
+                // Generar vista previa
+                let icon = 'fa-bullhorn';
+                let borderClass = 'border border-gray-100';
+                let iconBg = 'bg-gray-100 text-gray-500';
+                let badge = '';
+                
+                if (formValues.tipo === 'urgente') {
+                    icon = 'fa-triangle-exclamation';
+                    borderClass = 'border border-voca-red ring-1 ring-red-50';
+                    iconBg = 'bg-red-100 text-voca-red';
+                    badge = '<div class="absolute top-0 right-0 bg-voca-red text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg rounded-tr-xl uppercase tracking-wider">Urgente</div>';
+                } else if (formValues.tipo === 'cita') {
+                    icon = 'fa-calendar-day';
+                    borderClass = 'border border-voca-gold ring-1 ring-yellow-50';
+                    iconBg = 'bg-yellow-100 text-yellow-700';
+                }
+
+                let pinBadge = '';
+                if (formValues.isPinned) {
+                    pinBadge = '<div class="absolute top-0 left-0 bg-blue-100 text-voca-blue text-[10px] font-bold px-3 py-1 rounded-br-lg rounded-tl-xl uppercase tracking-wider"><i class="fa-solid fa-thumbtack mr-1"></i> Anclado</div>';
+                }
+
+                let attachmentHtml = '';
+                if (formValues.file) {
+                    const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(formValues.file.name);
+                    if (isImage) {
+                        const tempUrl = URL.createObjectURL(formValues.file);
+                        attachmentHtml = `
+                            <div class="mt-4 rounded-xl overflow-hidden border border-gray-100 max-w-lg shadow-sm bg-gray-50 flex justify-center">
+                                <img src="${tempUrl}" alt="${formValues.file.name}" class="w-full h-auto max-h-[250px] object-contain">
+                            </div>
+                        `;
+                    } else {
+                        attachmentHtml = `
+                            <div class="mt-4">
+                                <span class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-voca-blue border border-blue-100 rounded-lg text-sm font-medium shadow-sm">
+                                    <i class="fa-solid fa-paperclip"></i> ${formValues.file.name}
+                                </span>
+                            </div>
+                        `;
+                    }
+                }
+
+                const previewHtml = `
+                    <div class="text-left mb-4 text-sm text-gray-500"><i class="fa-solid fa-circle-info mr-1"></i> Así es como los estudiantes verán el comunicado:</div>
+                    ${formValues.fechaInput ? `<div class="bg-orange-50 text-orange-700 text-xs px-3 py-2 rounded mb-3"><i class="fa-regular fa-clock mr-1"></i> Se publicará el: ${new Date(formValues.fechaInput).toLocaleString('es-CR')}</div>` : ''}
+                    <div class="text-left bg-white ${borderClass} p-5 rounded-xl shadow-sm relative text-sm border">
+                        ${badge}
+                        ${pinBadge}
+                        <div class="flex gap-4 items-start ${(formValues.isPinned || formValues.tipo === 'urgente') ? 'mt-4' : ''}">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${iconBg}">
+                                <i class="fa-solid ${icon}"></i>
+                            </div>
+                            <div class="w-full">
+                                <h3 class="font-bold text-gray-800 text-lg pr-16">${formValues.titulo}</h3>
+                                <div class="text-gray-600 mt-3 leading-relaxed ql-editor p-0">${formValues.mensaje}</div>
+                                ${attachmentHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                const { isConfirmed } = await Swal.fire({
+                    title: 'Vista Previa',
+                    width: '600px',
+                    html: previewHtml,
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fa-solid fa-paper-plane mr-2"></i> Confirmar y Publicar',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#003366',
+                });
+
+                if (isConfirmed) {
+                    Swal.fire({
+                        title: 'Publicando...',
+                        text: 'Subiendo archivo y publicando aviso...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    let adjuntoUrl = null;
+                    let adjuntoNombre = null;
+
+                    if (formValues.file) {
+                        const file = formValues.file;
+                        const fileExt = file.name.split('.').pop();
+                        const fileName = `admin/${Date.now()}_aviso.${fileExt}`;
+                        
+                        const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                            .from('chat_adjuntos')
+                            .upload(fileName, file);
+                            
+                        if (uploadError) {
+                            Swal.fire('Error', 'No se pudo subir el archivo adjunto: ' + uploadError.message, 'error');
+                            return;
+                        }
+                        
+                        const { data: publicUrlData } = supabaseClient.storage
+                            .from('chat_adjuntos')
+                            .getPublicUrl(fileName);
+                            
+                        adjuntoUrl = publicUrlData.publicUrl;
+                        adjuntoNombre = file.name;
+                    }
+
+                    let fechaPub = new Date().toISOString();
+                    if (formValues.fechaInput) {
+                        fechaPub = new Date(formValues.fechaInput).toISOString();
+                    }
+
+                    const { error } = await supabaseClient
+                        .from('avisos')
+                        .insert([{
+                            titulo: formValues.titulo,
+                            mensaje: formValues.mensaje,
+                            tipo: formValues.tipo,
+                            adjunto_url: adjuntoUrl,
+                            adjunto_nombre: adjuntoNombre,
+                            is_pinned: formValues.isPinned,
+                            fecha_publicacion: fechaPub
+                        }]);
+
+                    if (error) {
+                        Swal.fire('Error', 'No se pudo publicar el aviso: ' + error.message, 'error');
+                    } else {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Publicado!',
+                            text: formValues.fechaInput ? 'El comunicado ha sido programado.' : 'El comunicado global ha sido publicado.',
+                            confirmButtonColor: '#003366'
+                        });
+                        loadAdminAvisos();
+                    }
+                }
+            }
+        }
+
+        async function loadAdminAvisos() {
+            const container = document.getElementById('admin-muro-container');
+            container.innerHTML = '<div class="text-center py-10"><i class="fa-solid fa-spinner animate-spin text-3xl text-voca-blue mb-3"></i><p class="text-gray-500">Cargando avisos...</p></div>';
+
+            const { data, error } = await supabaseClient
+                .from('avisos')
+                .select('*')
+                .order('is_pinned', { ascending: false, nullsFirst: false })
+                .order('fecha_publicacion', { ascending: false });
+
+            if (error) {
+                container.innerHTML = '<div class="bg-red-50 text-red-600 p-4 rounded-lg text-center">Error al cargar comunicados.</div>';
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                container.innerHTML = '<div class="text-center py-10 border-2 border-dashed border-gray-200 rounded-xl"><i class="fa-solid fa-inbox text-gray-300 text-4xl mb-3"></i><p class="text-gray-500 font-medium">No hay avisos registrados.</p></div>';
+                return;
+            }
+
+            let html = '';
+            const now = new Date();
+
+            data.forEach(aviso => {
+                const isScheduled = new Date(aviso.fecha_publicacion) > now;
+                const statusBadge = aviso.is_hidden 
+                    ? '<span class="bg-gray-200 text-gray-600 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ml-2"><i class="fa-solid fa-eye-slash mr-1"></i> Oculto</span>'
+                    : (isScheduled 
+                        ? '<span class="bg-orange-100 text-orange-600 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ml-2"><i class="fa-regular fa-clock mr-1"></i> Programado</span>' 
+                        : '<span class="bg-green-100 text-green-600 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ml-2"><i class="fa-solid fa-check mr-1"></i> Activo</span>');
+
+                let pinBadge = aviso.is_pinned ? '<i class="fa-solid fa-thumbtack text-voca-blue mr-2" title="Anclado"></i>' : '';
+
+                let attachmentHtml = '';
+                if (aviso.adjunto_url) {
+                    const isImage = aviso.adjunto_nombre && /\.(jpg|jpeg|png|gif|webp)$/i.test(aviso.adjunto_nombre);
+                    if (isImage) {
+                        attachmentHtml = `
+                            <div class="mt-4 rounded-xl overflow-hidden border border-gray-100 max-w-lg shadow-sm bg-gray-50 flex justify-center">
+                                <a href="${aviso.adjunto_url}" target="_blank" title="Ver imagen completa">
+                                    <img src="${aviso.adjunto_url}" alt="${aviso.adjunto_nombre}" class="w-full h-auto max-h-[400px] object-contain hover:opacity-95 transition">
+                                </a>
+                            </div>
+                        `;
+                    } else {
+                        attachmentHtml = `
+                            <div class="mt-4">
+                                <a href="${aviso.adjunto_url}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-voca-blue border border-blue-100 rounded-lg text-sm font-medium hover:bg-blue-100 transition shadow-sm">
+                                    <i class="fa-solid fa-paperclip"></i> ${aviso.adjunto_nombre || 'Ver archivo adjunto'}
+                                </a>
+                            </div>
+                        `;
+                    }
+                }
+
+                const likesCount = aviso.liked_by ? aviso.liked_by.length : 0;
+
+                html += `
+                    <div class="bg-white border border-gray-200 p-5 rounded-xl shadow-sm relative transition hover:shadow-md flex justify-between items-start gap-4 ${aviso.is_hidden ? 'opacity-60' : ''}">
+                        <div class="w-full overflow-hidden">
+                            <div class="flex items-center mb-2">
+                                ${pinBadge}
+                                <h3 class="font-bold text-gray-800 text-lg">${aviso.titulo}</h3>
+                                ${statusBadge}
+                            </div>
+                            <div class="text-gray-600 text-sm leading-relaxed ql-editor p-0">
+                                ${aviso.mensaje}
+                            </div>
+                            ${attachmentHtml}
+                            <div class="flex gap-4 text-xs text-gray-400 mt-4 pt-3 border-t border-gray-50 items-center">
+                                <span><i class="fa-regular fa-calendar mr-1"></i> Publicación: ${new Date(aviso.fecha_publicacion).toLocaleString('es-CR')}</span>
+                                ${likesCount > 0 ? `<span class="text-voca-red font-medium flex items-center gap-1" title="Me gusta"><i class="fa-solid fa-heart"></i> ${likesCount}</span>` : `<span class="text-gray-300 flex items-center gap-1" title="Sin me gusta"><i class="fa-regular fa-heart"></i> 0</span>`}
+                            </div>
+                        </div>
+                        <div class="flex gap-2 shrink-0">
+                            <button onclick="toggleAvisoPin('${aviso.id}', ${aviso.is_pinned})" class="w-8 h-8 rounded-lg ${aviso.is_pinned ? 'bg-blue-100 text-voca-blue' : 'bg-gray-100 hover:bg-gray-200 text-gray-400 hover:text-voca-blue'} flex items-center justify-center transition" title="${aviso.is_pinned ? 'Desanclar' : 'Anclar'}">
+                                <i class="fa-solid fa-thumbtack"></i>
+                            </button>
+                            <button onclick="toggleAvisoVisibility('${aviso.id}', ${aviso.is_hidden})" class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition" title="${aviso.is_hidden ? 'Mostrar' : 'Ocultar'}">
+                                <i class="fa-solid ${aviso.is_hidden ? 'fa-eye' : 'fa-eye-slash'}"></i>
+                            </button>
+                            <button onclick="deleteAviso('${aviso.id}')" class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-voca-red flex items-center justify-center transition" title="Eliminar">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        async function toggleAvisoVisibility(id, currentHidden) {
+            const { error } = await supabaseClient
+                .from('avisos')
+                .update({ is_hidden: !currentHidden })
+                .eq('id', id);
+            
+            if (!error) loadAdminAvisos();
+        }
+
+        async function toggleAvisoPin(id, currentPin) {
+            const { error } = await supabaseClient
+                .from('avisos')
+                .update({ is_pinned: !currentPin })
+                .eq('id', id);
+            
+            if (!error) loadAdminAvisos();
+        }
+
+        async function deleteAviso(id) {
+            const { isConfirmed } = await Swal.fire({
+                title: '¿Eliminar comunicado?',
+                text: "Esta acción no se puede deshacer.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (isConfirmed) {
+                const { error } = await supabaseClient.from('avisos').delete().eq('id', id);
+                if (!error) {
+                    Swal.fire('Eliminado', 'El comunicado ha sido borrado.', 'success');
+                    loadAdminAvisos();
+                } else {
+                    Swal.fire('Error', error.message, 'error');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
