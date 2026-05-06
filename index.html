@@ -41,8 +41,36 @@
                 <a href="login.html" class="btn btn-blue nav-btn">Iniciar Sesión</a>
                 <a href="#registro" class="btn btn-primary nav-btn">Regístrate Ahora</a>
             </div>
+            <button class="mobile-menu-toggle" id="mobileMenuBtn" aria-label="Abrir menú">
+                <i class="fa-solid fa-bars-staggered"></i>
+            </button>
         </div>
     </nav>
+
+    <!-- Mobile Menu Drawer -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    <div class="mobile-menu-drawer" id="mobileMenuDrawer">
+        <div class="mobile-drawer-header">
+            <div class="nav-logo">
+                <img src="src/logo/VOCA%20Admisiones.png" alt="VOCA Logo" class="logo-img">
+                <span class="logo-text">Portal VOCA</span>
+            </div>
+            <button class="close-drawer-btn" id="closeDrawerBtn" aria-label="Cerrar menú">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="mobile-drawer-links">
+            <a href="#inicio" onclick="closeMobileMenu()">Inicio</a>
+            <a href="#proceso" onclick="closeMobileMenu()">El Proceso</a>
+            <a href="#requisitos" onclick="closeMobileMenu()">Requisitos</a>
+            <a href="#contacto" onclick="closeMobileMenu()">Contacto</a>
+            <div class="drawer-buttons">
+                <a href="login.html" class="btn btn-blue w-full">Iniciar Sesión</a>
+                <a href="#registro" class="btn btn-primary w-full" onclick="closeMobileMenu()">Regístrate Ahora</a>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Hero Section -->
     <header id="inicio" class="hero">

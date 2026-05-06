@@ -10,13 +10,36 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { 
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            height: 100%;
+        }
         h1, h2, h3, h4, h5, h6, .font-outfit { font-family: 'Outfit', sans-serif; }
         .bg-voca-blue { background-color: #003366; }
         .text-voca-blue { color: #003366; }
         .bg-voca-red { background-color: #cc0000; }
         .hover-bg-voca-red:hover { background-color: #a30000; }
         .text-voca-red { color: #cc0000; }
+        
+        /* Mobile height optimization */
+        @media (max-height: 850px) and (max-width: 768px) {
+            .branding-section { padding: 1.5rem !important; }
+            .branding-section .my-12 { margin-top: 1rem !important; margin-bottom: 1rem !important; }
+            .branding-section img { width: 4rem !important; height: 4rem !important; }
+            .branding-section h1 { font-size: 1.5rem !important; margin-bottom: 0.5rem !important; }
+            .branding-section p { font-size: 0.875rem !important; display: none; }
+            
+            .form-section { padding: 1.5rem !important; }
+            .form-section h2 { margin-bottom: 1rem !important; font-size: 1.25rem !important; }
+            .form-section .mb-5, .form-section .mb-6 { margin-bottom: 0.75rem !important; }
+            .form-section .mt-8 { margin-top: 1rem !important; }
+        }
+        
+        @media (max-width: 768px) {
+            body { padding: 0.5rem !important; }
+            .branding-section { min-height: auto !important; }
+        }
     </style>
 </head>
 <body class="text-gray-800 min-h-screen flex items-center justify-center p-4 relative bg-[url('src/img/hero_background.jpg')] bg-cover bg-center bg-fixed">
@@ -28,7 +51,7 @@
     <div class="max-w-4xl w-full rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row relative z-10 border border-white/20 bg-white/20 backdrop-blur-[20px]">
         
         <!-- Left Side: Image/Branding -->
-        <div class="md:w-1/2 p-8 text-white flex flex-col justify-between relative overflow-hidden bg-[#003366]/70">
+        <div class="md:w-1/2 p-8 text-white flex flex-col justify-between relative overflow-hidden bg-[#003366]/70 branding-section">
             <!-- Background Decoration -->
             <div class="absolute -top-24 -right-24 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
             <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
@@ -51,7 +74,7 @@
         </div>
 
         <!-- Right Side: Login Form -->
-        <div class="md:w-1/2 p-8 md:p-12 relative bg-white/[0.85]">
+        <div class="md:w-1/2 p-8 md:p-12 relative bg-white/[0.85] form-section">
             <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Iniciar Sesión</h2>
 
             <!-- Form -->

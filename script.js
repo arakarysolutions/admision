@@ -246,4 +246,34 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+    // Lógica del menú móvil
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+    const mobileMenuDrawer = document.getElementById('mobileMenuDrawer');
+    const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+
+    const toggleMobileMenu = () => {
+        mobileMenuDrawer.classList.toggle('active');
+        mobileMenuOverlay.classList.toggle('active');
+        document.body.style.overflow = mobileMenuDrawer.classList.contains('active') ? 'hidden' : '';
+    };
+
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+    }
+
+    if (closeDrawerBtn) {
+        closeDrawerBtn.addEventListener('click', toggleMobileMenu);
+    }
+
+    if (mobileMenuOverlay) {
+        mobileMenuOverlay.addEventListener('click', toggleMobileMenu);
+    }
+
+    // Función global para cerrar el menú desde los enlaces
+    window.closeMobileMenu = () => {
+        mobileMenuDrawer.classList.remove('active');
+        mobileMenuOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    };
 });

@@ -52,18 +52,64 @@
         </nav>
 
         <div class="p-4 border-t border-blue-800">
-            <a href="login.html" class="flex items-center gap-3 px-4 py-3 text-red-300 hover:text-red-100 hover:bg-blue-800 rounded-lg font-medium transition">
+            <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-blue-800 rounded-lg font-medium transition">
                 <i class="fa-solid fa-arrow-right-from-bracket w-5 text-center"></i> Cerrar Sesión
-            </a>
+            </button>
         </div>
     </aside>
+
+    <!-- Mobile Sidebar Drawer -->
+    <div id="mobile-sidebar-overlay" class="fixed inset-0 bg-black/50 z-[60] hidden transition-opacity duration-300 opacity-0" onclick="toggleMobileMenu()"></div>
+    <aside id="mobile-sidebar" class="fixed inset-y-0 left-0 w-72 bg-voca-blue text-white z-[70] transform -translate-x-full transition-transform duration-300 md:hidden flex flex-col shadow-2xl">
+        <div class="h-20 flex items-center justify-between px-6 border-b border-blue-800">
+            <div class="flex items-center">
+                <img src="src/logo/VOCA%20Admisiones.png" alt="Logo" class="h-10 w-10 bg-white rounded-full p-1 mr-3">
+                <span class="font-outfit font-bold text-lg tracking-wide">Portal SVS</span>
+            </div>
+            <button onclick="toggleMobileMenu()" class="text-white text-2xl hover:text-blue-200 transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        
+        <nav class="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
+            <a href="#" onclick="switchTab('progreso'); toggleMobileMenu();" class="flex items-center gap-3 px-4 py-4 bg-blue-800 rounded-xl text-white font-medium transition active:scale-95">
+                <i class="fa-solid fa-chart-pie w-5 text-center"></i> Mi Progreso
+            </a>
+            <a href="#" onclick="switchTab('datos'); toggleMobileMenu();" class="flex items-center gap-3 px-4 py-4 hover:bg-blue-800/50 rounded-xl text-blue-100 font-medium transition active:scale-95">
+                <i class="fa-regular fa-id-card w-5 text-center"></i> Mis Datos
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-4 hover:bg-blue-800/50 rounded-xl text-blue-100 font-medium transition active:scale-95">
+                <i class="fa-solid fa-file-arrow-up w-5 text-center"></i> Documentos
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-4 hover:bg-blue-800/50 rounded-xl text-blue-100 font-medium transition active:scale-95">
+                <i class="fa-regular fa-calendar-check w-5 text-center"></i> Examen de Admisión
+            </a>
+            <div class="pt-4 mt-4 border-t border-blue-800/50">
+                <a href="#" onclick="toggleChatPanel(); toggleMobileMenu();" class="flex items-center justify-between px-4 py-4 hover:bg-blue-800/50 rounded-xl text-blue-100 font-medium transition active:scale-95">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-comments w-5 text-center"></i> Mensajes
+                    </div>
+                    <span id="mobile-sidebar-msg-badge" class="bg-voca-red text-white text-xs font-bold px-2 py-0.5 rounded-full hidden">0</span>
+                </a>
+            </div>
+        </nav>
+
+        <div class="p-6 border-t border-blue-800">
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-3 px-4 py-3 bg-red-600 text-white hover:bg-red-700 rounded-xl font-bold transition">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Cerrar Sesión
+            </button>
+        </div>
+    </aside>
+
 
     <!-- Main Content -->
     <main id="main-scroll" class="flex-1 flex flex-col h-screen overflow-y-auto relative">
         <!-- Topbar -->
-        <header class="h-20 bg-white shadow-sm flex items-center justify-between px-8 z-10">
+        <header class="h-20 bg-white shadow-sm flex items-center justify-between px-4 md:px-8 z-10">
             <div class="flex items-center md:hidden">
-                <button class="text-gray-500 hover:text-gray-700 text-xl" title="Menú"><i class="fa-solid fa-bars"></i></button>
+                <button onclick="toggleMobileMenu()" class="text-gray-600 hover:text-voca-blue text-2xl transition active:scale-90" title="Menú">
+                    <i class="fa-solid fa-bars-staggered"></i>
+                </button>
             </div>
             
             <h1 class="text-xl font-semibold text-gray-800 hidden md:block">Proceso de Admisión 2026</h1>
@@ -100,11 +146,11 @@
         </header>
 
         <!-- Dashboard Content -->
-        <div class="p-8 max-w-7xl mx-auto w-full">
+        <div class="p-4 md:p-8 max-w-7xl mx-auto w-full">
             
             <div id="view-progreso">
                 <div class="mb-8">
-                    <h2 id="greeting" class="text-3xl font-bold font-outfit text-voca-blue mb-2">¡Hola, Estudiante!</h2>
+                    <h2 id="greeting" class="text-2xl md:text-3xl font-bold font-outfit text-voca-blue mb-2">¡Hola, Estudiante!</h2>
                     <p class="text-gray-600">Este es tu panel de control. Aquí podrás dar seguimiento a tu admisión.</p>
                 </div>
                 <!-- Stats/Progress -->
@@ -155,6 +201,18 @@
                         </div>
                     </div>
 
+                    <!-- Tarjeta Detalle de Examen -->
+                    <div id="exam-card-container" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hidden">
+                        <div class="bg-blue-600 px-6 py-3">
+                            <h3 class="text-white font-bold flex items-center gap-2">
+                                <i class="fa-solid fa-calendar-check"></i> Detalle de tu Examen
+                            </h3>
+                        </div>
+                        <div id="exam-card-content" class="p-6">
+                            <!-- Se llena dinámicamente -->
+                        </div>
+                    </div>
+
                     <!-- Muro de Avisos -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                         <div class="border-b border-gray-100 px-6 py-4 flex justify-between items-center bg-gray-50">
@@ -179,7 +237,7 @@
             <div id="view-datos" class="hidden">
                 <div class="max-w-2xl mx-auto">
                     <!-- Resumen de Perfil -->
-                    <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+                    <div class="bg-white p-4 md:p-8 rounded-xl shadow-sm border border-gray-100">
                         <div class="flex flex-col items-center mb-8">
                             <div class="w-32 h-40 bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200 mb-4 relative shadow-sm group">
                                 <img id="profile-photo" src="" class="w-full h-full object-cover hidden cursor-pointer transition-transform duration-300 group-hover:scale-110" alt="Foto Pasaporte" onclick="viewFullPhoto()" title="Ver foto completa">
@@ -466,12 +524,11 @@
         });
 
         function updateExamCard(data) {
-            const examContent = document.getElementById('exam-card-content');
-            if (!examContent) return;
-            
             const step2Container = document.getElementById('step2-container');
             const step2Icon = document.getElementById('step2-icon');
             const step2Text = document.getElementById('step2-text');
+            const examCardContainer = document.getElementById('exam-card-container');
+            const examContent = document.getElementById('exam-card-content');
             
             if (!data || !data.cita_fecha) {
                 if (step2Container) {
@@ -481,20 +538,25 @@
                     step2Text.innerText = "Pendiente. Pronto se te asignará una fecha para el examen.";
                 }
 
-                examContent.innerHTML = `
-                    <div class="text-center w-full py-4">
-                        <i class="fa-solid fa-hourglass-half text-gray-300 text-4xl mb-3"></i>
-                        <h4 class="text-lg font-bold text-gray-700">Cita por asignar</h4>
-                        <p class="text-gray-500 mt-1">El departamento de admisiones aún no te ha asignado la fecha de tu examen. Te notificaremos pronto.</p>
-                    </div>
-                `;
+                if (examCardContainer) examCardContainer.classList.add('hidden');
+                
+                if (examContent) {
+                    examContent.innerHTML = `
+                        <div class="text-center w-full py-4">
+                            <i class="fa-solid fa-hourglass-half text-gray-300 text-4xl mb-3"></i>
+                            <h4 class="text-lg font-bold text-gray-700">Cita por asignar</h4>
+                            <p class="text-gray-500 mt-1">El departamento de admisiones aún no te ha asignado la fecha de tu examen. Te notificaremos pronto.</p>
+                        </div>
+                    `;
+                }
             } else {
+                if (examCardContainer) examCardContainer.classList.remove('hidden');
                 if (step2Container) {
                     if (data.cita_confirmada) {
                         step2Container.className = "bg-white p-6 rounded-xl shadow-sm border border-green-500 flex items-start gap-4 ring-2 ring-green-50 transition-all duration-300";
                         step2Icon.className = "h-12 w-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xl shrink-0 transition-colors";
-                        step2Icon.innerHTML = '<i class="fa-solid fa-check-double"></i>';
-                        step2Text.innerHTML = "<strong class='text-green-700'>Confirmado.</strong> Asistencia registrada para la prueba.";
+                        step2Icon.innerHTML = '<i class="fa-solid fa-check"></i>';
+                        step2Text.innerHTML = "<strong class='text-green-700'>Cita Confirmada.</strong> Tu espacio ha sido reservado con éxito.";
                     } else {
                         step2Container.className = "bg-white p-6 rounded-xl shadow-sm border border-voca-gold flex items-start gap-4 ring-2 ring-yellow-50 transition-all duration-300";
                         step2Icon.className = "h-12 w-12 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center text-xl shrink-0 transition-colors";
@@ -509,17 +571,19 @@
                 const monthName = dateObj.toLocaleString('es-ES', { month: 'short' });
                 
                 examContent.innerHTML = `
-                    <div class="bg-blue-50 p-4 rounded-lg text-center min-w-[120px]">
-                        <span class="block text-sm font-bold text-voca-blue uppercase mb-1">${monthName}</span>
-                        <span class="block text-4xl font-bold text-gray-800 font-outfit">${day}</span>
-                        <span class="block text-sm text-gray-500 mt-1">${year}</span>
-                    </div>
-                    <div>
-                        <h4 class="text-xl font-bold text-gray-800 mb-2">Examen de Admisión Confirmado</h4>
-                        <p class="text-gray-600 mb-4 text-sm">Debes presentarte en las instalaciones del colegio 30 minutos antes con tu cédula de identidad original.</p>
-                        <div class="flex items-center gap-4 text-sm font-medium text-gray-700">
-                            <span><i class="fa-regular fa-clock text-voca-red"></i> ${data.cita_hora}</span>
-                            <span><i class="fa-solid fa-location-dot text-voca-red"></i> ${data.cita_aula}</span>
+                    <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+                        <div class="bg-blue-50 p-4 rounded-lg text-center min-w-[120px] w-full sm:w-auto">
+                            <span class="block text-sm font-bold text-voca-blue uppercase mb-1">${monthName}</span>
+                            <span class="block text-4xl font-bold text-gray-800 font-outfit">${day}</span>
+                            <span class="block text-sm text-gray-500 mt-1">${year}</span>
+                        </div>
+                        <div class="text-center sm:text-left">
+                            <h4 class="text-xl font-bold text-gray-800 mb-2">Examen de Admisión Confirmado</h4>
+                            <p class="text-gray-600 mb-4 text-sm">Debes presentarte en las instalaciones del colegio 30 minutos antes con tu cédula de identidad original.</p>
+                            <div class="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-sm font-medium text-gray-700">
+                                <span><i class="fa-regular fa-clock text-voca-red"></i> ${data.cita_hora}</span>
+                                <span><i class="fa-solid fa-location-dot text-voca-red"></i> ${data.cita_aula}</span>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -611,15 +675,23 @@
                 .eq('leido', false);
                 
             const badge = document.getElementById('sidebar-msg-badge');
+            const mobileBadge = document.getElementById('mobile-sidebar-msg-badge');
             const bellBadge = document.getElementById('bell-badge');
             
             if(count > 0) {
-                badge.innerText = count;
-                badge.classList.remove('hidden');
-                bellBadge.classList.remove('hidden');
+                if(badge) {
+                    badge.innerText = count;
+                    badge.classList.remove('hidden');
+                }
+                if(mobileBadge) {
+                    mobileBadge.innerText = count;
+                    mobileBadge.classList.remove('hidden');
+                }
+                if(bellBadge) bellBadge.classList.remove('hidden');
             } else {
-                badge.classList.add('hidden');
-                bellBadge.classList.add('hidden');
+                if(badge) badge.classList.add('hidden');
+                if(mobileBadge) mobileBadge.classList.add('hidden');
+                if(bellBadge) bellBadge.classList.add('hidden');
             }
         }
 
@@ -1254,6 +1326,50 @@
                     top: 0,
                     behavior: 'smooth'
                 });
+            }
+        }
+        function logout() {
+            Swal.fire({
+                title: '¿Cerrar Sesión?',
+                text: "Esperamos verte pronto por aquí.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#003366',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, salir',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Limpiar todo el localStorage relacionado con la sesión
+                    localStorage.removeItem('studentName');
+                    localStorage.removeItem('studentLastName');
+                    localStorage.removeItem('studentEmail');
+                    localStorage.removeItem('studentId');
+                    localStorage.removeItem('studentPhone');
+                    // Opcional: limpiar otros datos si existen
+                    
+                    window.location.href = 'login.html';
+                }
+            });
+        }
+
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('mobile-sidebar');
+            const overlay = document.getElementById('mobile-sidebar-overlay');
+            const isOpen = !sidebar.classList.contains('-translate-x-full');
+            
+            if (isOpen) {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+                document.body.style.overflow = '';
+            } else {
+                overlay.classList.remove('hidden');
+                setTimeout(() => {
+                    overlay.classList.remove('opacity-0');
+                    sidebar.classList.remove('-translate-x-full');
+                }, 10);
+                document.body.style.overflow = 'hidden';
             }
         }
     </script>
