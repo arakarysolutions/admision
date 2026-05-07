@@ -19,6 +19,18 @@
         .text-voca-blue { color: #003366; }
         .bg-voca-red { background-color: #cc0000; }
         .bg-voca-gold { background-color: #ffcc00; }
+
+        @media (max-width: 480px) {
+            .p-8 { padding: 1rem !important; }
+            .p-6 { padding: 1rem !important; }
+            .mb-8 { margin-bottom: 1rem !important; }
+            .text-3xl { font-size: 1.5rem !important; }
+            .h-20 { height: 4rem !important; }
+        }
+
+        @media (max-height: 700px) {
+            .space-y-8 > :not([hidden]) ~ :not([hidden]) { margin-top: 1rem !important; }
+        }
     </style>
 </head>
 <body class="bg-gray-50 flex h-screen overflow-hidden">
@@ -1112,6 +1124,11 @@
                     let borderClass = 'border border-gray-100';
                     let iconBg = 'bg-gray-100 text-gray-500';
                     let badge = '';
+                    let pinBadge = '';
+
+                    if (aviso.is_pinned) {
+                        pinBadge = '<div class="absolute top-4 right-4 text-blue-400" title="Aviso fijado"><i class="fa-solid fa-thumbtack"></i></div>';
+                    }
                     
                     if (aviso.tipo === 'urgente') {
                         icon = 'fa-triangle-exclamation';
