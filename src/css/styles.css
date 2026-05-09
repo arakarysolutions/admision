@@ -315,7 +315,7 @@ ul {
     min-height: 600px;
     display: flex;
     align-items: center;
-    background-image: url('src/img/hero_background.jpg');
+    background-image: url('../img/hero_background.jpg');
     background-size: cover;
     background-position: center;
     padding-top: 80px;
