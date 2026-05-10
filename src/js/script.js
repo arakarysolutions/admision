@@ -6,20 +6,20 @@ document.addEventListener('DOMContentLoaded', () => {
     window.scrollTo(0, 0);
 
     const form = document.getElementById('registrationForm');
-    const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
     const identificationInput = document.getElementById('identification');
+    const emailInput = document.getElementById('email');
     const firstNameInput = document.getElementById('firstName');
     const lastName1Input = document.getElementById('lastName1');
+    const lastName2Input = document.getElementById('lastName2');
     const birthDateInput = document.getElementById('birthDate');
-    const phoneInput = document.getElementById('phone');
+    const numeroSobreInput = document.getElementById('numeroSobre');
+    const sobreWarning = document.getElementById('sobre-warning');
+    const btnValidarSobre = document.getElementById('btnValidarSobre');
 
     // Validation functions
     const isRequired = value => value.trim() !== '';
-    const isGmail = email => {
-        const re = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-        return re.test(String(email).toLowerCase());
-    };
     const isLengthValid = (value, min) => value.length >= min;
 
     // Error styling functions
@@ -33,8 +33,83 @@ document.addEventListener('DOMContentLoaded', () => {
         formGroup.classList.remove('error');
     };
 
+    const clearFields = () => {
+        firstNameInput.value = '';
+        lastName1Input.value = '';
+        lastName2Input.value = '';
+        numeroSobreInput.value = '';
+    };
+
+    // Lógica de Autocompletado por Identificación
+    const checkIdentification = async () => {
+        const id = identificationInput.value.trim();
+        
+        if (!id) {
+            Swal.fire('Atención', 'Por favor ingrese su número de identificación.', 'warning');
+            return;
+        }
+
+        Swal.fire({
+            title: 'Validando sobre...',
+            didOpen: () => Swal.showLoading(),
+            allowOutsideClick: false
+        });
+
+        const { data: sobre, error } = await supabaseClient
+            .from('admisiones_sobres')
+            .select('*')
+            .eq('cedula', id)
+            .maybeSingle();
+
+        Swal.close();
+
+        if (sobre) {
+            firstNameInput.value = sobre.nombre;
+            lastName1Input.value = sobre.apellido1;
+            lastName2Input.value = sobre.apellido2 || '';
+            numeroSobreInput.value = sobre.numero_sobre;
+            
+            [firstNameInput, lastName1Input].forEach(removeError);
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Sobre Validado',
+                text: `Hola ${sobre.nombre}, hemos encontrado tu sobre #${sobre.numero_sobre}. Por favor completa los datos faltantes.`,
+                confirmButtonColor: '#003366'
+            });
+        } else {
+            clearFields();
+            Swal.fire({
+                icon: 'error',
+                title: 'Identificación no encontrada',
+                html: `<p style="font-size: 0.9rem;">No hay un sobre registrado para esta identificación.</p>
+                       <p style="font-size: 0.9rem; margin-top: 10px; font-weight: bold; color: #cc0000;">Debe adquirir el Sobre de Matrícula en el Colegio para poder registrarse.</p>`,
+                confirmButtonColor: '#cc0000'
+            });
+        }
+    };
+
+    if (btnValidarSobre) {
+        btnValidarSobre.addEventListener('click', checkIdentification);
+    }
+
+    // Permitir Enter también en el botón o campo
+    identificationInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            checkIdentification();
+        }
+    });
+
+    // Mantener la limpieza inmediata si se borra todo el texto
+    identificationInput.addEventListener('input', () => {
+        if (!identificationInput.value.trim()) {
+            clearFields();
+        }
+    });
+
     // Live validation on input
-    const inputs = [emailInput, passwordInput, identificationInput, firstNameInput, lastName1Input, birthDateInput, phoneInput];
+    const inputs = [passwordInput, confirmPasswordInput, identificationInput, emailInput, firstNameInput, lastName1Input, birthDateInput];
     
     inputs.forEach(input => {
         input.addEventListener('input', () => {
@@ -44,19 +119,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    emailInput.addEventListener('input', () => {
-        if (isGmail(emailInput.value)) {
-            removeError(emailInput);
-        } else {
-            showError(emailInput, 'emailError');
-        }
-    });
-
     passwordInput.addEventListener('input', () => {
         if (isLengthValid(passwordInput.value, 8)) {
             removeError(passwordInput);
         } else {
             showError(passwordInput, 'passwordError');
+        }
+    });
+
+    confirmPasswordInput.addEventListener('input', () => {
+        if (confirmPasswordInput.value === passwordInput.value) {
+            removeError(confirmPasswordInput);
+        } else {
+            showError(confirmPasswordInput, 'confirmPasswordError');
         }
     });
 
@@ -70,18 +145,23 @@ document.addEventListener('DOMContentLoaded', () => {
         inputs.forEach(removeError);
 
         // Validations
-        if (!isRequired(emailInput.value) || !isGmail(emailInput.value)) {
-            showError(emailInput, 'emailError');
-            isValid = false;
-        }
-
         if (!isRequired(passwordInput.value) || !isLengthValid(passwordInput.value, 8)) {
             showError(passwordInput, 'passwordError');
             isValid = false;
         }
 
+        if (confirmPasswordInput.value !== passwordInput.value) {
+            showError(confirmPasswordInput, 'confirmPasswordError');
+            isValid = false;
+        }
+
         if (!isRequired(identificationInput.value)) {
             showError(identificationInput, 'idError');
+            isValid = false;
+        }
+
+        if (!isRequired(numeroSobreInput.value)) {
+            Swal.fire('Sobre Requerido', 'Primero debes validar tu identificación para cargar el número de sobre.', 'warning');
             isValid = false;
         }
 
@@ -95,135 +175,116 @@ document.addEventListener('DOMContentLoaded', () => {
             isValid = false;
         }
 
+        if (!isRequired(emailInput.value)) {
+            showError(emailInput, 'emailError');
+            isValid = false;
+        }
+
         if (!isRequired(birthDateInput.value)) {
             showError(birthDateInput, 'birthDateError');
             isValid = false;
         }
 
-        if (!isRequired(phoneInput.value)) {
-            showError(phoneInput, 'phoneError');
-            isValid = false;
-        }
-
         if (isValid) {
-            // Mostrar carga
+            // Generar PIN de 6 dígitos
+            const generatedPin = Math.floor(100000 + Math.random() * 900000).toString();
+
+            // Mostrar carga y enviar email
             Swal.fire({
-                title: 'Procesando registro...',
+                title: 'Verificando Correo...',
+                text: 'Estamos enviando un código de seguridad a tu Gmail.',
                 allowEscapeKey: false,
                 allowOutsideClick: false,
                 didOpen: () => Swal.showLoading()
             });
 
-            // Generar PIN de 6 dígitos
-            const pin = Math.floor(100000 + Math.random() * 900000).toString();
-
-            const { data, error } = await supabaseClient
-                .from('aspirantes')
-                .insert([
-                    {
-                        email: emailInput.value.toLowerCase(),
-                        password: passwordInput.value,
-                        identificacion: identificationInput.value,
-                        nombre: firstNameInput.value,
-                        apellido: lastName1Input.value,
-                        fecha_nacimiento: birthDateInput.value,
-                        telefono: phoneInput.value,
-                        pin: pin,
-                        estado: 'Pendiente'
-                    }
-                ]);
-
-            if (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error de Registro',
-                    text: error.message.includes('unique constraint') || error.code === '23505' ? 'Este correo ya está registrado.' : 'Hubo un error al guardar los datos en el servidor.',
-                    confirmButtonColor: '#cc0000'
-                });
-                return;
-            }
-
-            // Capturar el email antes de resetear el formulario
-            const userEmailToVerify = emailInput.value.toLowerCase();
-
-            // Enviar correo con EmailJS
-            Swal.fire({
-                title: 'Enviando correo...',
-                text: 'Estamos enviando tu código de verificación.',
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
-            });
-
-            const templateParams = {
-                to_email: userEmailToVerify,
-                subject: 'Tu PIN de Activación - Vocacional Monseñor Sanabria',
-                message: `Hola,\n\nTu PIN de activación de 6 dígitos es: ${pin}\n\nIngresa este código en la pantalla de verificación para completar tu registro.\n\nSaludos,\nVocacional Monseñor Sanabria`
-            };
+            const finalEmail = emailInput.value.trim() + "@gmail.com";
 
             try {
-                await emailjs.send('service_ykdsgde', 'template_wml65va', templateParams);
-            } catch (emailErr) {
-                console.error('Error al enviar correo:', emailErr);
-                Swal.fire('Error', 'No se pudo enviar el correo con el PIN. Inténtalo de nuevo más tarde.', 'error');
-                return;
-            }
+                // Envío con EmailJS (Mapeo exacto según tu plantilla + HTML para el PIN)
+                await emailjs.send("service_ykdsgde", "template_wml65va", {
+                    name: firstNameInput.value,
+                    to_email: finalEmail,
+                    subject: "Código de Verificación - VOCA Admisiones",
+                    message: `Tu código de seguridad para activar la cuenta es: <br><br><b style="color: #cc0000; font-size: 24px; letter-spacing: 5px;">${generatedPin}</b>`
+                });
 
-            // Pedir el PIN de verificación
-            Swal.fire({
-                icon: 'info',
-                title: '¡Revisa tu correo!',
-                html: `<p>Hemos enviado un código PIN a tu dirección de correo electrónico.</p>
-                       <br>
-                       <p>Ingresa el PIN de 6 dígitos para activar tu cuenta:</p>`,
-                input: 'text',
-                inputAttributes: {
-                    maxlength: 6,
-                    autocapitalize: 'off',
-                    autocorrect: 'off'
-                },
-                showCancelButton: true,
-                confirmButtonText: 'Verificar',
-                cancelButtonText: 'Más tarde',
-                confirmButtonColor: '#003366',
-                showLoaderOnConfirm: true,
-                preConfirm: async (enteredPin) => {
-                    if (enteredPin !== pin) {
-                        Swal.showValidationMessage('El PIN ingresado es incorrecto.');
-                        return false;
+                Swal.close();
+
+                // Pedir el PIN al usuario
+                const { value: userPin } = await Swal.fire({
+                    title: 'Verifica tu cuenta',
+                    text: `Ingresa el código de 6 dígitos que enviamos a ${finalEmail}`,
+                    input: 'text',
+                    inputAttributes: {
+                        maxlength: 6,
+                        autocapitalize: 'off',
+                        autocorrect: 'off'
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: 'Verificar y Registrar',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#003366',
+                    inputValidator: (value) => {
+                        if (!value || value.length !== 6) {
+                            return 'Debes ingresar el código completo';
+                        }
+                        if (value !== generatedPin) {
+                            return 'El código es incorrecto';
+                        }
                     }
-                    
-                    // Actualizar estado a Verificado usando el correo capturado
-                    const { error: updateError } = await supabaseClient
-                        .from('aspirantes')
-                        .update({ estado: 'Verificado' })
-                        .eq('email', userEmailToVerify);
-                        
-                    if (updateError) {
-                        Swal.showValidationMessage('Error al activar la cuenta. Inténtalo de nuevo.');
-                        return false;
+                });
+
+                if (userPin) {
+                    Swal.fire({
+                        title: 'Creando cuenta...',
+                        text: 'Estamos validando tus datos finales.',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+
+                    const { data, error: dbError } = await supabaseClient
+                        .from('admisiones_aspirantes')
+                        .insert([
+                            {
+                                password: passwordInput.value,
+                                identificacion: identificationInput.value,
+                                correo: finalEmail,
+                                nombre: firstNameInput.value,
+                                apellido: lastName1Input.value,
+                                apellido2: lastName2Input.value,
+                                fecha_nacimiento: birthDateInput.value,
+                                numero_sobre: numeroSobreInput.value,
+                                pin: generatedPin,
+                                estado: 'Verificado'
+                            }
+                        ]);
+
+                    if (dbError) {
+                        console.error("Error en base de datos:", dbError);
+                        throw new Error(dbError.message.includes('unique constraint') ? 'Esta identificación ya está registrada.' : `Error de base de datos: ${dbError.message}`);
                     }
-                    return true;
-                },
-                allowOutsideClick: () => !Swal.isLoading()
-            }).then((result) => {
-                form.reset(); // Ahora sí reseteamos el formulario
-                if (result.isConfirmed) {
+
+                    form.reset();
                     Swal.fire({
                         icon: 'success',
-                        title: '¡Cuenta Activada!',
-                        text: 'Tu registro ha sido completado. Serás redirigido para iniciar sesión.',
-                        confirmButtonColor: '#cc0000'
+                        title: '¡Registro Exitoso!',
+                        text: 'Tu cuenta ha sido activada. Ahora puedes iniciar sesión.',
+                        confirmButtonColor: '#003366'
                     }).then(() => {
                         window.location.href = 'login.html';
                     });
-                } else {
-                    Swal.fire({
-                        title: 'Registro Pendiente',
-                        text: 'Puedes activar tu cuenta más tarde iniciando sesión.',
-                        icon: 'warning'
-                    });
                 }
-            });
+
+            } catch (err) {
+                console.error("Error en proceso:", err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error en Registro',
+                    text: err.message || 'Ocurrió un problema inesperado.',
+                    confirmButtonColor: '#cc0000'
+                });
+            }
         }
     });
 

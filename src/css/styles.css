@@ -233,6 +233,7 @@ ul {
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
+    -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
 }
 
@@ -913,4 +914,81 @@ input:focus+i,
         height: 45px;
         font-size: 1.1rem;
     }
+}
+
+/* Form Validation Extensions */
+.input-group-search {
+    display: flex;
+    gap: 10px;
+}
+
+.input-with-button {
+    position: relative;
+    flex: 1;
+}
+
+.input-with-button i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    z-index: 5;
+}
+
+.input-with-button input {
+    padding-left: 45px !important;
+    width: 100%;
+}
+
+.btn-validar {
+    padding: 0.5rem 1.5rem !important;
+    white-space: nowrap;
+}
+
+.input-readonly {
+    background-color: #f3f4f6 !important;
+    cursor: not-allowed !important;
+    border-color: #e5e7eb !important;
+}
+
+.input-editable input {
+    background-color: #eff6ff !important; /* Ligeramente azulado */
+    border-color: #bfdbfe !important;
+    transition: all 0.2s ease;
+}
+
+.input-editable input:focus {
+    background-color: #ffffff !important;
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.input-group-email {
+    display: flex;
+    align-items: stretch; /* Estira para que ambos tengan el mismo alto */
+    width: 100%;
+}
+
+.email-suffix {
+    background-color: #f3f4f6;
+    border: 1px solid #bfdbfe; /* Color del borde editable para que combine */
+    border-left: none;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    border-radius: 0 8px 8px 0;
+    color: #4b5563;
+    font-size: 0.95rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.input-group-email .input-editable {
+    flex: 1;
+}
+
+.input-group-email .input-editable input {
+    border-radius: 8px 0 0 8px !important;
+    border-right: none !important;
 }

@@ -1,21 +1,20 @@
 -- ==========================================
--- SCRIPT DE CONFIGURACIÓN COMPLETA - VOCA ADMISIONES
--- Ejecuta este script en el Editor SQL de Supabase
+-- SCRIPT DE CONFIGURACIÓN COMPLETA - VOCA ADMISIONES (REFATORIZADO V2)
+-- Prefijo de tablas: admisiones_
 -- ==========================================
 
 -- 0. Extensiones necesarias
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- 1. Tabla de Aspirantes (Corazón del sistema)
-CREATE TABLE IF NOT EXISTS aspirantes (
+-- 1. Tabla de Aspirantes
+CREATE TABLE IF NOT EXISTS admisiones_aspirantes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    identificacion VARCHAR(50) NOT NULL,
+    identificacion VARCHAR(50) UNIQUE NOT NULL,
     nombre VARCHAR(100) NOT NULL,
     apellido VARCHAR(100) NOT NULL,
+    apellido2 VARCHAR(100),
     fecha_nacimiento DATE,
-    telefono VARCHAR(20),
     pin VARCHAR(6),
     estado VARCHAR(50) DEFAULT 'Pendiente',
     
@@ -27,18 +26,22 @@ CREATE TABLE IF NOT EXISTS aspirantes (
     
     -- Columnas de Perfil Completo (Paso 2)
     foto_url TEXT,
-    encargado_nombre TEXT,
-    encargado_telefono TEXT,
-    encargado_correo TEXT,
     centro_procedencia VARCHAR(255),
     registro_completado BOOLEAN DEFAULT false,
     cambio_clave_requerido BOOLEAN DEFAULT false,
+    numero_sobre VARCHAR(20),
     
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
+-- Habilitar RLS y permitir inserción pública para registro
+ALTER TABLE admisiones_aspirantes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Permitir registro público" ON admisiones_aspirantes FOR INSERT WITH CHECK (true);
+CREATE POLICY "Permitir lectura propia" ON admisiones_aspirantes FOR SELECT USING (true);
+CREATE POLICY "Permitir actualización propia" ON admisiones_aspirantes FOR UPDATE USING (true);
+
 -- 2. Tabla de Administradores
-CREATE TABLE IF NOT EXISTS administradores (
+CREATE TABLE IF NOT EXISTS admisiones_administradores (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     nombre VARCHAR(100) NOT NULL,
     correo VARCHAR(255) UNIQUE NOT NULL,
@@ -48,9 +51,9 @@ CREATE TABLE IF NOT EXISTS administradores (
 );
 
 -- 3. Tabla de Mensajería (Chat)
-CREATE TABLE IF NOT EXISTS mensajes (
+CREATE TABLE IF NOT EXISTS admisiones_mensajes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    aspirante_id UUID REFERENCES aspirantes(id) ON DELETE CASCADE,
+    aspirante_id UUID REFERENCES admisiones_aspirantes(id) ON DELETE CASCADE,
     remitente VARCHAR(20) CHECK (remitente IN ('admin', 'estudiante')),
     mensaje TEXT NOT NULL,
     leido BOOLEAN DEFAULT false,
@@ -60,7 +63,7 @@ CREATE TABLE IF NOT EXISTS mensajes (
 );
 
 -- 4. Tabla de Avisos/Comunicados
-CREATE TABLE IF NOT EXISTS avisos (
+CREATE TABLE IF NOT EXISTS admisiones_avisos (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     titulo VARCHAR(255) NOT NULL,
     mensaje TEXT NOT NULL,
@@ -75,7 +78,7 @@ CREATE TABLE IF NOT EXISTS avisos (
 );
 
 -- 5. Tabla de Historial/Auditoría
-CREATE TABLE IF NOT EXISTS historial_admin (
+CREATE TABLE IF NOT EXISTS admisiones_historial_admin (
     id SERIAL PRIMARY KEY,
     fecha_hora TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
     accion TEXT NOT NULL,
@@ -83,59 +86,89 @@ CREATE TABLE IF NOT EXISTS historial_admin (
     admin_nombre VARCHAR(100) DEFAULT 'Admin Principal'
 );
 
+-- 6. Tabla de Sobres (Registro Manual)
+CREATE TABLE IF NOT EXISTS admisiones_sobres (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    numero_sobre VARCHAR(20) UNIQUE,
+    cedula VARCHAR(50) UNIQUE NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    apellido1 VARCHAR(100) NOT NULL,
+    apellido2 VARCHAR(100),
+    admin_registra VARCHAR(100),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+
 -- ==========================================
 -- SEGURIDAD (RLS)
 -- ==========================================
 
--- Habilitar RLS en todas las tablas
-ALTER TABLE aspirantes ENABLE ROW LEVEL SECURITY;
-ALTER TABLE administradores ENABLE ROW LEVEL SECURITY;
-ALTER TABLE mensajes ENABLE ROW LEVEL SECURITY;
-ALTER TABLE avisos ENABLE ROW LEVEL SECURITY;
-ALTER TABLE historial_admin ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admisiones_aspirantes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admisiones_administradores ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admisiones_mensajes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admisiones_avisos ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admisiones_historial_admin ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admisiones_sobres ENABLE ROW LEVEL SECURITY;
 
--- Políticas de acceso simplificadas (Acceso Público para desarrollo)
--- Nota: En producción, se recomienda restringir esto a usuarios autenticados.
+DROP POLICY IF EXISTS "Acceso público" ON admisiones_aspirantes;
+CREATE POLICY "Acceso público" ON admisiones_aspirantes FOR ALL TO public USING (true) WITH CHECK (true);
 
-CREATE POLICY "Acceso público aspirantes" ON aspirantes FOR ALL TO public USING (true) WITH CHECK (true);
-CREATE POLICY "Acceso público administradores" ON administradores FOR ALL TO public USING (true) WITH CHECK (true);
-CREATE POLICY "Acceso público mensajes" ON mensajes FOR ALL TO public USING (true) WITH CHECK (true);
-CREATE POLICY "Acceso público avisos" ON avisos FOR ALL TO public USING (true) WITH CHECK (true);
-CREATE POLICY "Acceso público historial" ON historial_admin FOR ALL TO public USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "Acceso público" ON admisiones_administradores;
+CREATE POLICY "Acceso público" ON admisiones_administradores FOR ALL TO public USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Acceso público" ON admisiones_mensajes;
+CREATE POLICY "Acceso público" ON admisiones_mensajes FOR ALL TO public USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Acceso público" ON admisiones_avisos;
+CREATE POLICY "Acceso público" ON admisiones_avisos FOR ALL TO public USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Acceso público" ON admisiones_historial_admin;
+CREATE POLICY "Acceso público" ON admisiones_historial_admin FOR ALL TO public USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Acceso público" ON admisiones_sobres;
+CREATE POLICY "Acceso público" ON admisiones_sobres FOR ALL TO public USING (true) WITH CHECK (true);
 
 -- ==========================================
 -- REALTIME
 -- ==========================================
 
--- Habilitar Realtime para las tablas que lo necesitan (Mensajes y Avisos)
 BEGIN;
-  -- Eliminar si ya existen para evitar duplicados
-  DROP PUBLICATION IF EXISTS supabase_realtime;
-  
-  CREATE PUBLICATION supabase_realtime FOR TABLE mensajes, avisos, aspirantes;
+  DROP PUBLICATION IF EXISTS admisiones_realtime;
+  CREATE PUBLICATION admisiones_realtime FOR TABLE admisiones_mensajes, admisiones_avisos, admisiones_aspirantes;
 COMMIT;
 
 -- ==========================================
 -- DATOS INICIALES
 -- ==========================================
 
--- Insertar un administrador por defecto si no existe
-INSERT INTO administradores (nombre, correo, password) 
+INSERT INTO admisiones_administradores (nombre, correo, password) 
 VALUES ('Admin Principal', 'admin', 'admin2026')
 ON CONFLICT (correo) DO NOTHING;
-
 -- ==========================================
--- STORAGE (Políticas de Cubetas)
+-- STORAGE (Configuración de Buckets)
 -- ==========================================
--- NOTA: Debes crear manualmente los buckets 'chat_adjuntos' y 'avisos_adjuntos' en Supabase Storage.
--- Las siguientes políticas permiten el acceso público a esos buckets una vez creados:
 
-/* 
--- Políticas para el Bucket de Chat
-CREATE POLICY "Permitir subidas públicas a chat_adjuntos" ON storage.objects FOR INSERT TO public WITH CHECK (bucket_id = 'chat_adjuntos');
-CREATE POLICY "Permitir lectura pública a chat_adjuntos" ON storage.objects FOR SELECT TO public USING (bucket_id = 'chat_adjuntos');
+-- 1. Crear los Buckets si no existen
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('admisiones_avisos_adjuntos', 'admisiones_avisos_adjuntos', true)
+ON CONFLICT (id) DO NOTHING;
 
--- Políticas para el Bucket de Avisos
-CREATE POLICY "Permitir subidas públicas a avisos_adjuntos" ON storage.objects FOR INSERT TO public WITH CHECK (bucket_id = 'avisos_adjuntos');
-CREATE POLICY "Permitir lectura pública a avisos_adjuntos" ON storage.objects FOR SELECT TO public USING (bucket_id = 'avisos_adjuntos');
-*/
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('admisiones_chat_adjuntos', 'admisiones_chat_adjuntos', true)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('admisiones_fotos_aspirantes', 'admisiones_fotos_aspirantes', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- 2. Políticas de acceso para los Buckets
+-- Avisos
+DROP POLICY IF EXISTS "Acceso público avisos" ON storage.objects;
+CREATE POLICY "Acceso público avisos" ON storage.objects FOR ALL TO public USING (bucket_id = 'admisiones_avisos_adjuntos') WITH CHECK (bucket_id = 'admisiones_avisos_adjuntos');
+
+-- Chat
+DROP POLICY IF EXISTS "Acceso público chat" ON storage.objects;
+CREATE POLICY "Acceso público chat" ON storage.objects FOR ALL TO public USING (bucket_id = 'admisiones_chat_adjuntos') WITH CHECK (bucket_id = 'admisiones_chat_adjuntos');
+
+-- Fotos Aspirantes
+DROP POLICY IF EXISTS "Acceso público fotos" ON storage.objects;
+CREATE POLICY "Acceso público fotos" ON storage.objects FOR ALL TO public USING (bucket_id = 'admisiones_fotos_aspirantes') WITH CHECK (bucket_id = 'admisiones_fotos_aspirantes');

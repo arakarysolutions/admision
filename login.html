@@ -37,12 +37,12 @@
             .form-section input { padding-top: 0.6rem !important; padding-bottom: 0.6rem !important; font-size: 0.9rem !important; }
             .form-section .mt-8 { margin-top: 0.75rem !important; }
             .form-section .mt-2 { margin-top: 0.25rem !important; }
-            .form-section button { py: 0.6rem !important; }
+            .form-section button { padding-top: 0.6rem !important; padding-bottom: 0.6rem !important; }
         }
         
         @media (max-width: 768px) {
             body { padding: 0.25rem !important; }
-            .branding-section { min-height: auto !important; }
+            .branding-section { min-height: 0 !important; }
         }
     </style>
 </head>
@@ -87,9 +87,9 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-2" id="lbl-username">Identificación o Correo</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fa-solid fa-user text-gray-400"></i>
+                            <i class="fa-solid fa-id-card text-gray-400"></i>
                         </div>
-                        <input type="text" id="username" class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-opacity-50" placeholder="estudiante@gmail.com o usuario admin" required>
+                        <input type="text" id="username" class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-opacity-50" placeholder="Ej: 503150141" required>
                     </div>
                 </div>
 
@@ -126,7 +126,7 @@
             // Consulta a Supabase para verificar si es admin (en la nueva tabla)
             try {
                 const { data: adminData, error: adminError } = await supabaseClient
-                    .from('administradores')
+                    .from('admisiones_administradores')
                     .select('*')
                     .eq('correo', user.toLowerCase())
                     .eq('password', pass)
@@ -138,7 +138,7 @@
                     return;
                 }
             } catch (e) {
-                // Falla silenciosamente si la tabla 'administradores' aún no existe
+                // Falla silenciosamente si la tabla 'admisiones_administradores' aún no existe
             }
 
             // Validar admin sincrónicamente (fallback o admin por defecto)
@@ -149,11 +149,11 @@
             }
 
             // Validaciones locales rápidas antes de cargar
-            if (!user.toLowerCase().endsWith('@gmail.com') || pass.length < 8) {
+            if (user.length < 5 || pass.length < 8) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Credenciales inválidas',
-                    text: 'Verifique su correo/usuario y contraseña. Recuerde que los estudiantes usan correo @gmail.com y contraseñas de al menos 8 caracteres.',
+                    text: 'Verifique su identificación y contraseña. Las contraseñas tienen al menos 8 caracteres.',
                     confirmButtonColor: '#cc0000'
                 });
                 return;
@@ -169,11 +169,11 @@
                 }
             });
 
-            // Consulta a Supabase
+            // Consulta a Supabase flexible (Identificación o Correo)
             const { data, error } = await supabaseClient
-                .from('aspirantes')
+                .from('admisiones_aspirantes')
                 .select('*')
-                .eq('email', user.toLowerCase())
+                .or(`identificacion.eq.${user},correo.eq.${user}`)
                 .eq('password', pass)
                 .single();
 
@@ -225,7 +225,7 @@
                     Swal.fire({ title: 'Actualizando...', didOpen: () => Swal.showLoading() });
                     
                     const { error: updateError } = await supabaseClient
-                        .from('aspirantes')
+                        .from('admisiones_aspirantes')
                         .update({ password: newPassword, cambio_clave_requerido: false })
                         .eq('id', data.id);
                         
@@ -237,9 +237,7 @@
                         // Guardar datos en localStorage y redirigir
                         localStorage.setItem('studentName', data.nombre);
                         localStorage.setItem('studentLastName', data.apellido);
-                        localStorage.setItem('studentEmail', data.email);
                         localStorage.setItem('studentId', data.identificacion);
-                        localStorage.setItem('studentPhone', data.telefono || '');
                         
                         if (!data.registro_completado || !data.centro_procedencia) {
                             window.location.href = 'completar-registro.html';
@@ -252,9 +250,7 @@
                 // Guardar datos en localStorage para mostrarlos en el dashboard
                 localStorage.setItem('studentName', data.nombre);
                 localStorage.setItem('studentLastName', data.apellido);
-                localStorage.setItem('studentEmail', data.email);
                 localStorage.setItem('studentId', data.identificacion);
-                localStorage.setItem('studentPhone', data.telefono || '');
                 
                 if (!data.registro_completado || !data.centro_procedencia) {
                     window.location.href = 'completar-registro.html';

@@ -50,8 +50,8 @@
                     <i class="fa-solid fa-chart-line w-5 text-center"></i> Resumen
                 </a>
 
-                <a href="#" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-800 rounded-lg hover:text-white transition">
-                    <i class="fa-solid fa-file-contract w-5 text-center"></i> Exámenes
+                <a href="#" id="tab-sobres" onclick="switchTabAdmin('sobres')" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-800 rounded-lg hover:text-white transition">
+                    <i class="fa-solid fa-folder-open w-5 text-center"></i> Sobres
                 </a>
                 <a href="#" id="tab-avisos" onclick="switchTabAdmin('avisos')" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-800 rounded-lg hover:text-white transition">
                     <i class="fa-solid fa-bullhorn w-5 text-center"></i> Comunicados Globales
@@ -99,12 +99,12 @@
                 <button class="text-gray-500 hover:text-gray-700 text-xl md:hidden" title="Menú"><i class="fa-solid fa-bars"></i></button>
                 <div class="relative hidden sm:block">
                     <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    <input type="text" placeholder="Buscar aspirante por cédula..." class="pl-10 pr-4 py-2 bg-gray-100 border-transparent rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition w-64 md:w-80 text-sm">
+                    <input type="text" id="global-search" oninput="handleGlobalSearch()" placeholder="Buscar por cédula o nombre..." class="pl-10 pr-4 py-2 bg-gray-100 border-transparent rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition w-64 md:w-80 text-sm">
                 </div>
             </div>
             
             <div class="flex items-center gap-6">
-                <button class="text-gray-400 hover:text-voca-blue transition" title="Exportar Reporte">
+                <button class="text-gray-400 hover:text-voca-blue transition" title="Exportar Reporte" onclick="handleGlobalExport()">
                     <i class="fa-solid fa-download text-lg"></i>
                 </button>
                 <button class="text-gray-400 hover:text-voca-blue transition relative" title="Notificaciones">
@@ -254,7 +254,75 @@
                     </div>
                 </div>
             </div>
+            <div id="view-sobres" class="hidden max-w-6xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-gray-200 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold font-outfit text-gray-800">Sistema de Sobres</h2>
+                        <p class="text-gray-500 text-sm mt-1">Registro manual de información de estudiantes y encargados.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="loadSobres()" class="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition shadow-sm">
+                            <i class="fa-solid fa-arrows-rotate mr-2"></i> Actualizar
+                        </button>
+                        <button class="bg-voca-blue hover:bg-blue-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm" onclick="openSobreModal()">
+                            <i class="fa-solid fa-plus mr-2"></i> Registrar Nuevo Sobre
+                        </button>
+                    </div>
+                </div>
 
+                <!-- Sobres Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Total Sobres</p>
+                            <h3 id="stat-total-sobres" class="text-2xl font-bold text-gray-800">0</h3>
+                            <p class="text-[10px] text-green-500 mt-1 font-semibold"><i class="fa-solid fa-check-double mr-1"></i> Histórico</p>
+                        </div>
+                        <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-voca-blue">
+                            <i class="fa-solid fa-box-archive text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Registrados Hoy</p>
+                            <h3 id="stat-sobres-hoy" class="text-2xl font-bold text-gray-800">0</h3>
+                            <p class="text-[10px] text-blue-500 mt-1 font-semibold"><i class="fa-solid fa-calendar-day mr-1"></i> Nuevos</p>
+                        </div>
+                        <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-voca-blue">
+                            <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Último Folio</p>
+                            <h3 id="stat-ultimo-folio" class="text-2xl font-bold text-gray-800">---</h3>
+                            <p class="text-[10px] text-indigo-500 mt-1 font-semibold"><i class="fa-solid fa-hashtag mr-1"></i> Siguiente disponible</p>
+                        </div>
+                        <div class="w-10 h-10 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600">
+                            <i class="fa-solid fa-list-ol text-lg"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500">
+                                    <th class="px-6 py-4 font-semibold">N° Sobre</th>
+                                    <th class="px-6 py-4 font-semibold">Identificación</th>
+                                    <th class="px-6 py-4 font-semibold">Estudiante</th>
+                                    <th class="px-6 py-4 font-semibold">Registrado Por</th>
+                                    <th class="px-6 py-4 font-semibold text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sobres-table-body" class="text-sm divide-y divide-gray-100">
+                                <!-- Filas dinámicas -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -262,7 +330,9 @@
     <script src="src/js/supabase-client.js"></script>
     <script>
         let aspirantesData = [];
+        let sobresData = [];
         let currentFilteredData = [];
+        let currentTab = 'resumen';
 
         document.addEventListener('DOMContentLoaded', () => {
             const adminName = localStorage.getItem('adminName') || 'Admin Principal';
@@ -279,14 +349,15 @@
         });
 
         function switchTabAdmin(tabId) {
-            ['resumen', 'avisos'].forEach(t => {
+            currentTab = tabId;
+            ['resumen', 'avisos', 'sobres'].forEach(t => {
                 const view = document.getElementById('view-' + t);
                 if (view) view.classList.add('hidden');
             });
             const selectedView = document.getElementById('view-' + tabId);
             if (selectedView) selectedView.classList.remove('hidden');
 
-            ['resumen', 'avisos'].forEach(t => {
+            ['resumen', 'avisos', 'sobres'].forEach(t => {
                 const el = document.getElementById('tab-' + t);
                 if (!el) return;
                 if (t === tabId) {
@@ -300,6 +371,8 @@
 
             if (tabId === 'avisos') {
                 loadAdminAvisos();
+            } else if (tabId === 'sobres') {
+                loadSobres();
             }
         }
 
@@ -308,7 +381,7 @@
             tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Cargando aspirantes...</td></tr>';
             
             const { data, error } = await supabaseClient
-                .from('aspirantes')
+                .from('admisiones_aspirantes')
                 .select('*')
                 .order('id', { ascending: false });
 
@@ -350,8 +423,44 @@
             currentFilteredData = filteredData;
             renderTable(filteredData);
             
+            // Si hay algo en el buscador, aplicar también
+            const searchVal = document.getElementById('global-search').value.toLowerCase();
+            if (searchVal) handleGlobalSearch();
+
             // Update selection buttons state just in case
             updateSelection();
+        }
+
+        function handleGlobalSearch() {
+            const term = document.getElementById('global-search').value.toLowerCase().trim();
+            
+            if (currentTab === 'resumen') {
+                // Filtrar aspirantes por cualquier campo
+                const filtered = aspirantesData.filter(a => {
+                    return Object.values(a).some(val => 
+                        val && val.toString().toLowerCase().includes(term)
+                    );
+                });
+                renderTable(filtered);
+            } else if (currentTab === 'sobres') {
+                // Filtrar sobres por cualquier campo
+                const filtered = sobresData.filter(s => {
+                    return Object.values(s).some(val => 
+                        val && val.toString().toLowerCase().includes(term)
+                    );
+                });
+                renderSobresTable(filtered);
+            }
+        }
+
+        function handleGlobalExport() {
+            if (currentTab === 'resumen') {
+                exportStudentsPDF();
+            } else if (currentTab === 'sobres') {
+                exportSobresPDF();
+            } else {
+                Swal.fire('Información', 'La exportación no está disponible para esta sección.', 'info');
+            }
         }
 
         async function exportStudentsPDF() {
@@ -368,6 +477,31 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('landscape'); // Landscape is better for wide tables
             
+            // Marca de Agua (Logo en el centro)
+            try {
+                const img = new Image();
+                img.src = 'src/logo/VOCA Admisiones.png';
+                await new Promise((resolve) => {
+                    img.onload = resolve;
+                    img.onerror = resolve;
+                });
+                if (img.complete && img.naturalWidth > 0) {
+                    // Calculamos centro para Landscape (297x210) manteniendo relación de aspecto
+                    const pageWidth = doc.internal.pageSize.getWidth();
+                    const pageHeight = doc.internal.pageSize.getHeight();
+                    
+                    const ratio = img.naturalWidth / img.naturalHeight;
+                    const logoW = 180; // Ancho deseado en mm
+                    const logoH = logoW / ratio; 
+                    
+                    // Guardar estado, aplicar transparencia y dibujar
+                    doc.saveGraphicsState();
+                    doc.setGState(new doc.GState({opacity: 0.08}));
+                    doc.addImage(img, 'PNG', (pageWidth - logoW) / 2, (pageHeight - logoH) / 2, logoW, logoH);
+                    doc.restoreGraphicsState();
+                }
+            } catch (e) { console.error("Error cargando marca de agua:", e); }
+
             // Título
             doc.setFontSize(18);
             doc.setTextColor(0, 51, 102); // voca-blue
@@ -493,7 +627,6 @@
                             ${avatarHtml}
                             <div>
                                 <p class="font-semibold text-gray-800">${aspirante.nombre} ${aspirante.apellido}</p>
-                                <p class="text-xs text-gray-500">${aspirante.email}</p>
                             </div>
                         </div>
                     </td>
@@ -507,7 +640,7 @@
                     <td class="px-6 py-4 text-right">
                         <button class="text-gray-400 hover:text-green-500 transition p-1 mr-2" title="Mensajes" onclick="openChat('${aspirante.id}', '${aspirante.nombre} ${aspirante.apellido}')"><i class="fa-solid fa-comments"></i></button>
                         <button class="text-gray-400 hover:text-voca-blue transition p-1 mr-2" title="Ver Expediente" onclick="viewProfile('${aspirante.id}')"><i class="fa-solid fa-address-card"></i></button>
-                        <button class="text-gray-400 hover:text-voca-gold transition p-1 mr-2" title="Resetear Clave Temporal" onclick="resetPassword('${aspirante.id}', '${aspirante.email}')"><i class="fa-solid fa-key"></i></button>
+                        <button class="text-gray-400 hover:text-voca-gold transition p-1 mr-2" title="Resetear Clave Temporal" onclick="resetPassword('${aspirante.id}', '${aspirante.nombre} ${aspirante.apellido}')"><i class="fa-solid fa-key"></i></button>
                         <button class="text-gray-400 hover:text-voca-red transition p-1" title="Eliminar Aspirante" onclick="deleteUser('${aspirante.id}', '${aspirante.nombre} ${aspirante.apellido}')"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 `;
@@ -572,7 +705,7 @@
                 Swal.fire({ title: 'Guardando citas...', didOpen: () => Swal.showLoading() });
 
                 const { error } = await supabaseClient
-                    .from('aspirantes')
+                    .from('admisiones_aspirantes')
                     .update({ 
                         cita_fecha: formValues.fecha,
                         cita_hora: formValues.hora,
@@ -590,23 +723,23 @@
             }
         }
 
-        async function resetPassword(id, email) {
+        async function resetPassword(id, name) {
             const tempPass = 'Temp' + Math.floor(1000 + Math.random() * 9000);
             
             const result = await Swal.fire({
                 title: 'Generar Clave Temporal',
-                text: `¿Seguro que deseas generar una clave temporal para ${email}? Al aceptar, su clave actual dejará de funcionar y el estudiante deberá cambiarla al iniciar sesión.`,
+                text: `¿Seguro que deseas generar una clave temporal para ${name}? Al aceptar, su clave actual dejará de funcionar y deberás entregarle la clave manualmente.`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#cc0000',
-                confirmButtonText: 'Sí, generar y enviar correo'
+                confirmButtonText: 'Sí, generar clave'
             });
 
             if (result.isConfirmed) {
                 Swal.fire({ title: 'Generando y enviando correo...', didOpen: () => Swal.showLoading() });
                 
                 const { error } = await supabaseClient
-                    .from('aspirantes')
+                    .from('admisiones_aspirantes')
                     .update({ 
                         password: tempPass,
                         cambio_clave_requerido: true
@@ -616,31 +749,13 @@
                 if (error) {
                     Swal.fire('Error', 'Hubo un problema al generar la clave temporal.', 'error');
                 } else {
-                    const templateParams = {
-                        to_email: email,
-                        subject: 'Recuperación de Contraseña - Vocacional Monseñor Sanabria',
-                        message: `Estimado/a estudiante,\n\nSe ha generado una nueva contraseña temporal para tu cuenta de admisiones.\n\nContraseña Temporal: ${tempPass}\n\nIngresa al portal con esta clave. Por tu seguridad, el sistema te pedirá que crees una nueva inmediatamente.\n\nSaludos cordiales,\nDepartamento de Admisiones\nVocacional Monseñor Sanabria`
-                    };
-
-                    try {
-                        await emailjs.send('service_ykdsgde', 'template_wml65va', templateParams);
-                        await logAction('Generación de Clave Temporal', `Se generó clave y se envió correo exitosamente a ${email}`);
-                        Swal.fire({
-                            title: '¡Correo Enviado!',
-                            html: `La clave temporal <b>${tempPass}</b> fue generada y enviada automáticamente a <b>${email}</b>.`,
-                            icon: 'success',
-                            confirmButtonColor: '#003366'
-                        });
-                    } catch (emailErr) {
-                        console.error('Error enviando email:', emailErr);
-                        await logAction('Generación de Clave Temporal', `Se generó clave para ${email} pero falló el envío de correo automático`);
-                        Swal.fire({
-                            title: 'Atención',
-                            html: `La clave se generó correctamente (<b>${tempPass}</b>), pero falló el envío del correo automático. Deberás enviársela manualmente.`,
-                            icon: 'warning',
-                            confirmButtonColor: '#003366'
-                        });
-                    }
+                    await logAction('Generación de Clave Temporal', `Se generó clave para ${name}`);
+                    Swal.fire({
+                        title: 'Clave Generada',
+                        html: `La clave temporal es: <br><br><span class="text-2xl font-mono bg-gray-100 px-4 py-2 rounded border block select-all">${tempPass}</span><br>Copia esta clave y entrégala al estudiante.`,
+                        icon: 'success',
+                        confirmButtonColor: '#003366'
+                    });
                 }
             }
         }
@@ -649,7 +764,7 @@
             Swal.fire({ title: 'Cargando expediente...', didOpen: () => Swal.showLoading() });
             
             const { data, error } = await supabaseClient
-                .from('aspirantes')
+                .from('admisiones_aspirantes')
                 .select('*')
                 .eq('id', id)
                 .single();
@@ -681,8 +796,6 @@
                     <div>
                         <h4 class="font-bold text-voca-blue border-b pb-1 mb-2 text-sm uppercase">Datos del Estudiante</h4>
                         <div class="grid grid-cols-2 gap-2 text-sm">
-                            <div><span class="text-gray-500">Correo:</span><br>${data.email}</div>
-                            <div><span class="text-gray-500">Teléfono:</span><br>${data.telefono || 'N/A'}</div>
                             <div class="col-span-2"><span class="text-gray-500">Centro Educativo de Procedencia:</span><br>${data.centro_procedencia || '<span class="text-red-500 italic">No registrado</span>'}</div>
                         </div>
                     </div>
@@ -746,7 +859,7 @@
                 .on('postgres_changes', { 
                     event: 'INSERT', 
                     schema: 'public', 
-                    table: 'mensajes'
+                    table: 'admisiones_mensajes'
                 }, payload => {
                     if (payload.new.remitente === 'estudiante') {
                         // Check if we have a chat open with this student
@@ -782,7 +895,7 @@
             Swal.fire({ title: 'Cargando mensajes...', didOpen: () => Swal.showLoading() });
             
             const { data: mensajes, error } = await supabaseClient
-                .from('mensajes')
+                .from('admisiones_mensajes')
                 .select('*')
                 .eq('aspirante_id', id)
                 .order('fecha_hora', { ascending: true });
@@ -795,7 +908,7 @@
 
             // Marcar leídos
             await supabaseClient
-                .from('mensajes')
+                .from('admisiones_mensajes')
                 .update({ leido: true })
                 .eq('aspirante_id', id)
                 .eq('remitente', 'estudiante')
@@ -963,7 +1076,7 @@
                 const fileExt = file.name.split('.').pop();
                 const fileName = `${id}/${Date.now()}.${fileExt}`;
                 const { data: uploadData, error: uploadError } = await supabaseClient.storage
-                    .from('chat_adjuntos')
+                    .from('admisiones_chat_adjuntos')
                     .upload(fileName, file);
                     
                 if (uploadError) {
@@ -975,7 +1088,7 @@
                 }
                 
                 const { data: publicUrlData } = supabaseClient.storage
-                    .from('chat_adjuntos')
+                    .from('admisiones_chat_adjuntos')
                     .getPublicUrl(fileName);
                     
                 adjuntoUrl = publicUrlData.publicUrl;
@@ -983,7 +1096,7 @@
             }
             
             const { error } = await supabaseClient
-                .from('mensajes')
+                .from('admisiones_mensajes')
                 .insert([{
                     aspirante_id: id,
                     remitente: 'admin',
@@ -1019,7 +1132,7 @@
                 Swal.fire({ title: 'Actualizando...', didOpen: () => Swal.showLoading() });
                 
                 const { error } = await supabaseClient
-                    .from('aspirantes')
+                    .from('admisiones_aspirantes')
                     .update({ foto_url: null, registro_completado: false })
                     .eq('id', id);
 
@@ -1049,7 +1162,7 @@
                 Swal.fire({ title: 'Eliminando...', didOpen: () => Swal.showLoading() });
                 
                 const { error } = await supabaseClient
-                    .from('aspirantes')
+                    .from('admisiones_aspirantes')
                     .delete()
                     .eq('id', id);
 
@@ -1099,7 +1212,7 @@
                 Swal.fire({ title: 'Creando administrador...', didOpen: () => Swal.showLoading() });
 
                 const { error } = await supabaseClient
-                    .from('administradores')
+                    .from('admisiones_administradores')
                     .insert([{
                         nombre: formValues.nombre,
                         correo: formValues.correo.toLowerCase(),
@@ -1124,7 +1237,7 @@
         async function logAction(accion, detalle) {
             const adminName = localStorage.getItem('adminName') || 'Admin Principal';
             const { error } = await supabaseClient
-                .from('historial_admin')
+                .from('admisiones_historial_admin')
                 .insert([{ accion: accion, detalle: detalle, admin_nombre: adminName }]);
             if (error) console.error("Error guardando historial:", error);
         }
@@ -1135,18 +1248,18 @@
             Swal.fire({ title: 'Cargando historial...', didOpen: () => Swal.showLoading() });
             
             let query = supabaseClient
-                .from('historial_admin')
+                .from('admisiones_historial_admin')
                 .select('*')
                 .order('fecha_hora', { ascending: false });
 
             if (startDate) {
-                query = query.gte('fecha_hora', startDate + 'T00:00:00.000Z');
+                query = query.gte('fecha_hora', startDate + 'T00:00:00');
             }
             if (endDate) {
-                query = query.lte('fecha_hora', endDate + 'T23:59:59.999Z');
+                query = query.lte('fecha_hora', endDate + 'T23:59:59');
             }
             if (!startDate && !endDate) {
-                query = query.limit(50);
+                query = query.limit(100);
             }
 
             const { data, error } = await query;
@@ -1256,6 +1369,74 @@
             });
 
             doc.save(`Historial_Auditoria_${new Date().getTime()}.pdf`);
+        }
+
+        async function exportSobresPDF() {
+            if (sobresData.length === 0) {
+                Swal.fire('Atención', 'No hay sobres registrados para exportar.', 'info');
+                return;
+            }
+
+            Swal.fire({ title: 'Generando PDF de Sobres...', didOpen: () => Swal.showLoading() });
+            await new Promise(r => setTimeout(r, 100));
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape');
+            
+            // Marca de Agua (Logo en el centro)
+            try {
+                const img = new Image();
+                img.src = 'src/logo/VOCA Admisiones.png';
+                await new Promise((resolve) => {
+                    img.onload = resolve;
+                    img.onerror = resolve;
+                });
+                if (img.complete && img.naturalWidth > 0) {
+                    const pageWidth = doc.internal.pageSize.getWidth();
+                    const pageHeight = doc.internal.pageSize.getHeight();
+                    
+                    const ratio = img.naturalWidth / img.naturalHeight;
+                    const logoW = 180; 
+                    const logoH = logoW / ratio; 
+                    
+                    doc.saveGraphicsState();
+                    doc.setGState(new doc.GState({opacity: 0.08}));
+                    doc.addImage(img, 'PNG', (pageWidth - logoW) / 2, (pageHeight - logoH) / 2, logoW, logoH);
+                    doc.restoreGraphicsState();
+                }
+            } catch (e) { console.error("Error cargando marca de agua:", e); }
+
+            doc.setFontSize(18);
+            doc.setTextColor(0, 51, 102);
+            doc.text('Vocacional Monseñor Sanabria', 14, 20);
+            
+            doc.setFontSize(14);
+            doc.setTextColor(50, 50, 50);
+            doc.text('Control de Sobres Vendidos / Registrados', 14, 28);
+            
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Generado: ${new Date().toLocaleString('es-CR')} | Total: ${sobresData.length} registros`, 14, 36);
+
+            const tableColumn = ["N° Sobre", "Identificación", "Estudiante", "Registrado Por", "Fecha"];
+            const tableRows = sobresData.map(s => [
+                s.numero_sobre || '---',
+                s.cedula,
+                `${s.nombre} ${s.apellido1} ${s.apellido2 || ''}`,
+                s.admin_registra || 'Sistema',
+                new Date(s.created_at).toLocaleDateString('es-CR')
+            ]);
+
+            doc.autoTable({
+                head: [tableColumn],
+                body: tableRows,
+                startY: 42,
+                styles: { fontSize: 8 },
+                headStyles: { fillColor: [0, 51, 102] }
+            });
+
+            doc.save(`Reporte_Sobres_${new Date().getTime()}.pdf`);
+            Swal.close();
         }
 
         function showCreateAlert() {
@@ -1444,7 +1625,7 @@
                         const fileName = `admin/${Date.now()}_aviso.${fileExt}`;
                         
                         const { data: uploadData, error: uploadError } = await supabaseClient.storage
-                            .from('chat_adjuntos')
+                            .from('admisiones_chat_adjuntos')
                             .upload(fileName, file);
                             
                         if (uploadError) {
@@ -1453,7 +1634,7 @@
                         }
                         
                         const { data: publicUrlData } = supabaseClient.storage
-                            .from('chat_adjuntos')
+                            .from('admisiones_chat_adjuntos')
                             .getPublicUrl(fileName);
                             
                         adjuntoUrl = publicUrlData.publicUrl;
@@ -1466,7 +1647,7 @@
                     }
 
                     const { error } = await supabaseClient
-                        .from('avisos')
+                        .from('admisiones_avisos')
                         .insert([{
                             titulo: formValues.titulo,
                             mensaje: formValues.mensaje,
@@ -1480,6 +1661,7 @@
                     if (error) {
                         Swal.fire('Error', 'No se pudo publicar el aviso: ' + error.message, 'error');
                     } else {
+                        await logAction('Publicación de Aviso', `Se publicó el aviso: ${formValues.titulo}`);
                         Swal.fire({
                             icon: 'success',
                             title: '¡Publicado!',
@@ -1497,7 +1679,7 @@
             container.innerHTML = '<div class="text-center py-10"><i class="fa-solid fa-spinner animate-spin text-3xl text-voca-blue mb-3"></i><p class="text-gray-500">Cargando avisos...</p></div>';
 
             const { data, error } = await supabaseClient
-                .from('avisos')
+                .from('admisiones_avisos')
                 .select('*')
                 .order('is_pinned', { ascending: false, nullsFirst: false })
                 .order('fecha_publicacion', { ascending: false });
@@ -1615,10 +1797,281 @@
             });
 
             if (isConfirmed) {
-                const { error } = await supabaseClient.from('avisos').delete().eq('id', id);
+                const { error } = await supabaseClient.from('admisiones_avisos').delete().eq('id', id);
                 if (!error) {
+                    await logAction('Eliminación de Aviso', `Se eliminó un comunicado del muro.`);
                     Swal.fire('Eliminado', 'El comunicado ha sido borrado.', 'success');
                     loadAdminAvisos();
+                } else {
+                    Swal.fire('Error', error.message, 'error');
+                }
+            }
+        }
+
+        // --- Sistema de Sobres ---
+        async function loadSobres() {
+            const tbody = document.getElementById('sobres-table-body');
+            tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500"><i class="fa-solid fa-spinner animate-spin mr-2"></i> Cargando sobres...</td></tr>';
+            
+            const { data, error } = await supabaseClient
+                .from('admisiones_sobres')
+                .select('*')
+                .order('numero_sobre', { ascending: true });
+
+            if (error) {
+                if (error.code === 'PGRST116' || error.message.includes('relation "sobres" does not exist')) {
+                     tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-yellow-600"><i class="fa-solid fa-triangle-exclamation mr-2"></i> La tabla "sobres" no existe. Contacte a soporte o cree la tabla en Supabase.</td></tr>';
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-red-500">Error: ' + error.message + '</td></tr>';
+                }
+                return;
+            }
+
+            sobresData = data;
+            renderSobresTable(data);
+        }
+
+        function renderSobresTable(data) {
+            const tbody = document.getElementById('sobres-table-body');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No hay sobres que coincidan con la búsqueda.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(s => `
+                <tr class="hover:bg-gray-50 transition">
+                    <td class="px-6 py-4 font-bold text-voca-blue">#${s.numero_sobre || '---'}</td>
+                    <td class="px-6 py-4 font-medium text-gray-900">${s.cedula}</td>
+                    <td class="px-6 py-4">
+                        <div class="font-semibold text-gray-800">${s.nombre} ${s.apellido1} ${s.apellido2 || ''}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 bg-blue-50 text-voca-blue text-xs font-bold rounded-full">${s.admin_registra || 'Sistema'}</span>
+                    </td>
+                    <td class="px-6 py-4 text-right flex justify-end gap-2">
+                        <button onclick="viewSobreFicha('${s.id}')" class="text-blue-500 hover:text-blue-700 transition" title="Ver ficha completa"><i class="fa-solid fa-eye"></i></button>
+                        <button onclick="editSobre('${s.id}')" class="text-voca-blue hover:text-blue-900 transition" title="Actualizar datos"><i class="fa-solid fa-pen-to-square"></i></button>
+                        <button onclick="deleteSobre('${s.id}')" class="text-red-500 hover:text-red-700 transition" title="Eliminar sobre"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Actualizar estadísticas de sobres (solo el total histórico se mantiene del data original si es necesario, pero aquí usamos el filtrado para consistencia visual si se desea)
+            document.getElementById('stat-total-sobres').innerText = sobresData.length;
+            
+            const todayStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+            const hoy = sobresData.filter(s => {
+                if (!s.created_at) return false;
+                return s.created_at.startsWith(todayStr);
+            }).length;
+            document.getElementById('stat-sobres-hoy').innerText = hoy;
+
+            const maxFolio = sobresData.reduce((max, s) => {
+                const n = parseInt(s.numero_sobre);
+                return (!isNaN(n) && n > max) ? n : max;
+            }, 0);
+            document.getElementById('stat-ultimo-folio').innerText = maxFolio > 0 ? maxFolio : '---';
+        }
+
+        async function openSobreModal(editData = null) {
+            const isEdit = !!editData;
+            const { value: formValues } = await Swal.fire({
+                title: isEdit ? 'Actualizar Datos del Sobre' : 'Registrar Nuevo Sobre',
+                html: `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left p-2 overflow-y-auto max-h-[60vh]">
+                        <div class="md:col-span-2 border-b pb-2 mb-2 flex justify-between items-center">
+                            <h4 class="font-bold text-voca-blue">Datos del Estudiante</h4>
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs font-bold text-gray-600 uppercase">N° Sobre *</label>
+                                <input id="swal-numero-sobre" class="w-24 px-2 py-1 border rounded font-bold text-center text-voca-blue border-voca-blue" placeholder="000" value="${isEdit ? editData.numero_sobre : ''}">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 uppercase">Identificación *</label>
+                            <input id="swal-cedula" class="w-full px-3 py-2 border rounded mt-1" placeholder="Ej: 503150141" value="${isEdit ? editData.cedula : ''}">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 uppercase">Nombre *</label>
+                            <input id="swal-nombre" class="w-full px-3 py-2 border rounded mt-1" placeholder="Nombre" value="${isEdit ? editData.nombre : ''}">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 uppercase">Primer Apellido *</label>
+                            <input id="swal-apellido1" class="w-full px-3 py-2 border rounded mt-1" placeholder="Primer Apellido" value="${isEdit ? editData.apellido1 : ''}">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 uppercase">Segundo Apellido</label>
+                            <input id="swal-apellido2" class="w-full px-3 py-2 border rounded mt-1" placeholder="Segundo Apellido" value="${isEdit ? editData.apellido2 || '' : ''}">
+                        </div>
+                    </div>
+                `,
+                focusConfirm: false,
+                width: '800px',
+                showCancelButton: true,
+                confirmButtonText: isEdit ? 'Actualizar Datos' : 'Guardar Sobre',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#003366',
+                showLoaderOnConfirm: true,
+                didOpen: () => {
+                    const container = Swal.getHtmlContainer();
+                    const inputs = container.querySelectorAll('input, textarea');
+                    inputs.forEach((input, index) => {
+                        input.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                const nextInput = inputs[index + 1];
+                                if (nextInput) {
+                                    nextInput.focus();
+                                } else {
+                                    Swal.clickConfirm();
+                                }
+                            }
+                        });
+                    });
+                },
+                preConfirm: async () => {
+                    const data = {
+                        numero_sobre: document.getElementById('swal-numero-sobre').value.trim(),
+                        cedula: document.getElementById('swal-cedula').value.trim(),
+                        nombre: document.getElementById('swal-nombre').value.trim(),
+                        apellido1: document.getElementById('swal-apellido1').value.trim(),
+                        apellido2: document.getElementById('swal-apellido2').value.trim(),
+                        admin_registra: isEdit ? editData.admin_registra : (localStorage.getItem('adminName') || 'Admin Principal')
+                    };
+
+                    if (!data.numero_sobre || !data.cedula || !data.nombre || !data.apellido1) {
+                        Swal.showValidationMessage('Por favor complete todos los campos obligatorios del Estudiante (*)');
+                        return false;
+                    }
+
+                    // Validar duplicado de N° de Sobre
+                    const { data: existingSobre, error: sobreError } = await supabaseClient
+                        .from('admisiones_sobres')
+                        .select('nombre, apellido1, cedula, telefono_estudiante')
+                        .eq('numero_sobre', data.numero_sobre)
+                        .neq('id', isEdit ? editData.id : '00000000-0000-0000-0000-000000000000')
+                        .maybeSingle();
+
+                    if (existingSobre) {
+                        const input = document.getElementById('swal-numero-sobre');
+                        input.focus(); input.select();
+                        Swal.showValidationMessage(`El Sobre #${data.numero_sobre} ya pertenece a: ${existingSobre.nombre} ${existingSobre.apellido1} (ID: ${existingSobre.cedula})`);
+                        return false;
+                    }
+
+                    // Validar duplicado de Identificación (Cédula)
+                    const { data: existingCedula, error: cedulaError } = await supabaseClient
+                        .from('admisiones_sobres')
+                        .select('nombre, apellido1, numero_sobre')
+                        .eq('cedula', data.cedula)
+                        .neq('id', isEdit ? editData.id : '00000000-0000-0000-0000-000000000000')
+                        .maybeSingle();
+
+                    if (existingCedula) {
+                        const input = document.getElementById('swal-cedula');
+                        input.focus(); input.select();
+                        Swal.showValidationMessage(`La Identificación ${data.cedula} ya tiene asignado el Sobre #${existingCedula.numero_sobre} (${existingCedula.nombre} ${existingCedula.apellido1})`);
+                        return false;
+                    }
+
+                    let result;
+                    if (isEdit) {
+                        result = await supabaseClient.from('admisiones_sobres').update(data).eq('id', editData.id);
+                    } else {
+                        result = await supabaseClient.from('admisiones_sobres').insert([data]);
+                    }
+
+                    if (result.error) {
+                        Swal.showValidationMessage(`Error: ${result.error.message}`);
+                        return false;
+                    }
+                    return true;
+                }
+            });
+
+            if (formValues) {
+                let actionType = isEdit ? 'Edición de Sobre' : 'Registro de Sobre';
+                let actionDetail = '';
+
+                if (isEdit) {
+                    const changes = [];
+                    if (editData.numero_sobre !== document.getElementById('swal-numero-sobre').value) changes.push(`N° Sobre (${editData.numero_sobre} -> ${document.getElementById('swal-numero-sobre').value})`);
+                    if (editData.cedula !== document.getElementById('swal-cedula').value) changes.push(`Identificación (${editData.cedula} -> ${document.getElementById('swal-cedula').value})`);
+                    if (editData.nombre !== document.getElementById('swal-nombre').value) changes.push(`Nombre (${editData.nombre} -> ${document.getElementById('swal-nombre').value})`);
+                    if (editData.apellido1 !== document.getElementById('swal-apellido1').value) changes.push(`Primer Apellido (${editData.apellido1} -> ${document.getElementById('swal-apellido1').value})`);
+                    if (editData.apellido2 !== document.getElementById('swal-apellido2').value) changes.push(`Segundo Apellido (${editData.apellido2 || 'N/A'} -> ${document.getElementById('swal-apellido2').value || 'N/A'})`);
+                    
+                    actionDetail = changes.length > 0 
+                        ? `Se actualizó el Sobre #${editData.numero_sobre}. Cambios: ${changes.join(', ')}` 
+                        : `Se guardó el Sobre #${editData.numero_sobre} sin cambios aparentes.`;
+                } else {
+                    actionDetail = `Se registró un nuevo Sobre (#${document.getElementById('swal-numero-sobre').value}) para el estudiante: ${document.getElementById('swal-nombre').value} ${document.getElementById('swal-apellido1').value}`;
+                }
+
+                await logAction(actionType, actionDetail);
+
+                Swal.fire('¡Éxito!', isEdit ? 'Datos actualizados correctamente.' : 'El sobre ha sido registrado correctamente.', 'success');
+                loadSobres();
+            }
+        }
+
+        async function editSobre(id) {
+            const { data, error } = await supabaseClient.from('admisiones_sobres').select('*').eq('id', id).single();
+            if (!error && data) {
+                openSobreModal(data);
+            } else {
+                Swal.fire('Error', 'No se pudo cargar la información para editar.', 'error');
+            }
+        }
+
+        async function viewSobreFicha(id) {
+            const { data: s, error } = await supabaseClient.from('admisiones_sobres').select('*').eq('id', id).single();
+            if (error) return Swal.fire('Error', 'No se pudo cargar la ficha.', 'error');
+
+            Swal.fire({
+                title: `Ficha del Estudiante - Sobre #${s.numero_sobre}`,
+                html: `
+                    <div class="text-left space-y-4 p-2 text-sm overflow-y-auto max-h-[70vh]">
+                        <div class="border-b pb-1"><h4 class="font-bold text-voca-blue text-xs uppercase">Información del Estudiante</h4></div>
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-2">
+                            <div><label class="text-[10px] font-bold text-gray-500 uppercase">Identificación</label><p class="font-medium text-gray-800">${s.cedula}</p></div>
+                            <div><label class="text-[10px] font-bold text-gray-500 uppercase">Nombre Completo</label><p class="font-medium text-gray-800">${s.nombre} ${s.apellido1} ${s.apellido2 || ''}</p></div>
+                        </div>
+                        
+                        <div class="mt-4 pt-2 border-t text-[10px] text-gray-400 flex justify-between">
+                            <span>Registrado por: <b>${s.admin_registra || 'Sistema'}</b></span>
+                            <span>Fecha: <b>${new Date(s.created_at).toLocaleDateString()}</b></span>
+                        </div>
+                    </div>
+                `,
+                width: '550px',
+                confirmButtonText: 'Cerrar',
+                confirmButtonColor: '#003366'
+            });
+        }
+
+        async function deleteSobre(id) {
+            const { isConfirmed } = await Swal.fire({
+                title: '¿Eliminar este sobre?',
+                text: "Esta acción no se puede deshacer.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (isConfirmed) {
+                // Obtener datos antes de borrar para el historial
+                const { data: sobreInfo } = await supabaseClient.from('admisiones_sobres').select('numero_sobre, nombre, apellido1').eq('id', id).single();
+                
+                const { error } = await supabaseClient.from('admisiones_sobres').delete().eq('id', id);
+                if (!error) {
+                    const detail = sobreInfo ? `Sobre #${sobreInfo.numero_sobre} de ${sobreInfo.nombre} ${sobreInfo.apellido1}` : `ID: ${id}`;
+                    await logAction('Eliminación de Sobre', `Se eliminó permanentemente: ${detail}`);
+                    Swal.fire('Eliminado', 'El sobre ha sido borrado.', 'success');
+                    loadSobres();
                 } else {
                     Swal.fire('Error', error.message, 'error');
                 }

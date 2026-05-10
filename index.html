@@ -169,38 +169,18 @@
 
                     <form id="registrationForm" novalidate>
                         <div class="form-grid">
-                            <!-- Correo Electrónico -->
-                            <div class="form-group full-width">
-                                <label for="email">Correo Electrónico (Solo Gmail) <span
-                                        class="required">*</span></label>
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-envelope"></i>
-                                    <input type="email" id="email" name="email" placeholder="estudiante@gmail.com"
-                                        required>
-                                </div>
-                                <span class="error-message" id="emailError">Debe ser un correo válido terminado en
-                                    @gmail.com</span>
-                            </div>
-
-                            <!-- Contraseña -->
-                            <div class="form-group full-width">
-                                <label for="password">Contraseña <span class="required">*</span></label>
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-lock"></i>
-                                    <input type="password" id="password" name="password"
-                                        placeholder="Mínimo 8 caracteres" required minlength="8">
-                                </div>
-                                <span class="error-message" id="passwordError">La contraseña debe tener al menos 8
-                                    caracteres</span>
-                            </div>
-
                             <!-- Identificación -->
                             <div class="form-group full-width">
                                 <label for="identification">Identificación <span class="required">*</span></label>
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-id-card"></i>
-                                    <input type="text" id="identification" name="identification"
-                                        placeholder="Cédula nacional o pasaporte" required>
+                                <div class="input-group-search">
+                                    <div class="input-with-button">
+                                        <i class="fa-solid fa-id-card"></i>
+                                        <input type="text" id="identification" name="identification"
+                                            placeholder="Escribe tu cédula..." required>
+                                    </div>
+                                    <button type="button" id="btnValidarSobre" class="btn btn-blue btn-validar">
+                                        <i class="fa-solid fa-magnifying-glass mr-1"></i> Validar
+                                    </button>
                                 </div>
                                 <span class="error-message" id="idError">La identificación es obligatoria</span>
                             </div>
@@ -210,9 +190,8 @@
                                 <label for="firstName">Nombre <span class="required">*</span></label>
                                 <div class="input-icon">
                                     <i class="fa-solid fa-user"></i>
-                                    <input type="text" id="firstName" name="firstName" placeholder="Tu nombre" required>
+                                    <input type="text" id="firstName" name="firstName" placeholder="Tu nombre" readonly class="input-readonly bg-gray-50">
                                 </div>
-                                <span class="error-message" id="firstNameError">El nombre es obligatorio</span>
                             </div>
 
                             <!-- Primer Apellido -->
@@ -220,10 +199,8 @@
                                 <label for="lastName1">Primer Apellido <span class="required">*</span></label>
                                 <div class="input-icon">
                                     <i class="fa-regular fa-user"></i>
-                                    <input type="text" id="lastName1" name="lastName1" placeholder="Primer apellido"
-                                        required>
+                                    <input type="text" id="lastName1" name="lastName1" placeholder="Primer apellido" readonly class="input-readonly bg-gray-50">
                                 </div>
-                                <span class="error-message" id="lastName1Error">Requerido</span>
                             </div>
 
                             <!-- Segundo Apellido -->
@@ -231,28 +208,63 @@
                                 <label for="lastName2">Segundo Apellido</label>
                                 <div class="input-icon">
                                     <i class="fa-regular fa-user"></i>
-                                    <input type="text" id="lastName2" name="lastName2" placeholder="(Opcional)">
+                                    <input type="text" id="lastName2" name="lastName2" placeholder="Segundo Apellido" readonly class="input-readonly bg-gray-50">
                                 </div>
                             </div>
 
-                            <!-- Fecha de Nacimiento -->
+                            <!-- Número de Sobre -->
                             <div class="form-group">
-                                <label for="birthDate">Fecha de Nacimiento <span class="required">*</span></label>
+                                <label for="numeroSobre">Número de Sobre <span class="required">*</span></label>
                                 <div class="input-icon">
+                                    <i class="fa-solid fa-envelope-open-text"></i>
+                                    <input type="text" id="numeroSobre" name="numeroSobre" placeholder="Se completará solo" readonly class="input-readonly bg-gray-50 font-bold text-voca-blue">
+                                </div>
+                            </div>
+
+                            <!-- Correo Electrónico (Optimizado) -->
+                            <div class="form-group full-width">
+                                <label for="email">Correo Personal <span class="required">*</span></label>
+                                <div class="input-group-email">
+                                    <div class="input-icon input-editable flex-1">
+                                        <i class="fa-solid fa-envelope"></i>
+                                        <input type="text" id="email" name="email"
+                                            placeholder="Digite su correo electrónico" required class="bg-blue-50/30">
+                                    </div>
+                                    <span class="email-suffix">@gmail.com</span>
+                                </div>
+                                <span class="error-message" id="emailError">El correo es obligatorio</span>
+                            </div>
+
+                            <!-- Fecha de Nacimiento -->
+                            <div class="form-group full-width">
+                                <label for="birthDate">Fecha de Nacimiento <span class="required">*</span></label>
+                                <div class="input-icon input-editable">
                                     <i class="fa-solid fa-calendar-days"></i>
-                                    <input type="date" id="birthDate" name="birthDate" required>
+                                    <input type="date" id="birthDate" name="birthDate" required class="bg-blue-50/30">
                                 </div>
                                 <span class="error-message" id="birthDateError">Selecciona una fecha</span>
                             </div>
 
-                            <!-- Teléfono -->
-                            <div class="form-group full-width">
-                                <label for="phone">Teléfono Móvil <span class="required">*</span></label>
-                                <div class="input-icon">
-                                    <i class="fa-solid fa-mobile-screen-button"></i>
-                                    <input type="tel" id="phone" name="phone" placeholder="Ej. 8888-8888" required>
+                            <!-- Contraseña -->
+                            <div class="form-group">
+                                <label for="password">Contraseña <span class="required">*</span></label>
+                                <div class="input-icon input-editable">
+                                    <i class="fa-solid fa-lock"></i>
+                                    <input type="password" id="password" name="password"
+                                        placeholder="Mínimo 8 caracteres" required minlength="8" class="bg-blue-50/30">
                                 </div>
-                                <span class="error-message" id="phoneError">El teléfono es obligatorio</span>
+                                <span class="error-message" id="passwordError">Mínimo 8 caracteres</span>
+                            </div>
+
+                            <!-- Confirmar Contraseña -->
+                            <div class="form-group">
+                                <label for="confirmPassword">Confirmar Contraseña <span class="required">*</span></label>
+                                <div class="input-icon input-editable">
+                                    <i class="fa-solid fa-lock"></i>
+                                    <input type="password" id="confirmPassword" name="confirmPassword"
+                                        placeholder="Repite tu contraseña" required class="bg-blue-50/30">
+                                </div>
+                                <span class="error-message" id="confirmPasswordError">Las contraseñas no coinciden</span>
                             </div>
                         </div>
 

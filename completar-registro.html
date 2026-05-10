@@ -151,8 +151,8 @@
         let existingFotoUrl = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
-            const studentEmail = localStorage.getItem('studentEmail');
-            if (!studentEmail) {
+            const studentId = localStorage.getItem('studentId');
+            if (!studentId) {
                 window.location.href = 'login.html';
                 return;
             }
@@ -176,9 +176,9 @@
             // Pre-llenar datos si ya existen (caso de rechazo de foto o nuevos campos)
             try {
                 const { data } = await supabaseClient
-                    .from('aspirantes')
+                    .from('admisiones_aspirantes')
                     .select('encargado_nombre, encargado_telefono, encargado_correo, centro_procedencia, foto_url')
-                    .eq('email', studentEmail)
+                    .eq('identificacion', studentId)
                     .single();
                 
                 if (data) {
@@ -336,8 +336,12 @@
                 return;
             }
 
-            const email = localStorage.getItem('studentEmail');
             const ident = localStorage.getItem('studentId');
+            
+            if (!ident) {
+                window.location.href = 'login.html';
+                return;
+            }
             
             Swal.fire({
                 title: 'Guardando Perfil...',
@@ -355,7 +359,7 @@
                     
                     const { data: uploadData, error: uploadError } = await supabaseClient
                         .storage
-                        .from('fotos_aspirantes')
+                        .from('admisiones_fotos_aspirantes')
                         .upload(fileName, finalImageBlob, {
                             cacheControl: '3600',
                             upsert: false,
@@ -366,7 +370,7 @@
 
                     const { data: publicUrlData } = supabaseClient
                         .storage
-                        .from('fotos_aspirantes')
+                        .from('admisiones_fotos_aspirantes')
                         .getPublicUrl(fileName);
 
                     fotoUrl = publicUrlData.publicUrl;
@@ -378,8 +382,9 @@
                 const encargadoCorreo = document.getElementById('encargado_correo').value.trim();
                 const centroProcedencia = document.getElementById('centro_procedencia').value.trim();
 
+                const studentId = localStorage.getItem('studentId');
                 const { error: dbError } = await supabaseClient
-                    .from('aspirantes')
+                    .from('admisiones_aspirantes')
                     .update({
                         foto_url: fotoUrl,
                         encargado_nombre: encargadoNombre,
@@ -388,7 +393,7 @@
                         centro_procedencia: centroProcedencia,
                         registro_completado: true
                     })
-                    .eq('email', email);
+                    .eq('identificacion', studentId);
 
                 if (dbError) throw new Error('No se pudieron guardar los datos en la base de datos.');
 

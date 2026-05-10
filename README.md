@@ -28,7 +28,7 @@ cd admision
 ### 2. Configuración de Supabase
 1. Crea un nuevo proyecto en [Supabase](https://supabase.com/).
 2. Ejecuta el script **`setup.sql`** en el Editor SQL de Supabase. Este archivo contiene toda la estructura necesaria (tablas, RLS, Realtime y un administrador por defecto).
-   - *Nota:* Asegúrate de crear manualmente los buckets de Storage si vas a usar adjuntos (`chat_adjuntos` y `avisos_adjuntos`).
+   - *Nota:* Asegúrate de crear manualmente los buckets de Storage si vas a usar adjuntos (`admisiones_chat_adjuntos` y `admisiones_avisos_adjuntos`).
 
 ### 3. Variables de Entorno
 Actualiza el archivo `supabase-client.js` con tus credenciales de Supabase:

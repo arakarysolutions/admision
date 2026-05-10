@@ -78,7 +78,7 @@
                 <img src="src/logo/VOCA%20Admisiones.png" alt="Logo" class="h-10 w-10 bg-white rounded-full p-1 mr-3">
                 <span class="font-outfit font-bold text-lg tracking-wide">Portal SVS</span>
             </div>
-            <button onclick="toggleMobileMenu()" class="text-white text-2xl hover:text-blue-200 transition">
+            <button onclick="toggleMobileMenu()" class="text-white text-2xl hover:text-blue-200 transition" title="Cerrar menú" aria-label="Cerrar menú">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
@@ -152,7 +152,7 @@
                 </div>
                 <div class="hidden md:block text-sm">
                     <p class="font-semibold text-gray-700" id="header-name">Estudiante</p>
-                    <p class="text-gray-500 text-xs" id="header-email">estudiante@gmail.com</p>
+                    <p class="text-gray-500 text-xs" id="header-id">Identificación</p>
                 </div>
             </div>
         </header>
@@ -269,16 +269,34 @@
                                 <span class="font-semibold text-gray-800 text-lg" id="profile-id">1-2345-6789</span>
                             </div>
                             <div>
-                                <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Correo Electrónico</span>
-                                <span class="font-semibold text-gray-800 text-lg break-all" id="profile-email">estudiante@gmail.com</span>
+                                <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Fecha de Nacimiento</span>
+                                <span class="font-semibold text-gray-800 text-lg" id="profile-birth">No registrada</span>
                             </div>
                             <div>
-                                <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Teléfono</span>
-                                <span class="font-semibold text-gray-800 text-lg" id="profile-phone">8888-8888</span>
+                                <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Edad</span>
+                                <span class="font-semibold text-gray-800 text-lg" id="profile-age">-- años</span>
+                            </div>
+                            <div>
+                                <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Número de Sobre</span>
+                                <span class="font-semibold text-voca-blue text-lg" id="profile-sobre">---</span>
                             </div>
                             <div class="md:col-span-2">
                                 <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Centro de Procedencia</span>
                                 <span class="font-semibold text-gray-800 text-lg" id="profile-school">No registrado</span>
+                            </div>
+                            <div class="md:col-span-2">
+                                <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Estado del Trámite</span>
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-voca-blue" id="profile-status">Pendiente</span>
+                            </div>
+
+                            <!-- Bloque de Cita (Solo si existe) -->
+                            <div id="profile-cita-block" class="md:col-span-2 bg-blue-50/50 p-4 rounded-lg border border-blue-100 hidden">
+                                <h5 class="text-voca-blue font-bold text-xs uppercase mb-3 flex items-center gap-2"><i class="fa-solid fa-calendar-day"></i> Datos de tu Cita para Examen</h5>
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    <div><span class="block text-[10px] text-gray-500 uppercase">Fecha</span><span class="font-bold text-gray-800" id="profile-cita-fecha">---</span></div>
+                                    <div><span class="block text-[10px] text-gray-500 uppercase">Hora</span><span class="font-bold text-gray-800" id="profile-cita-hora">---</span></div>
+                                    <div><span class="block text-[10px] text-gray-500 uppercase">Aula</span><span class="font-bold text-gray-800" id="profile-cita-aula">---</span></div>
+                                </div>
                             </div>
                         </div>
 
@@ -373,11 +391,9 @@
         document.addEventListener('DOMContentLoaded', async () => {
             const studentName = localStorage.getItem('studentName');
             const studentLastName = localStorage.getItem('studentLastName');
-            const studentEmail = localStorage.getItem('studentEmail');
             const studentId = localStorage.getItem('studentId');
-            const studentPhone = localStorage.getItem('studentPhone');
 
-            if (!studentEmail) {
+            if (!studentId) {
                 // Redirigir si no hay sesión
                 window.location.href = 'login.html';
                 return;
@@ -387,9 +403,9 @@
             let studentRecord = null;
             try {
                 const { data: checkData, error: fetchError } = await supabaseClient
-                    .from('aspirantes')
+                    .from('admisiones_aspirantes')
                     .select('*')
-                    .eq('email', studentEmail)
+                    .eq('identificacion', studentId)
                     .single();
                 
                 studentRecord = checkData;
@@ -424,6 +440,31 @@
                     if (checkData.encargado_nombre) document.getElementById('profile-encargado-name').innerText = checkData.encargado_nombre;
                     if (checkData.encargado_telefono) document.getElementById('profile-encargado-phone').innerText = checkData.encargado_telefono;
                     if (checkData.encargado_correo) document.getElementById('profile-encargado-email').innerText = checkData.encargado_correo;
+                    
+                    // Nuevos campos
+                    if (checkData.fecha_nacimiento) {
+                        const bday = new Date(checkData.fecha_nacimiento);
+                        document.getElementById('profile-birth').innerText = bday.toLocaleDateString('es-CR');
+                        
+                        // Calcular Edad dinámicamente
+                        const today = new Date();
+                        let age = today.getFullYear() - bday.getFullYear();
+                        const m = today.getMonth() - bday.getMonth();
+                        if (m < 0 || (m === 0 && today.getDate() < bday.getDate())) {
+                            age--;
+                        }
+                        document.getElementById('profile-age').innerText = `${age} años`;
+                    }
+                    if (checkData.numero_sobre) document.getElementById('profile-sobre').innerText = `#${checkData.numero_sobre}`;
+                    if (checkData.estado) document.getElementById('profile-status').innerText = checkData.estado;
+                    
+                    // Cita
+                    if (checkData.cita_fecha) {
+                        document.getElementById('profile-cita-block').classList.remove('hidden');
+                        document.getElementById('profile-cita-fecha').innerText = checkData.cita_fecha;
+                        document.getElementById('profile-cita-hora').innerText = checkData.cita_hora || '---';
+                        document.getElementById('profile-cita-aula').innerText = checkData.cita_aula || '---';
+                    }
                 }
             } catch (e) {
                 console.error("Error validando perfil del estudiante:", e);
@@ -432,15 +473,13 @@
             if (studentName) {
                 document.getElementById('greeting').innerText = `¡Hola, ${studentName}!`;
                 document.getElementById('header-name').innerText = studentName;
-                document.getElementById('header-email').innerText = studentEmail || '';
+                document.getElementById('header-id').innerText = studentId || '';
                 
                 const initials = studentName.charAt(0).toUpperCase() + (studentLastName ? studentLastName.charAt(0).toUpperCase() : '');
                 document.getElementById('header-initials').innerText = initials;
                 
                 document.getElementById('profile-name').innerText = `${studentName} ${studentLastName || ''}`.trim();
                 document.getElementById('profile-id').innerText = studentId || '';
-                document.getElementById('profile-email').innerText = studentEmail || '';
-                document.getElementById('profile-phone').innerText = studentPhone || '';
             }
             
             // Inicializar Quill con tecla Enter fija
@@ -486,7 +525,7 @@
                     .on('postgres_changes', { 
                         event: 'INSERT', 
                         schema: 'public', 
-                        table: 'mensajes',
+                        table: 'admisiones_mensajes',
                         filter: `aspirante_id=eq.${window.currentStudentId}`
                     }, payload => {
                         if (payload.new.remitente === 'admin') {
@@ -500,7 +539,7 @@
                     .on('postgres_changes', {
                         event: 'UPDATE',
                         schema: 'public',
-                        table: 'aspirantes',
+                        table: 'admisiones_aspirantes',
                         filter: `id=eq.${window.currentStudentId}`
                     }, payload => {
                         const newData = payload.new;
@@ -620,7 +659,7 @@
                 Swal.fire({ title: 'Confirmando...', didOpen: () => Swal.showLoading() });
                 
                 const { error } = await supabaseClient
-                    .from('aspirantes')
+                    .from('admisiones_aspirantes')
                     .update({ cita_confirmada: true })
                     .eq('id', window.currentStudentId);
 
@@ -680,7 +719,7 @@
         async function checkUnreadMessages() {
             if(!window.currentStudentId) return;
             const { count } = await supabaseClient
-                .from('mensajes')
+                .from('admisiones_mensajes')
                 .select('*', { count: 'exact', head: true })
                 .eq('aspirante_id', window.currentStudentId)
                 .eq('remitente', 'admin')
@@ -711,14 +750,14 @@
             if(!window.currentStudentId) return;
             
             const { data: mensajes } = await supabaseClient
-                .from('mensajes')
+                .from('admisiones_mensajes')
                 .select('*')
                 .eq('aspirante_id', window.currentStudentId)
                 .order('fecha_hora', { ascending: true });
                 
             // Marcar como leídos
             await supabaseClient
-                .from('mensajes')
+                .from('admisiones_mensajes')
                 .update({ leido: true })
                 .eq('aspirante_id', window.currentStudentId)
                 .eq('remitente', 'admin')
@@ -845,7 +884,7 @@
                 const fileExt = file.name.split('.').pop();
                 const fileName = `${window.currentStudentId}/${Date.now()}_student.${fileExt}`;
                 const { data: uploadData, error: uploadError } = await supabaseClient.storage
-                    .from('chat_adjuntos')
+                    .from('admisiones_chat_adjuntos')
                     .upload(fileName, file);
                     
                 if (uploadError) {
@@ -857,7 +896,7 @@
                 }
                 
                 const { data: publicUrlData } = supabaseClient.storage
-                    .from('chat_adjuntos')
+                    .from('admisiones_chat_adjuntos')
                     .getPublicUrl(fileName);
                     
                 adjuntoUrl = publicUrlData.publicUrl;
@@ -865,7 +904,7 @@
             }
             
             const { error } = await supabaseClient
-                .from('mensajes')
+                .from('admisiones_mensajes')
                 .insert([{
                     aspirante_id: window.currentStudentId,
                     remitente: 'estudiante',
@@ -1043,7 +1082,7 @@
             window.avisoTimeouts = [];
 
             const { data: allData, error } = await supabaseClient
-                .from('avisos')
+                .from('admisiones_avisos')
                 .select('*')
                 .eq('is_hidden', false)
                 .order('is_pinned', { ascending: false, nullsFirst: false })
@@ -1259,7 +1298,7 @@
             }
 
             const { data: currentAviso, error: fetchError } = await supabaseClient
-                .from('avisos')
+                .from('admisiones_avisos')
                 .select('liked_by')
                 .eq('id', avisoId)
                 .single();
@@ -1277,15 +1316,15 @@
             }
 
             await supabaseClient
-                .from('avisos')
+                .from('admisiones_avisos')
                 .update({ liked_by: likedBy })
                 .eq('id', avisoId);
         }
 
         // Configurar Realtime para el muro de avisos
         const avisosSubscription = supabaseClient
-            .channel('public:avisos')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'avisos' }, payload => {
+            .channel('public:admisiones_avisos')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'admisiones_avisos' }, payload => {
                 if (payload.eventType === 'INSERT') {
                     const aviso = payload.new;
                     const nowIso = new Date().toISOString();
