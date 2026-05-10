@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Ventas - VOCA Admisiones</title>
+    <link rel="icon" type="image/png" href="src/logo/VOCA%20Admisiones.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-outfit { font-family: 'Outfit', sans-serif; }
+        .bg-voca-blue { background-color: #003366; }
+        .text-voca-blue { color: #003366; }
+        .bg-voca-red { background-color: #cc0000; }
+        .text-voca-red { color: #cc0000; }
+        .bg-voca-gold { background-color: #ffcc00; }
+    </style>
+    
+    <!-- jsPDF & AutoTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body class="bg-gray-100 flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-slate-900 text-gray-300 flex flex-col hidden md:flex shrink-0">
+        <div class="h-20 bg-slate-950 flex items-center px-6 border-b border-slate-800 shadow-md">
+            <img src="src/logo/VOCA%20Admisiones.png" alt="Logo" class="h-10 w-10 bg-white rounded-full p-1 mr-3">
+            <span class="font-outfit font-bold text-white text-lg tracking-wide">Ventas VOCA</span>
+        </div>
+        
+        <div class="p-4">
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 mt-2">Principal</p>
+            <nav class="space-y-1">
+                <a href="#" class="flex items-center gap-3 px-4 py-2.5 bg-voca-blue text-white rounded-lg font-medium transition">
+                    <i class="fa-solid fa-house w-5 text-center"></i> Inicio
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-slate-800 mt-auto">
+            <div class="flex items-center gap-3 mb-4 px-2">
+                <div class="w-8 h-8 rounded-full bg-voca-gold flex items-center justify-center text-voca-blue font-bold text-xs" id="sidebar-user-initials">
+                    VE
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-white leading-tight" id="sidebar-user-name">Usuario Ventas</p>
+                    <p class="text-xs text-slate-500">Módulo de Ventas</p>
+                </div>
+            </div>
+            <a href="login.html" class="flex items-center gap-3 px-4 py-2 text-red-400 hover:text-red-300 hover:bg-slate-800 rounded-lg text-sm transition" onclick="logout()">
+                <i class="fa-solid fa-arrow-right-from-bracket w-5 text-center"></i> Cerrar Sesión
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <!-- Topbar -->
+        <header class="h-20 bg-white shadow-sm flex items-center justify-between px-8 shrink-0 z-10">
+            <div class="flex items-center gap-4">
+                <div class="relative hidden sm:block">
+                    <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" id="sobres-search" oninput="handleSobresSearch()" placeholder="Buscar sobre, cédula o nombre..." class="pl-10 pr-4 py-2 bg-gray-100 border-transparent rounded-lg focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition w-64 md:w-80 text-sm">
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <button class="text-gray-400 hover:text-voca-blue transition" title="Exportar Reporte de Sobres" onclick="exportSobresPDF()">
+                    <i class="fa-solid fa-download text-lg"></i>
+                </button>
+                <div class="text-right">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-tighter">Admisiones 2026</p>
+                    <p class="text-sm font-bold text-voca-blue">Módulo de Ventas</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="p-8 w-full overflow-y-auto relative h-full">
+            
+            <div id="view-resumen">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold font-outfit text-gray-800">Panel de Ventas</h2>
+                        <p class="text-gray-500 text-sm">Registro y gestión de información para aspirantes.</p>
+                    </div>
+                    <button class="bg-voca-blue hover:bg-blue-800 text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-lg transition flex items-center gap-2" onclick="openSobreModal()">
+                        <i class="fa-solid fa-plus-circle"></i> Registrar Nuevo Sobre
+                    </button>
+                </div>
+
+                <!-- Estadísticas Rápidas -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm font-medium">Total Sobres</p>
+                                <h3 id="stat-total-sobres" class="text-3xl font-bold text-gray-800 font-outfit mt-1">0</h3>
+                            </div>
+                            <div class="w-10 h-10 rounded-lg bg-blue-50 text-voca-blue flex items-center justify-center">
+                                <i class="fa-solid fa-folder-tree"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm font-medium">Registrados Hoy</p>
+                                <h3 id="stat-sobres-hoy" class="text-3xl font-bold text-gray-800 font-outfit mt-1">0</h3>
+                            </div>
+                            <div class="w-10 h-10 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <p class="text-gray-500 text-sm font-medium">Último Folio</p>
+                                <h3 id="stat-ultimo-folio" class="text-3xl font-bold text-voca-red font-outfit mt-1">---</h3>
+                            </div>
+                            <div class="w-10 h-10 rounded-lg bg-red-50 text-voca-red flex items-center justify-center">
+                                <i class="fa-solid fa-list-ol"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de Gestión Directa -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-50 flex justify-between items-center bg-white sticky top-0 z-10">
+                        <h3 class="font-bold text-gray-800">Listado de Sobres Registrados</h3>
+                        <div class="text-xs text-gray-400 font-medium"><i class="fa-solid fa-info-circle mr-1"></i> Mostrando todos los registros</div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 border-b border-gray-100">
+                                <tr>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">N° Sobre</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">Identificación</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">Estudiante</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">Registrado Por</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sobres-table-body" class="divide-y divide-gray-50">
+                                <!-- Datos dinámicos -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="src/js/supabase-client.js"></script>
+    <script>
+        let sobresData = [];
+        let adminName = localStorage.getItem('adminName') || 'Usuario Ventas';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!localStorage.getItem('adminUser')) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            document.getElementById('sidebar-user-name').innerText = adminName;
+            document.getElementById('sidebar-user-initials').innerText = adminName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0,2);
+            
+            loadSobres();
+        });
+
+        async function loadSobres() {
+            const { data, error } = await supabaseClient
+                .from('admisiones_sobres')
+                .select('*')
+                .order('numero_sobre', { ascending: false });
+
+            if (!error) {
+                sobresData = data;
+                renderSobresTable(data);
+                updateStats();
+            }
+        }
+
+        function getAdminColor(name) {
+            if (!name || name === 'Admin Principal' || name === 'Sistema') return 'bg-blue-100 text-blue-800';
+            
+            const colors = [
+                'bg-green-100 text-green-800',
+                'bg-purple-100 text-purple-800',
+                'bg-orange-100 text-orange-800',
+                'bg-pink-100 text-pink-800',
+                'bg-indigo-100 text-indigo-800',
+                'bg-teal-100 text-teal-800'
+            ];
+            
+            // Simple hash based on name
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) {
+                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return colors[Math.abs(hash) % colors.length];
+        }
+
+        function renderSobresTable(data) {
+            const tbody = document.getElementById('sobres-table-body');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-gray-400 italic">No se han encontrado registros.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(s => {
+                const badgeColor = getAdminColor(s.admin_registra);
+                return `
+                <tr class="hover:bg-gray-50 transition border-b border-gray-50">
+                    <td class="px-6 py-4 font-bold text-voca-blue">#${s.numero_sobre || '---'}</td>
+                    <td class="px-6 py-4 font-medium text-gray-900">${s.cedula}</td>
+                    <td class="px-6 py-4">
+                        <div class="font-semibold text-gray-800">${s.nombre} ${s.apellido1} ${s.apellido2 || ''}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2.5 py-0.5 ${badgeColor} text-[10px] font-bold rounded-full uppercase tracking-wider shadow-sm border border-black/5">${s.admin_registra || 'Ventas'}</span>
+                    </td>
+                    <td class="px-6 py-4 text-right flex justify-end gap-3">
+                        <button onclick="viewSobreFicha('${s.id}')" class="text-gray-400 hover:text-blue-500 transition" title="Ver ficha"><i class="fa-solid fa-eye"></i></button>
+                        <button onclick="editSobre('${s.id}')" class="text-gray-400 hover:text-voca-blue transition" title="Editar registro"><i class="fa-solid fa-pen-to-square"></i></button>
+                    </td>
+                </tr>
+            `;}).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total-sobres').innerText = sobresData.length;
+            
+            const todayStr = new Date().toLocaleDateString('en-CA');
+            const hoy = sobresData.filter(s => s.created_at && s.created_at.startsWith(todayStr)).length;
+            document.getElementById('stat-sobres-hoy').innerText = hoy;
+
+            const maxFolio = sobresData.reduce((max, s) => {
+                const n = parseInt(s.numero_sobre);
+                return (!isNaN(n) && n > max) ? n : max;
+            }, 0);
+            document.getElementById('stat-ultimo-folio').innerText = maxFolio > 0 ? maxFolio : '---';
+        }
+
+        async function openSobreModal(editData = null) {
+            const isEdit = !!editData;
+            const { value: formValues } = await Swal.fire({
+                title: isEdit ? 'Actualizar Datos del Sobre' : 'Registrar Nuevo Sobre',
+                html: `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left p-2 overflow-y-auto max-h-[60vh]">
+                        <div class="md:col-span-2 border-b pb-2 mb-2 flex justify-between items-center">
+                            <h4 class="font-bold text-voca-blue">Datos del Estudiante</h4>
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs font-bold text-gray-600 uppercase">N° Sobre *</label>
+                                <input id="swal-numero-sobre" class="w-24 px-2 py-1 border rounded font-bold text-center text-voca-blue border-voca-blue" placeholder="000" value="${isEdit ? editData.numero_sobre : ''}">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 uppercase">Identificación *</label>
+                            <input id="swal-cedula" class="w-full px-3 py-2 border rounded mt-1" placeholder="Ej: 503150141" value="${isEdit ? editData.cedula : ''}">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 uppercase">Nombre *</label>
+                            <input id="swal-nombre" class="w-full px-3 py-2 border rounded mt-1" placeholder="Nombre" value="${isEdit ? editData.nombre : ''}">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 uppercase">Primer Apellido *</label>
+                            <input id="swal-apellido1" class="w-full px-3 py-2 border rounded mt-1" placeholder="Primer Apellido" value="${isEdit ? editData.apellido1 : ''}">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 uppercase">Segundo Apellido</label>
+                            <input id="swal-apellido2" class="w-full px-3 py-2 border rounded mt-1" placeholder="Segundo Apellido" value="${isEdit ? editData.apellido2 || '' : ''}">
+                        </div>
+                    </div>
+                `,
+                focusConfirm: false,
+                width: '800px',
+                showCancelButton: true,
+                confirmButtonText: isEdit ? 'Actualizar Datos' : 'Guardar Sobre',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#003366',
+                showLoaderOnConfirm: true,
+                didOpen: () => {
+                    const container = Swal.getHtmlContainer();
+                    const inputs = container.querySelectorAll('input');
+                    inputs.forEach((input, index) => {
+                        input.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                const nextInput = inputs[index + 1];
+                                if (nextInput) {
+                                    nextInput.focus();
+                                } else {
+                                    Swal.clickConfirm();
+                                }
+                            }
+                        });
+                    });
+                },
+                preConfirm: async () => {
+                    const data = {
+                        numero_sobre: document.getElementById('swal-numero-sobre').value.trim(),
+                        cedula: document.getElementById('swal-cedula').value.trim(),
+                        nombre: document.getElementById('swal-nombre').value.trim(),
+                        apellido1: document.getElementById('swal-apellido1').value.trim(),
+                        apellido2: document.getElementById('swal-apellido2').value.trim(),
+                        admin_registra: adminName
+                    };
+
+                    if (!data.numero_sobre || !data.cedula || !data.nombre || !data.apellido1) {
+                        Swal.showValidationMessage('Complete todos los campos obligatorios (*)');
+                        return false;
+                    }
+
+                    // Validar duplicados
+                    const { data: existingSobre } = await supabaseClient.from('admisiones_sobres').select('cedula').eq('numero_sobre', data.numero_sobre).neq('id', isEdit ? editData.id : '00000000-0000-0000-0000-000000000000').maybeSingle();
+                    if (existingSobre) { Swal.showValidationMessage(`El Sobre #${data.numero_sobre} ya existe.`); return false; }
+
+                    const { data: existingCedula } = await supabaseClient.from('admisiones_sobres').select('numero_sobre').eq('cedula', data.cedula).neq('id', isEdit ? editData.id : '00000000-0000-0000-0000-000000000000').maybeSingle();
+                    if (existingCedula) { Swal.showValidationMessage(`La Identificación ${data.cedula} ya tiene un sobre asignado.`); return false; }
+
+                    let result;
+                    if (isEdit) result = await supabaseClient.from('admisiones_sobres').update(data).eq('id', editData.id);
+                    else result = await supabaseClient.from('admisiones_sobres').insert([data]);
+
+                    if (result.error) { Swal.showValidationMessage(`Error: ${result.error.message}`); return false; }
+                    return data;
+                }
+            });
+
+            if (formValues) {
+                const actionType = isEdit ? 'Edición de Sobre (Ventas)' : 'Registro de Sobre (Ventas)';
+                const actionDetail = `Sobre #${formValues.numero_sobre} para ${formValues.nombre} ${formValues.apellido1}.`;
+                await logAction(actionType, actionDetail);
+
+                Swal.fire('¡Éxito!', 'Operación completada.', 'success');
+                loadSobres();
+            }
+        }
+
+        async function logAction(accion, detalle) {
+            await supabaseClient
+                .from('admisiones_historial_admin')
+                .insert([{ accion: accion, detalle: detalle, admin_nombre: adminName }]);
+        }
+
+        async function editSobre(id) {
+            const { data } = await supabaseClient.from('admisiones_sobres').select('*').eq('id', id).single();
+            if (data) openSobreModal(data);
+        }
+
+        async function viewSobreFicha(id) {
+            const { data: s } = await supabaseClient.from('admisiones_sobres').select('*').eq('id', id).single();
+            if (!s) return;
+
+            Swal.fire({
+                title: `Ficha del Estudiante - Sobre #${s.numero_sobre}`,
+                html: `
+                    <div class="text-left space-y-4 p-2 text-sm">
+                        <div class="border-b pb-1"><h4 class="font-bold text-voca-blue text-xs uppercase">Información del Estudiante</h4></div>
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-2">
+                            <div><label class="text-[10px] font-bold text-gray-500 uppercase">Identificación</label><p class="font-medium text-gray-800">${s.cedula}</p></div>
+                            <div><label class="text-[10px] font-bold text-gray-500 uppercase">Nombre Completo</label><p class="font-medium text-gray-800">${s.nombre} ${s.apellido1} ${s.apellido2 || ''}</p></div>
+                        </div>
+                        <div class="mt-4 pt-2 border-t text-[10px] text-gray-400 flex justify-between">
+                            <span>Vendido por: <b>${s.admin_registra || 'Sistema'}</b></span>
+                            <span>Fecha: <b>${new Date(s.created_at).toLocaleDateString()}</b></span>
+                        </div>
+                    </div>
+                `,
+                width: '550px',
+                confirmButtonText: 'Cerrar',
+                confirmButtonColor: '#003366'
+            });
+        }
+
+        function handleSobresSearch() {
+            const term = document.getElementById('sobres-search').value.toLowerCase();
+            const filtered = sobresData.filter(s => 
+                s.numero_sobre?.toString().includes(term) ||
+                s.cedula?.toLowerCase().includes(term) ||
+                s.nombre?.toLowerCase().includes(term) ||
+                s.apellido1?.toLowerCase().includes(term)
+            );
+            renderSobresTable(filtered);
+        }
+
+        function exportSobresPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFontSize(18);
+            doc.text('Vocacional Monseñor Sanabria', 14, 20);
+            doc.setFontSize(14);
+            doc.text('Listado de Sobres (Ventas)', 14, 28);
+            
+            const tableRows = sobresData.map(s => [s.numero_sobre, s.cedula, `${s.nombre} ${s.apellido1}`, s.admin_registra, new Date(s.created_at).toLocaleDateString()]);
+            doc.autoTable({
+                head: [['Sobre', 'Cédula', 'Estudiante', 'Registrado Por', 'Fecha']],
+                body: tableRows,
+                startY: 35,
+                headStyles: { fillColor: [0, 51, 102] }
+            });
+            doc.save(`Reporte_Ventas_Sobres.pdf`);
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

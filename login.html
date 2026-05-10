@@ -134,7 +134,13 @@
 
                 if (adminData && !adminError) {
                     localStorage.setItem('adminName', adminData.nombre);
-                    window.location.href = 'dashboard-admin.html';
+                    localStorage.setItem('adminUser', adminData.correo);
+                    
+                    if (adminData.rol === 'Ventas') {
+                        window.location.href = 'dashboard-ventas.html';
+                    } else {
+                        window.location.href = 'dashboard-admin.html';
+                    }
                     return;
                 }
             } catch (e) {

@@ -64,7 +64,7 @@
                     <i class="fa-solid fa-clock-rotate-left w-5 text-center"></i> Historial de Actividades
                 </a>
                 <a href="#" onclick="createAdmin()" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-800 rounded-lg hover:text-white transition">
-                    <i class="fa-solid fa-user-shield w-5 text-center"></i> Nuevo Administrador
+                    <i class="fa-solid fa-user-plus w-5 text-center"></i> Crear Usuarios
                 </a>
                 <a href="#" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-800 rounded-lg hover:text-white transition">
                     <i class="fa-solid fa-gear w-5 text-center"></i> Ajustes del Sistema
@@ -1178,23 +1178,29 @@
 
         async function createAdmin() {
             const { value: formValues } = await Swal.fire({
-                title: 'Nuevo Administrador',
+                title: 'Crear Nuevo Usuario del Sistema',
                 html:
-                    `<label class="block text-left text-sm font-semibold mt-2">Nombre y Apellido:</label>` +
+                    `<label class="block text-left text-sm font-semibold mt-2">Nombre Completo:</label>` +
                     `<input id="swal-admin-name" type="text" class="swal2-input" style="width: 80%;" required placeholder="Ej. Juan Pérez">` +
                     `<label class="block text-left text-sm font-semibold mt-4">Usuario / Correo:</label>` +
                     `<input id="swal-admin-email" type="text" class="swal2-input" style="width: 80%;" required placeholder="Ej. admin.juan">` +
                     `<label class="block text-left text-sm font-semibold mt-4">Contraseña:</label>` +
-                    `<input id="swal-admin-pass" type="password" class="swal2-input" style="width: 80%;" required>`,
+                    `<input id="swal-admin-pass" type="password" class="swal2-input" style="width: 80%;" required>` +
+                    `<label class="block text-left text-sm font-semibold mt-4">Rol del Usuario:</label>` +
+                    `<select id="swal-admin-rol" class="swal2-input" style="width: 80%;">
+                        <option value="Administrador">Administrador</option>
+                        <option value="Ventas">Ventas</option>
+                    </select>`,
                 focusConfirm: false,
                 confirmButtonColor: '#003366',
-                confirmButtonText: 'Crear Administrador',
+                confirmButtonText: 'Crear Usuario',
                 showCancelButton: true,
                 cancelButtonText: 'Cancelar',
                 preConfirm: () => {
                     const nombre = document.getElementById('swal-admin-name').value;
                     const correo = document.getElementById('swal-admin-email').value;
                     const password = document.getElementById('swal-admin-pass').value;
+                    const rol = document.getElementById('swal-admin-rol').value;
                     
                     if (!nombre || !correo || !password) {
                         Swal.showValidationMessage('Todos los campos son obligatorios');
@@ -1204,19 +1210,20 @@
                         Swal.showValidationMessage('La contraseña debe tener al menos 6 caracteres');
                         return false;
                     }
-                    return { nombre, correo, password };
+                    return { nombre, correo, password, rol };
                 }
             });
 
             if (formValues) {
-                Swal.fire({ title: 'Creando administrador...', didOpen: () => Swal.showLoading() });
+                Swal.fire({ title: 'Creando usuario...', didOpen: () => Swal.showLoading() });
 
                 const { error } = await supabaseClient
                     .from('admisiones_administradores')
                     .insert([{
                         nombre: formValues.nombre,
                         correo: formValues.correo.toLowerCase(),
-                        password: formValues.password
+                        password: formValues.password,
+                        rol: formValues.rol
                     }]);
 
                 if (error) {
@@ -1809,6 +1816,23 @@
         }
 
         // --- Sistema de Sobres ---
+        function getAdminColor(name) {
+            if (!name || name === 'Admin Principal' || name === 'Sistema') return 'bg-blue-100 text-blue-800';
+            const colors = [
+                'bg-green-100 text-green-800',
+                'bg-purple-100 text-purple-800',
+                'bg-orange-100 text-orange-800',
+                'bg-pink-100 text-pink-800',
+                'bg-indigo-100 text-indigo-800',
+                'bg-teal-100 text-teal-800'
+            ];
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) {
+                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            return colors[Math.abs(hash) % colors.length];
+        }
+
         async function loadSobres() {
             const tbody = document.getElementById('sobres-table-body');
             tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500"><i class="fa-solid fa-spinner animate-spin mr-2"></i> Cargando sobres...</td></tr>';
@@ -1839,7 +1863,9 @@
                 return;
             }
 
-            tbody.innerHTML = data.map(s => `
+            tbody.innerHTML = data.map(s => {
+                const badgeColor = getAdminColor(s.admin_registra);
+                return `
                 <tr class="hover:bg-gray-50 transition">
                     <td class="px-6 py-4 font-bold text-voca-blue">#${s.numero_sobre || '---'}</td>
                     <td class="px-6 py-4 font-medium text-gray-900">${s.cedula}</td>
@@ -1847,7 +1873,7 @@
                         <div class="font-semibold text-gray-800">${s.nombre} ${s.apellido1} ${s.apellido2 || ''}</div>
                     </td>
                     <td class="px-6 py-4">
-                        <span class="px-2 py-1 bg-blue-50 text-voca-blue text-xs font-bold rounded-full">${s.admin_registra || 'Sistema'}</span>
+                        <span class="px-2.5 py-0.5 ${badgeColor} text-[10px] font-bold rounded-full uppercase tracking-wider shadow-sm border border-black/5">${s.admin_registra || 'Sistema'}</span>
                     </td>
                     <td class="px-6 py-4 text-right flex justify-end gap-2">
                         <button onclick="viewSobreFicha('${s.id}')" class="text-blue-500 hover:text-blue-700 transition" title="Ver ficha completa"><i class="fa-solid fa-eye"></i></button>
@@ -1855,7 +1881,7 @@
                         <button onclick="deleteSobre('${s.id}')" class="text-red-500 hover:text-red-700 transition" title="Eliminar sobre"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>
-            `).join('');
+            `;}).join('');
 
             // Actualizar estadísticas de sobres (solo el total histórico se mantiene del data original si es necesario, pero aquí usamos el filtrado para consistencia visual si se desea)
             document.getElementById('stat-total-sobres').innerText = sobresData.length;
