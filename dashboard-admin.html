@@ -56,6 +56,11 @@
                 <a href="#" id="tab-avisos" onclick="switchTabAdmin('avisos')" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-800 rounded-lg hover:text-white transition">
                     <i class="fa-solid fa-bullhorn w-5 text-center"></i> Comunicados Globales
                 </a>
+                <a href="#" id="tab-usuarios" onclick="switchTabAdmin('usuarios')" class="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-800 rounded-lg hover:text-white transition group">
+                    <i class="fa-solid fa-users-gear w-5 text-center"></i> 
+                    <span>Gestión de Usuarios</span>
+                    <span class="ml-auto text-[10px] bg-voca-red text-white px-1.5 py-0.5 rounded-full font-bold animate-pulse">NUEVO</span>
+                </a>
             </nav>
 
             <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 mt-8">Configuración</p>
@@ -323,6 +328,41 @@
                     </div>
                 </div>
             </div>
+            <div id="view-usuarios" class="hidden max-w-6xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 border-b border-gray-200 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold font-outfit text-gray-800">Gestión de Usuarios</h2>
+                        <p class="text-gray-500 text-sm mt-1">Administra los accesos al panel administrativo y de ventas.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="loadAdministradores()" class="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition shadow-sm">
+                            <i class="fa-solid fa-arrows-rotate mr-2"></i> Actualizar
+                        </button>
+                        <button class="bg-voca-blue hover:bg-blue-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm" onclick="createAdmin()">
+                            <i class="fa-solid fa-user-plus mr-2"></i> Nuevo Usuario
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500">
+                                    <th class="px-6 py-4 font-semibold">Nombre</th>
+                                    <th class="px-6 py-4 font-semibold">Usuario / Correo</th>
+                                    <th class="px-6 py-4 font-semibold">Rol</th>
+                                    <th class="px-6 py-4 font-semibold">Fecha Registro</th>
+                                    <th class="px-6 py-4 font-semibold text-right">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usuarios-table-body" class="text-sm divide-y divide-gray-100">
+                                <!-- Filas dinámicas -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -350,14 +390,14 @@
 
         function switchTabAdmin(tabId) {
             currentTab = tabId;
-            ['resumen', 'avisos', 'sobres'].forEach(t => {
+            ['resumen', 'avisos', 'sobres', 'usuarios'].forEach(t => {
                 const view = document.getElementById('view-' + t);
                 if (view) view.classList.add('hidden');
             });
             const selectedView = document.getElementById('view-' + tabId);
             if (selectedView) selectedView.classList.remove('hidden');
 
-            ['resumen', 'avisos', 'sobres'].forEach(t => {
+            ['resumen', 'avisos', 'sobres', 'usuarios'].forEach(t => {
                 const el = document.getElementById('tab-' + t);
                 if (!el) return;
                 if (t === tabId) {
@@ -373,6 +413,8 @@
                 loadAdminAvisos();
             } else if (tabId === 'sobres') {
                 loadSobres();
+            } else if (tabId === 'usuarios') {
+                loadAdministradores();
             }
         }
 
@@ -450,6 +492,148 @@
                     );
                 });
                 renderSobresTable(filtered);
+            } else if (currentTab === 'usuarios') {
+                const filtered = administradoresData.filter(u => {
+                    return Object.values(u).some(val => 
+                        val && val.toString().toLowerCase().includes(term)
+                    );
+                });
+                renderAdministradoresTable(filtered);
+            }
+        }
+
+        let administradoresData = [];
+
+        function renderAdministradoresTable(data) {
+            const tbody = document.getElementById('usuarios-table-body');
+            tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No se encontraron usuarios</td></tr>';
+                return;
+            }
+
+            data.forEach(user => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 transition';
+                
+                const date = new Date(user.created_at).toLocaleDateString('es-CR');
+                const badgeClass = user.rol === 'Administrador' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800';
+                
+                // El usuario 'admin' no se puede borrar
+                const isMainAdmin = user.correo === 'admin';
+                const deleteBtn = isMainAdmin 
+                    ? '<span class="text-gray-300 p-1 cursor-not-allowed" title="El administrador principal no se puede eliminar"><i class="fa-solid fa-trash"></i></span>'
+                    : `<button class="text-gray-400 hover:text-voca-red transition p-1" title="Eliminar Usuario" onclick="deleteAdmin('${user.id}', '${user.nombre}', '${user.correo}')">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>`;
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center font-bold text-xs text-gray-600">
+                                ${user.nombre.substring(0, 2).toUpperCase()}
+                            </div>
+                            <span class="font-medium text-gray-800">${user.nombre}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-gray-600">${user.correo}</td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badgeClass}">
+                            ${user.rol}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-gray-500">${date}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button class="text-gray-400 hover:text-voca-blue transition p-1 mr-2" title="Editar Usuario" onclick="editAdmin('${user.id}', '${user.nombre}', '${user.correo}', '${user.rol}')">
+                            <i class="fa-solid fa-user-pen"></i>
+                        </button>
+                        ${deleteBtn}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function editAdmin(id, name, email, rol) {
+            const isMainAdmin = email === 'admin';
+            const { value: formValues } = await Swal.fire({
+                title: 'Editar Usuario',
+                html:
+                    `<label class="block text-left text-sm font-semibold mt-2">Nombre Completo:</label>` +
+                    `<input id="swal-edit-name" type="text" class="swal2-input" style="width: 80%;" value="${name}" required>` +
+                    `<label class="block text-left text-sm font-semibold mt-4">Usuario / Correo:</label>` +
+                    `<input id="swal-edit-email" type="text" class="swal2-input" style="width: 80%;" value="${email}" ${isMainAdmin ? 'readonly bg-gray-100' : ''} required>` +
+                    `<label class="block text-left text-sm font-semibold mt-4">Nueva Contraseña (dejar en blanco para no cambiar):</label>` +
+                    `<input id="swal-edit-pass" type="password" class="swal2-input" style="width: 80%;" placeholder="********">` +
+                    `<label class="block text-left text-sm font-semibold mt-4">Rol del Usuario:</label>` +
+                    `<select id="swal-edit-rol" class="swal2-input" style="width: 80%;" ${isMainAdmin ? 'disabled' : ''}>
+                        <option value="Administrador" ${rol === 'Administrador' ? 'selected' : ''}>Administrador</option>
+                        <option value="Ventas" ${rol === 'Ventas' ? 'selected' : ''}>Ventas</option>
+                    </select>`,
+                focusConfirm: false,
+                confirmButtonColor: '#003366',
+                confirmButtonText: 'Guardar Cambios',
+                showCancelButton: true,
+                cancelButtonText: 'Cancelar',
+                preConfirm: () => {
+                    const newName = document.getElementById('swal-edit-name').value;
+                    const newEmail = document.getElementById('swal-edit-email').value;
+                    const newPass = document.getElementById('swal-edit-pass').value;
+                    const newRol = isMainAdmin ? rol : document.getElementById('swal-edit-rol').value;
+                    
+                    if (!newName || !newEmail) {
+                        Swal.showValidationMessage('El nombre y el correo son obligatorios');
+                        return false;
+                    }
+                    return { newName, newEmail, newPass, newRol };
+                }
+            });
+
+            if (formValues) {
+                Swal.fire({ title: 'Actualizando...', didOpen: () => Swal.showLoading() });
+
+                const updateData = {
+                    nombre: formValues.newName,
+                    correo: formValues.newEmail.toLowerCase()
+                };
+                
+                // Solo cambiar rol si no es admin principal
+                if (!isMainAdmin) {
+                    updateData.rol = formValues.newRol;
+                }
+
+                // Solo actualizar password si se escribió algo
+                if (formValues.newPass) {
+                    if (formValues.newPass.length < 6) {
+                        Swal.fire('Error', 'La nueva contraseña debe tener al menos 6 caracteres', 'error');
+                        return;
+                    }
+                    updateData.password = formValues.newPass;
+                }
+
+                const { error } = await supabaseClient
+                    .from('admisiones_administradores')
+                    .update(updateData)
+                    .eq('id', id);
+
+                if (error) {
+                    Swal.fire('Error', 'No se pudo actualizar el usuario: ' + error.message, 'error');
+                } else {
+                    await logAction('Edición de Usuario', `Se editó el usuario: ${email}`);
+                    Swal.fire('¡Éxito!', 'Usuario actualizado correctamente.', 'success');
+                    
+                    // Si se editó a sí mismo, actualizar localStorage
+                    const currentAdminUser = localStorage.getItem('adminUser');
+                    if (email === currentAdminUser) {
+                        localStorage.setItem('adminName', formValues.newName);
+                        // Re-renderizar sidebar info
+                        document.getElementById('sidebar-admin-name').innerText = formValues.newName;
+                        document.getElementById('sidebar-admin-initials').innerText = formValues.newName.substring(0, 2).toUpperCase();
+                    }
+                    
+                    loadAdministradores();
+                }
             }
         }
 
@@ -1237,6 +1421,64 @@
                 } else {
                     await logAction('Creación de Administrador', `Se creó el administrador: ${formValues.correo}`);
                     Swal.fire('¡Éxito!', 'El administrador fue creado correctamente.', 'success');
+                    if (currentTab === 'usuarios') loadAdministradores();
+                }
+            }
+        }
+
+        async function loadAdministradores() {
+            const tbody = document.getElementById('usuarios-table-body');
+            tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Cargando usuarios...</td></tr>';
+            
+            const { data, error } = await supabaseClient
+                .from('admisiones_administradores')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-4 text-center text-red-500">Error al cargar datos: ${error.message}</td></tr>`;
+                console.error(error);
+                return;
+            }
+
+            administradoresData = data;
+            renderAdministradoresTable(data);
+        }
+
+        async function deleteAdmin(id, name, email) {
+            if (email === 'admin') {
+                Swal.fire('Prohibido', 'El usuario administrador principal no puede ser eliminado del sistema.', 'error');
+                return;
+            }
+
+            const currentAdminEmail = localStorage.getItem('adminUser'); 
+            if (email === currentAdminEmail) {
+                Swal.fire('Atención', 'No puedes eliminar tu propio usuario mientras tienes la sesión activa.', 'warning');
+                return;
+            }
+
+            const result = await Swal.fire({
+                title: '¿Eliminar Usuario?',
+                text: `Estás a punto de eliminar al usuario ${name}. Esta acción no se puede deshacer.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#cc0000',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (result.isConfirmed) {
+                const { error } = await supabaseClient
+                    .from('admisiones_administradores')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) {
+                    Swal.fire('Error', 'No se pudo eliminar el usuario: ' + error.message, 'error');
+                } else {
+                    await logAction('Eliminación de Usuario', `Se eliminó al usuario: ${name}`);
+                    Swal.fire('¡Eliminado!', 'El usuario ha sido removido del sistema.', 'success');
+                    loadAdministradores();
                 }
             }
         }
