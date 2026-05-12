@@ -368,6 +368,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="src/js/supabase-client.js"></script>
+    <script src="src/js/alpha-warning.js"></script>
     <script>
         let aspirantesData = [];
         let sobresData = [];
@@ -1917,15 +1918,35 @@
                             text: formValues.fechaInput ? 'El comunicado ha sido programado.' : 'El comunicado global ha sido publicado.',
                             confirmButtonColor: '#003366'
                         });
-                        loadAdminAvisos();
+                        // loadAdminAvisos(); // No es necesario llamar aquí manualmente si Realtime está activo, pero lo dejamos por seguridad si falla la suscripción
                     }
                 }
             }
         }
 
-        async function loadAdminAvisos() {
+        // --- Suscripción Realtime para Avisos en Panel Admin ---
+        let adminAvisosChannel = null;
+        function initAdminAvisosRealtime() {
+            if (adminAvisosChannel) return;
+            adminAvisosChannel = supabaseClient
+                .channel('admin_avisos_realtime')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'admisiones_avisos' }, payload => {
+                    console.log('Admin detectó cambio en avisos:', payload.eventType);
+                    if (currentTab === 'avisos') {
+                        loadAdminAvisos(true); // Carga silenciosa
+                    }
+                })
+                .subscribe();
+        }
+
+        async function loadAdminAvisos(isSilent = false) {
             const container = document.getElementById('admin-muro-container');
-            container.innerHTML = '<div class="text-center py-10"><i class="fa-solid fa-spinner animate-spin text-3xl text-voca-blue mb-3"></i><p class="text-gray-500">Cargando avisos...</p></div>';
+            if (!isSilent) {
+                container.innerHTML = '<div class="text-center py-10"><i class="fa-solid fa-spinner animate-spin text-3xl text-voca-blue mb-3"></i><p class="text-gray-500">Cargando avisos...</p></div>';
+            }
+            
+            // Iniciar realtime si no está activo
+            initAdminAvisosRealtime();
 
             const { data, error } = await supabaseClient
                 .from('admisiones_avisos')
@@ -2212,22 +2233,20 @@
                         return false;
                     }
 
-                    // Validar duplicado de N° de Sobre
+                    // 1. Validar duplicado de N° de Sobre en la tabla de sobres
                     const { data: existingSobre, error: sobreError } = await supabaseClient
                         .from('admisiones_sobres')
-                        .select('nombre, apellido1, cedula, telefono_estudiante')
+                        .select('nombre, apellido1, cedula')
                         .eq('numero_sobre', data.numero_sobre)
                         .neq('id', isEdit ? editData.id : '00000000-0000-0000-0000-000000000000')
                         .maybeSingle();
 
                     if (existingSobre) {
-                        const input = document.getElementById('swal-numero-sobre');
-                        input.focus(); input.select();
-                        Swal.showValidationMessage(`El Sobre #${data.numero_sobre} ya pertenece a: ${existingSobre.nombre} ${existingSobre.apellido1} (ID: ${existingSobre.cedula})`);
+                        Swal.showValidationMessage(`ERROR: El Sobre #${data.numero_sobre} ya fue vendido a: ${existingSobre.nombre} ${existingSobre.apellido1} (ID: ${existingSobre.cedula})`);
                         return false;
                     }
 
-                    // Validar duplicado de Identificación (Cédula)
+                    // 2. Validar que la Identificación no tenga YA un sobre asignado
                     const { data: existingCedula, error: cedulaError } = await supabaseClient
                         .from('admisiones_sobres')
                         .select('nombre, apellido1, numero_sobre')
@@ -2236,9 +2255,19 @@
                         .maybeSingle();
 
                     if (existingCedula) {
-                        const input = document.getElementById('swal-cedula');
-                        input.focus(); input.select();
-                        Swal.showValidationMessage(`La Identificación ${data.cedula} ya tiene asignado el Sobre #${existingCedula.numero_sobre} (${existingCedula.nombre} ${existingCedula.apellido1})`);
+                        Swal.showValidationMessage(`ERROR: Esta identificación (${data.cedula}) ya tiene asignado el Sobre #${existingCedula.numero_sobre}. No se permite asignar múltiples sobres a una misma persona.`);
+                        return false;
+                    }
+
+                    // 3. Opcional: Validar si ya existe un aspirante con esa cédula para evitar ventas a personas ya registradas (opcional según flujo, lo activamos por seguridad)
+                    const { data: existingAspirante } = await supabaseClient
+                        .from('admisiones_aspirantes')
+                        .select('nombre, apellido')
+                        .eq('identificacion', data.cedula)
+                        .maybeSingle();
+
+                    if (existingAspirante && !isEdit) {
+                        Swal.showValidationMessage(`ADVERTENCIA: El estudiante ${existingAspirante.nombre} ${existingAspirante.apellido} ya está registrado en el sistema. Verifique los datos.`);
                         return false;
                     }
 

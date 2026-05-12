@@ -108,6 +108,25 @@
                                 <label for="centro_procedencia" class="block text-sm font-semibold text-gray-700 mb-1">Centro Educativo de Procedencia <span class="text-voca-red">*</span></label>
                                 <input type="text" id="centro_procedencia" required placeholder="Ej. Colegio Técnico Profesional..." class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-voca-blue outline-none transition">
                             </div>
+
+                            <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
+                                <label class="block text-sm font-bold text-voca-blue mb-3">¿Usted tiene Apoyos Educativos? (Adecuaciones Curriculares) <span class="text-voca-red">*</span></label>
+                                <div class="flex gap-6 mb-4">
+                                    <label class="flex items-center gap-2 cursor-pointer group">
+                                        <input type="radio" name="tiene_adecuacion" value="si" class="w-4 h-4 text-voca-blue focus:ring-voca-blue" onchange="toggleAdecuacion(true)">
+                                        <span class="text-sm font-medium text-gray-700 group-hover:text-voca-blue transition">Sí, tengo apoyos</span>
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer group">
+                                        <input type="radio" name="tiene_adecuacion" value="no" class="w-4 h-4 text-voca-blue focus:ring-voca-blue" onchange="toggleAdecuacion(false)" checked>
+                                        <span class="text-sm font-medium text-gray-700 group-hover:text-voca-blue transition">No, no tengo</span>
+                                    </label>
+                                </div>
+
+                                <div id="detalle_adecuacion_container" class="hidden animate__animated animate__fadeIn">
+                                    <label for="detalle_adecuacion" class="block text-xs font-bold text-gray-600 uppercase mb-1">Describa el tipo de adecuación y explique brevemente:</label>
+                                    <textarea id="detalle_adecuacion" placeholder="Ej: Adecuación No Significativa en las materias de..." class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-voca-blue outline-none transition h-24 resize-none"></textarea>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -145,6 +164,7 @@
     </main>
 
     <script src="src/js/supabase-client.js"></script>
+    <script src="src/js/alpha-warning.js"></script>
     <script>
         let faceDetectionLoaded = false;
         let finalImageBlob = null;
@@ -187,6 +207,15 @@
                     if (data.encargado_correo) document.getElementById('encargado_correo').value = data.encargado_correo;
                     if (data.centro_procedencia) document.getElementById('centro_procedencia').value = data.centro_procedencia;
                     
+                    if (data.tiene_adecuacion) {
+                        const radioSi = document.querySelector('input[name="tiene_adecuacion"][value="si"]');
+                        if (radioSi) {
+                            radioSi.checked = true;
+                            toggleAdecuacion(true);
+                            document.getElementById('detalle_adecuacion').value = data.detalle_adecuacion || '';
+                        }
+                    }
+
                     if (data.foto_url) {
                         existingFotoUrl = data.foto_url;
                         const preview = document.getElementById('fotoPreview');
@@ -208,6 +237,19 @@
                 console.error("No se pudo pre-llenar los datos:", e);
             }
         });
+
+        function toggleAdecuacion(show) {
+            const container = document.getElementById('detalle_adecuacion_container');
+            const textarea = document.getElementById('detalle_adecuacion');
+            if (show) {
+                container.classList.remove('hidden');
+                textarea.required = true;
+            } else {
+                container.classList.add('hidden');
+                textarea.required = false;
+                textarea.value = '';
+            }
+        }
 
         async function previewAndProcessImage(event) {
             const file = event.target.files[0];
@@ -381,6 +423,8 @@
                 const encargadoTel = document.getElementById('encargado_telefono').value.trim();
                 const encargadoCorreo = document.getElementById('encargado_correo').value.trim();
                 const centroProcedencia = document.getElementById('centro_procedencia').value.trim();
+                const tieneAdecuacion = document.querySelector('input[name="tiene_adecuacion"]:checked').value === 'si';
+                const detalleAdecuacion = tieneAdecuacion ? document.getElementById('detalle_adecuacion').value.trim() : null;
 
                 const studentId = localStorage.getItem('studentId');
                 const { error: dbError } = await supabaseClient
@@ -391,6 +435,8 @@
                         encargado_telefono: encargadoTel,
                         encargado_correo: encargadoCorreo,
                         centro_procedencia: centroProcedencia,
+                        tiene_adecuacion: tieneAdecuacion,
+                        detalle_adecuacion: detalleAdecuacion,
                         registro_completado: true
                     })
                     .eq('identificacion', studentId);

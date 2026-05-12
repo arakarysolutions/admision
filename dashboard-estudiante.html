@@ -1,38 +1,75 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal de Estudiante - Vocacional Monseñor Sanabria</title>
     <link rel="icon" type="image/png" href="src/logo/VOCA%20Admisiones.png">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1.21.3/index.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .font-outfit { font-family: 'Outfit', sans-serif; }
-        .bg-voca-blue { background-color: #003366; }
-        .text-voca-blue { color: #003366; }
-        .bg-voca-red { background-color: #cc0000; }
-        .bg-voca-gold { background-color: #ffcc00; }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .font-outfit {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .bg-voca-blue {
+            background-color: #003366;
+        }
+
+        .text-voca-blue {
+            color: #003366;
+        }
+
+        .bg-voca-red {
+            background-color: #cc0000;
+        }
+
+        .bg-voca-gold {
+            background-color: #ffcc00;
+        }
 
         @media (max-width: 480px) {
-            .p-8 { padding: 1rem !important; }
-            .p-6 { padding: 1rem !important; }
-            .mb-8 { margin-bottom: 1rem !important; }
-            .text-3xl { font-size: 1.5rem !important; }
-            .h-20 { height: 4rem !important; }
+            .p-8 {
+                padding: 1rem !important;
+            }
+
+            .p-6 {
+                padding: 1rem !important;
+            }
+
+            .mb-8 {
+                margin-bottom: 1rem !important;
+            }
+
+            .text-3xl {
+                font-size: 1.5rem !important;
+            }
+
+            .h-20 {
+                height: 4rem !important;
+            }
         }
 
         @media (max-height: 700px) {
-            .space-y-8 > :not([hidden]) ~ :not([hidden]) { margin-top: 1rem !important; }
+            .space-y-8> :not([hidden])~ :not([hidden]) {
+                margin-top: 1rem !important;
+            }
         }
     </style>
 </head>
+
 <body class="bg-gray-50 flex h-screen overflow-hidden">
 
     <!-- Sidebar -->
@@ -41,73 +78,91 @@
             <img src="src/logo/VOCA%20Admisiones.png" alt="Logo" class="h-10 w-10 bg-white rounded-full p-1 mr-3">
             <span class="font-outfit font-bold text-lg tracking-wide">Portal SVS</span>
         </div>
-        
+
         <nav class="flex-1 py-6 px-4 space-y-2">
-            <a href="#" id="tab-progreso" onclick="switchTab('progreso')" class="flex items-center gap-3 px-4 py-3 bg-blue-800 rounded-lg text-white font-medium transition">
+            <a href="#" id="tab-progreso" onclick="switchTab('progreso')"
+                class="flex items-center gap-3 px-4 py-3 bg-blue-800 rounded-lg text-white font-medium transition">
                 <i class="fa-solid fa-chart-pie w-5 text-center"></i> Mi Progreso
             </a>
-            <a href="#" id="tab-datos" onclick="switchTab('datos')" class="flex items-center gap-3 px-4 py-3 hover:bg-blue-800 rounded-lg text-blue-200 hover:text-white font-medium transition">
+            <a href="#" id="tab-datos" onclick="switchTab('datos')"
+                class="flex items-center gap-3 px-4 py-3 hover:bg-blue-800 rounded-lg text-blue-200 hover:text-white font-medium transition">
                 <i class="fa-regular fa-id-card w-5 text-center"></i> Mis Datos
             </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-3 hover:bg-blue-800 rounded-lg text-blue-200 hover:text-white font-medium transition">
+            <a href="#"
+                class="flex items-center gap-3 px-4 py-3 hover:bg-blue-800 rounded-lg text-blue-200 hover:text-white font-medium transition">
                 <i class="fa-solid fa-file-arrow-up w-5 text-center"></i> Documentos
             </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-3 hover:bg-blue-800 rounded-lg text-blue-200 hover:text-white font-medium transition">
+            <a href="#"
+                class="flex items-center gap-3 px-4 py-3 hover:bg-blue-800 rounded-lg text-blue-200 hover:text-white font-medium transition">
                 <i class="fa-regular fa-calendar-check w-5 text-center"></i> Examen de Admisión
             </a>
-            <a href="#" onclick="toggleChatPanel()" class="flex items-center justify-between px-4 py-3 hover:bg-blue-800 rounded-lg text-blue-200 hover:text-white font-medium transition mt-4 border-t border-blue-800/50 pt-4">
+            <a href="#" onclick="toggleChatPanel()"
+                class="flex items-center justify-between px-4 py-3 hover:bg-blue-800 rounded-lg text-blue-200 hover:text-white font-medium transition mt-4 border-t border-blue-800/50 pt-4">
                 <div class="flex items-center gap-3">
                     <i class="fa-solid fa-comments w-5 text-center"></i> Mensajes
                 </div>
-                <span id="sidebar-msg-badge" class="bg-voca-red text-white text-xs font-bold px-2 py-0.5 rounded-full hidden shadow-lg animate-pulse">0</span>
+                <span id="sidebar-msg-badge"
+                    class="bg-voca-red text-white text-xs font-bold px-2 py-0.5 rounded-full hidden shadow-lg animate-pulse">0</span>
             </a>
         </nav>
 
         <div class="p-4 border-t border-blue-800">
-            <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-blue-800 rounded-lg font-medium transition">
+            <button onclick="logout()"
+                class="w-full flex items-center gap-3 px-4 py-3 text-white hover:bg-blue-800 rounded-lg font-medium transition">
                 <i class="fa-solid fa-arrow-right-from-bracket w-5 text-center"></i> Cerrar Sesión
             </button>
         </div>
     </aside>
 
     <!-- Mobile Sidebar Drawer -->
-    <div id="mobile-sidebar-overlay" class="fixed inset-0 bg-black/50 z-[60] hidden transition-opacity duration-300 opacity-0" onclick="toggleMobileMenu()"></div>
-    <aside id="mobile-sidebar" class="fixed inset-y-0 left-0 w-72 bg-voca-blue text-white z-[70] transform -translate-x-full transition-transform duration-300 md:hidden flex flex-col shadow-2xl">
+    <div id="mobile-sidebar-overlay"
+        class="fixed inset-0 bg-black/50 z-[60] hidden transition-opacity duration-300 opacity-0"
+        onclick="toggleMobileMenu()"></div>
+    <aside id="mobile-sidebar"
+        class="fixed inset-y-0 left-0 w-72 bg-voca-blue text-white z-[70] transform -translate-x-full transition-transform duration-300 md:hidden flex flex-col shadow-2xl">
         <div class="h-20 flex items-center justify-between px-6 border-b border-blue-800">
             <div class="flex items-center">
                 <img src="src/logo/VOCA%20Admisiones.png" alt="Logo" class="h-10 w-10 bg-white rounded-full p-1 mr-3">
                 <span class="font-outfit font-bold text-lg tracking-wide">Portal SVS</span>
             </div>
-            <button onclick="toggleMobileMenu()" class="text-white text-2xl hover:text-blue-200 transition" title="Cerrar menú" aria-label="Cerrar menú">
+            <button onclick="toggleMobileMenu()" class="text-white text-2xl hover:text-blue-200 transition"
+                title="Cerrar menú" aria-label="Cerrar menú">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
-        
+
         <nav class="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
-            <a href="#" onclick="switchTab('progreso'); toggleMobileMenu();" class="flex items-center gap-3 px-4 py-4 bg-blue-800 rounded-xl text-white font-medium transition active:scale-95">
+            <a href="#" onclick="switchTab('progreso'); toggleMobileMenu();"
+                class="flex items-center gap-3 px-4 py-4 bg-blue-800 rounded-xl text-white font-medium transition active:scale-95">
                 <i class="fa-solid fa-chart-pie w-5 text-center"></i> Mi Progreso
             </a>
-            <a href="#" onclick="switchTab('datos'); toggleMobileMenu();" class="flex items-center gap-3 px-4 py-4 hover:bg-blue-800/50 rounded-xl text-blue-100 font-medium transition active:scale-95">
+            <a href="#" onclick="switchTab('datos'); toggleMobileMenu();"
+                class="flex items-center gap-3 px-4 py-4 hover:bg-blue-800/50 rounded-xl text-blue-100 font-medium transition active:scale-95">
                 <i class="fa-regular fa-id-card w-5 text-center"></i> Mis Datos
             </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-4 hover:bg-blue-800/50 rounded-xl text-blue-100 font-medium transition active:scale-95">
+            <a href="#"
+                class="flex items-center gap-3 px-4 py-4 hover:bg-blue-800/50 rounded-xl text-blue-100 font-medium transition active:scale-95">
                 <i class="fa-solid fa-file-arrow-up w-5 text-center"></i> Documentos
             </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-4 hover:bg-blue-800/50 rounded-xl text-blue-100 font-medium transition active:scale-95">
+            <a href="#"
+                class="flex items-center gap-3 px-4 py-4 hover:bg-blue-800/50 rounded-xl text-blue-100 font-medium transition active:scale-95">
                 <i class="fa-regular fa-calendar-check w-5 text-center"></i> Examen de Admisión
             </a>
             <div class="pt-4 mt-4 border-t border-blue-800/50">
-                <a href="#" onclick="toggleChatPanel(); toggleMobileMenu();" class="flex items-center justify-between px-4 py-4 hover:bg-blue-800/50 rounded-xl text-blue-100 font-medium transition active:scale-95">
+                <a href="#" onclick="toggleChatPanel(); toggleMobileMenu();"
+                    class="flex items-center justify-between px-4 py-4 hover:bg-blue-800/50 rounded-xl text-blue-100 font-medium transition active:scale-95">
                     <div class="flex items-center gap-3">
                         <i class="fa-solid fa-comments w-5 text-center"></i> Mensajes
                     </div>
-                    <span id="mobile-sidebar-msg-badge" class="bg-voca-red text-white text-xs font-bold px-2 py-0.5 rounded-full hidden">0</span>
+                    <span id="mobile-sidebar-msg-badge"
+                        class="bg-voca-red text-white text-xs font-bold px-2 py-0.5 rounded-full hidden">0</span>
                 </a>
             </div>
         </nav>
 
         <div class="p-6 border-t border-blue-800">
-            <button onclick="logout()" class="w-full flex items-center justify-center gap-3 px-4 py-3 bg-red-600 text-white hover:bg-red-700 rounded-xl font-bold transition">
+            <button onclick="logout()"
+                class="w-full flex items-center justify-center gap-3 px-4 py-3 bg-red-600 text-white hover:bg-red-700 rounded-xl font-bold transition">
                 <i class="fa-solid fa-arrow-right-from-bracket"></i> Cerrar Sesión
             </button>
         </div>
@@ -119,34 +174,42 @@
         <!-- Topbar -->
         <header class="h-20 bg-white shadow-sm flex items-center justify-between px-4 md:px-8 z-10">
             <div class="flex items-center md:hidden">
-                <button onclick="toggleMobileMenu()" class="text-gray-600 hover:text-voca-blue text-2xl transition active:scale-90" title="Menú">
+                <button onclick="toggleMobileMenu()"
+                    class="text-gray-600 hover:text-voca-blue text-2xl transition active:scale-90" title="Menú">
                     <i class="fa-solid fa-bars-staggered"></i>
                 </button>
             </div>
-            
+
             <h1 class="text-xl font-semibold text-gray-800 hidden md:block">Proceso de Admisión 2026</h1>
-            
+
             <div class="flex items-center gap-4">
                 <div class="relative">
-                    <button class="text-gray-400 hover:text-voca-blue transition relative" onclick="toggleNotificationsMenu()" title="Notificaciones">
+                    <button class="text-gray-400 hover:text-voca-blue transition relative"
+                        onclick="toggleNotificationsMenu()" title="Notificaciones">
                         <i class="fa-regular fa-bell text-xl"></i>
-                        <span id="bell-badge" class="absolute top-0 right-0 w-2.5 h-2.5 bg-voca-red rounded-full hidden ring-2 ring-white"></span>
+                        <span id="bell-badge"
+                            class="absolute top-0 right-0 w-2.5 h-2.5 bg-voca-red rounded-full hidden ring-2 ring-white"></span>
                     </button>
                     <!-- Menú de Notificaciones -->
-                    <div id="notifications-dropdown" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden">
+                    <div id="notifications-dropdown"
+                        class="hidden absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden">
                         <div class="p-3 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                             <span class="font-bold text-gray-700 font-outfit text-sm">Notificaciones</span>
-                            <button onclick="markAllNotificationsAsRead()" class="text-xs text-voca-blue hover:underline">Marcar todo como leído</button>
+                            <button onclick="markAllNotificationsAsRead()"
+                                class="text-xs text-voca-blue hover:underline">Marcar todo como leído</button>
                         </div>
                         <div id="notifications-list" class="max-h-80 overflow-y-auto bg-white">
                             <!-- Lista generada dinámicamente -->
                         </div>
                         <div class="p-2 border-t border-gray-100 bg-gray-50 text-center">
-                            <button onclick="scrollToAvisos(); toggleNotificationsMenu();" class="text-xs text-gray-500 font-medium hover:text-voca-blue">Ver todos en el Muro</button>
+                            <button onclick="scrollToAvisos(); toggleNotificationsMenu();"
+                                class="text-xs text-gray-500 font-medium hover:text-voca-blue">Ver todos en el
+                                Muro</button>
                         </div>
                     </div>
                 </div>
-                <div id="header-avatar-container" class="h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-bold font-outfit border-2 border-voca-blue overflow-hidden">
+                <div id="header-avatar-container"
+                    class="h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-bold font-outfit border-2 border-voca-blue overflow-hidden">
                     <span id="header-initials">--</span>
                     <img id="header-photo" src="" class="w-full h-full object-cover hidden" alt="Foto de perfil">
                 </div>
@@ -159,17 +222,19 @@
 
         <!-- Dashboard Content -->
         <div class="p-4 md:p-8 max-w-7xl mx-auto w-full">
-            
+
             <div id="view-progreso">
                 <div class="mb-8">
-                    <h2 id="greeting" class="text-2xl md:text-3xl font-bold font-outfit text-voca-blue mb-2">¡Hola, Estudiante!</h2>
+                    <h2 id="greeting" class="text-2xl md:text-3xl font-bold font-outfit text-voca-blue mb-2">¡Hola,
+                        Estudiante!</h2>
                     <p class="text-gray-600">Este es tu panel de control. Aquí podrás dar seguimiento a tu admisión.</p>
                 </div>
                 <!-- Stats/Progress -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <!-- Step 1 -->
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-start gap-4">
-                        <div class="h-12 w-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xl shrink-0">
+                        <div
+                            class="h-12 w-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xl shrink-0">
                             <i class="fa-solid fa-check"></i>
                         </div>
                         <div>
@@ -179,24 +244,30 @@
                     </div>
 
                     <!-- Step 2 -->
-                    <div id="step2-container" class="bg-white p-6 rounded-xl shadow-sm border border-voca-blue flex items-start gap-4 ring-2 ring-blue-50 transition-all duration-300">
-                        <div id="step2-icon" class="h-12 w-12 rounded-full bg-blue-100 text-voca-blue flex items-center justify-center text-xl shrink-0 transition-colors">
+                    <div id="step2-container"
+                        class="bg-white p-6 rounded-xl shadow-sm border border-voca-blue flex items-start gap-4 ring-2 ring-blue-50 transition-all duration-300">
+                        <div id="step2-icon"
+                            class="h-12 w-12 rounded-full bg-blue-100 text-voca-blue flex items-center justify-center text-xl shrink-0 transition-colors">
                             <i class="fa-solid fa-spinner animate-spin-slow"></i>
                         </div>
                         <div>
                             <h3 class="font-bold text-gray-800 mb-1">Paso 2: Examen</h3>
-                            <p id="step2-text" class="text-sm text-gray-500 transition-colors">Pendiente. Pronto se te asignará una fecha para el examen.</p>
+                            <p id="step2-text" class="text-sm text-gray-500 transition-colors">Pendiente. Pronto se te
+                                asignará una fecha para el examen.</p>
                         </div>
                     </div>
 
                     <!-- Step 3 -->
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-start gap-4 opacity-60">
-                        <div class="h-12 w-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xl shrink-0">
+                    <div
+                        class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-start gap-4 opacity-60">
+                        <div
+                            class="h-12 w-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xl shrink-0">
                             <i class="fa-solid fa-lock"></i>
                         </div>
                         <div>
                             <h3 class="font-bold text-gray-800 mb-1">Paso 3: Matrícula</h3>
-                            <p class="text-sm text-gray-500">Bloqueado. Se habilitará tras aprobar el examen de admisión.</p>
+                            <p class="text-sm text-gray-500">Bloqueado. Se habilitará tras aprobar el examen de
+                                admisión.</p>
                         </div>
                     </div>
                 </div>
@@ -204,17 +275,22 @@
                 <!-- Progreso Alerts and Info -->
                 <div class="space-y-8 max-w-4xl mx-auto">
                     <!-- Warning/Alert -->
-                    <div id="photo-warning" class="bg-yellow-50 border-l-4 border-voca-gold p-5 rounded-r-lg gap-4 items-start flex">
+                    <div id="photo-warning"
+                        class="bg-yellow-50 border-l-4 border-voca-gold p-5 rounded-r-lg gap-4 items-start flex">
                         <i class="fa-solid fa-triangle-exclamation text-yellow-600 text-xl mt-0.5"></i>
                         <div>
                             <h4 class="font-semibold text-yellow-800">Acción Requerida: Subir Fotografía</h4>
-                            <p class="text-yellow-700 text-sm mt-1">Aún no has subido tu fotografía tamaño pasaporte, requerida para tu carné de examen. Tienes hasta el 15 de Mayo.</p>
-                            <button class="mt-3 text-sm font-semibold text-voca-blue hover:underline" onclick="window.location.href='completar-registro.html'">Subir documento ahora &rarr;</button>
+                            <p class="text-yellow-700 text-sm mt-1">Aún no has subido tu fotografía tamaño pasaporte,
+                                requerida para tu carné de examen. Tienes hasta el 15 de Mayo.</p>
+                            <button class="mt-3 text-sm font-semibold text-voca-blue hover:underline"
+                                onclick="window.location.href='completar-registro.html'">Subir documento ahora
+                                &rarr;</button>
                         </div>
                     </div>
 
                     <!-- Tarjeta Detalle de Examen -->
-                    <div id="exam-card-container" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hidden">
+                    <div id="exam-card-container"
+                        class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hidden">
                         <div class="bg-blue-600 px-6 py-3">
                             <h3 class="text-white font-bold flex items-center gap-2">
                                 <i class="fa-solid fa-calendar-check"></i> Detalle de tu Examen
@@ -228,8 +304,11 @@
                     <!-- Muro de Avisos -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                         <div class="border-b border-gray-100 px-6 py-4 flex justify-between items-center bg-gray-50">
-                            <h3 class="font-bold text-gray-800"><i class="fa-solid fa-bullhorn mr-2 text-voca-blue"></i> Muro de Avisos</h3>
-                            <button onclick="loadAvisos()" class="text-voca-blue hover:text-blue-800 text-sm font-semibold transition" title="Refrescar">
+                            <h3 class="font-bold text-gray-800"><i class="fa-solid fa-bullhorn mr-2 text-voca-blue"></i>
+                                Muro de Avisos</h3>
+                            <button onclick="loadAvisos()"
+                                class="text-voca-blue hover:text-blue-800 text-sm font-semibold transition"
+                                title="Refrescar">
                                 <i class="fa-solid fa-arrows-rotate mr-1"></i> Actualizar
                             </button>
                         </div>
@@ -251,69 +330,108 @@
                     <!-- Resumen de Perfil -->
                     <div class="bg-white p-4 md:p-8 rounded-xl shadow-sm border border-gray-100">
                         <div class="flex flex-col items-center mb-8">
-                            <div class="w-32 h-40 bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200 mb-4 relative shadow-sm group">
-                                <img id="profile-photo" src="" class="w-full h-full object-cover hidden cursor-pointer transition-transform duration-300 group-hover:scale-110" alt="Foto Pasaporte" onclick="viewFullPhoto()" title="Ver foto completa">
-                                <div id="profile-photo-placeholder" class="absolute inset-0 flex items-center justify-center text-gray-300 text-5xl">
+                            <div
+                                class="w-32 h-40 bg-gray-100 rounded-lg overflow-hidden border-2 border-gray-200 mb-4 relative shadow-sm group">
+                                <img id="profile-photo" src=""
+                                    class="w-full h-full object-cover hidden cursor-pointer transition-transform duration-300 group-hover:scale-110"
+                                    alt="Foto Pasaporte" onclick="viewFullPhoto()" title="Ver foto completa">
+                                <div id="profile-photo-placeholder"
+                                    class="absolute inset-0 flex items-center justify-center text-gray-300 text-5xl">
                                     <i class="fa-solid fa-user"></i>
                                 </div>
                             </div>
-                            <h3 class="text-xl font-bold font-outfit text-gray-800 text-center">Información de Aspirante</h3>
+                            <h3 class="text-xl font-bold font-outfit text-gray-800 text-center">Información de Aspirante
+                            </h3>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 w-full mt-4">
                             <div>
-                                <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Nombre Completo</span>
-                                <span class="font-semibold text-gray-800 text-lg" id="profile-name">Estudiante Prueba</span>
+                                <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Nombre
+                                    Completo</span>
+                                <span class="font-semibold text-gray-800 text-lg" id="profile-name">Estudiante
+                                    Prueba</span>
                             </div>
                             <div>
-                                <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Identificación</span>
+                                <span
+                                    class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Identificación</span>
                                 <span class="font-semibold text-gray-800 text-lg" id="profile-id">1-2345-6789</span>
                             </div>
                             <div>
-                                <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Fecha de Nacimiento</span>
-                                <span class="font-semibold text-gray-800 text-lg" id="profile-birth">No registrada</span>
+                                <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Fecha de
+                                    Nacimiento</span>
+                                <span class="font-semibold text-gray-800 text-lg" id="profile-birth">No
+                                    registrada</span>
                             </div>
                             <div>
                                 <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Edad</span>
                                 <span class="font-semibold text-gray-800 text-lg" id="profile-age">-- años</span>
                             </div>
                             <div>
-                                <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Número de Sobre</span>
+                                <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Número de
+                                    Sobre</span>
                                 <span class="font-semibold text-voca-blue text-lg" id="profile-sobre">---</span>
                             </div>
                             <div class="md:col-span-2">
-                                <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Centro de Procedencia</span>
-                                <span class="font-semibold text-gray-800 text-lg" id="profile-school">No registrado</span>
+                                <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Centro de
+                                    Procedencia</span>
+                                <span class="font-semibold text-gray-800 text-lg" id="profile-school">No
+                                    registrado</span>
                             </div>
                             <div class="md:col-span-2">
-                                <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Estado del Trámite</span>
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-voca-blue" id="profile-status">Pendiente</span>
+                                <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Estado del
+                                    Trámite</span>
+                                <span
+                                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-voca-blue"
+                                    id="profile-status">Pendiente</span>
+                            </div>
+
+                            <!-- Apoyo Educativo -->
+                            <div id="profile-adecuacion-block"
+                                class="md:col-span-2 bg-yellow-50 p-4 rounded-lg border border-yellow-100 hidden">
+                                <h5 class="text-yellow-700 font-bold text-xs uppercase mb-2 flex items-center gap-2"><i
+                                        class="fa-solid fa-hand-holding-hand"></i> Apoyo Educativo (Adecuación)</h5>
+                                <p class="text-sm text-gray-700 leading-relaxed italic" id="profile-adecuacion-detalle">
+                                    ---</p>
                             </div>
 
                             <!-- Bloque de Cita (Solo si existe) -->
-                            <div id="profile-cita-block" class="md:col-span-2 bg-blue-50/50 p-4 rounded-lg border border-blue-100 hidden">
-                                <h5 class="text-voca-blue font-bold text-xs uppercase mb-3 flex items-center gap-2"><i class="fa-solid fa-calendar-day"></i> Datos de tu Cita para Examen</h5>
+                            <div id="profile-cita-block"
+                                class="md:col-span-2 bg-blue-50/50 p-4 rounded-lg border border-blue-100 hidden">
+                                <h5 class="text-voca-blue font-bold text-xs uppercase mb-3 flex items-center gap-2"><i
+                                        class="fa-solid fa-calendar-day"></i> Datos de tu Cita para Examen</h5>
                                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                    <div><span class="block text-[10px] text-gray-500 uppercase">Fecha</span><span class="font-bold text-gray-800" id="profile-cita-fecha">---</span></div>
-                                    <div><span class="block text-[10px] text-gray-500 uppercase">Hora</span><span class="font-bold text-gray-800" id="profile-cita-hora">---</span></div>
-                                    <div><span class="block text-[10px] text-gray-500 uppercase">Aula</span><span class="font-bold text-gray-800" id="profile-cita-aula">---</span></div>
+                                    <div><span class="block text-[10px] text-gray-500 uppercase">Fecha</span><span
+                                            class="font-bold text-gray-800" id="profile-cita-fecha">---</span></div>
+                                    <div><span class="block text-[10px] text-gray-500 uppercase">Hora</span><span
+                                            class="font-bold text-gray-800" id="profile-cita-hora">---</span></div>
+                                    <div><span class="block text-[10px] text-gray-500 uppercase">Aula</span><span
+                                            class="font-bold text-gray-800" id="profile-cita-aula">---</span></div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="mt-8 pt-6 border-t border-gray-100 w-full">
-                            <h4 class="text-voca-blue font-bold mb-6 uppercase tracking-wide text-sm flex items-center gap-2"><i class="fa-solid fa-user-shield"></i> Datos del Encargado Legal</h4>
+                            <h4
+                                class="text-voca-blue font-bold mb-6 uppercase tracking-wide text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-user-shield"></i> Datos del Encargado Legal
+                            </h4>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                                 <div class="md:col-span-2">
-                                    <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Nombre</span>
-                                    <span class="font-semibold text-gray-800 text-lg" id="profile-encargado-name">No registrado</span>
+                                    <span
+                                        class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Nombre</span>
+                                    <span class="font-semibold text-gray-800 text-lg" id="profile-encargado-name">No
+                                        registrado</span>
                                 </div>
                                 <div>
-                                    <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Teléfono</span>
-                                    <span class="font-semibold text-gray-800 text-lg" id="profile-encargado-phone">No registrado</span>
+                                    <span
+                                        class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Teléfono</span>
+                                    <span class="font-semibold text-gray-800 text-lg" id="profile-encargado-phone">No
+                                        registrado</span>
                                 </div>
                                 <div>
-                                    <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Correo Electrónico</span>
-                                    <span class="font-semibold text-gray-800 text-lg break-all" id="profile-encargado-email">No registrado</span>
+                                    <span class="block text-gray-400 text-xs uppercase tracking-wider mb-1">Correo
+                                        Electrónico</span>
+                                    <span class="font-semibold text-gray-800 text-lg break-all"
+                                        id="profile-encargado-email">No registrado</span>
                                 </div>
                             </div>
                         </div>
@@ -326,25 +444,32 @@
     </main>
 
     <!-- Chat Offcanvas -->
-    <div id="chat-offcanvas" class="fixed inset-y-0 right-0 w-full md:w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50 flex flex-col">
+    <div id="chat-offcanvas"
+        class="fixed inset-y-0 right-0 w-full md:w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50 flex flex-col">
         <div class="bg-voca-blue text-white p-4 flex justify-between items-center shadow-md z-10">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center"><i class="fa-solid fa-headset text-xl"></i></div>
+                <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center"><i
+                        class="fa-solid fa-headset text-xl"></i></div>
                 <div>
                     <h3 class="font-bold leading-tight">Bandeja de Mensajes</h3>
                     <p class="text-[10px] text-blue-200 uppercase tracking-wider font-semibold">Administración VOCA</p>
                 </div>
             </div>
-            <button onclick="toggleChatPanel()" class="text-white hover:text-gray-200 transition text-2xl p-1" title="Cerrar chat"><i class="fa-solid fa-xmark"></i></button>
+            <button onclick="toggleChatPanel()" class="text-white hover:text-gray-200 transition text-2xl p-1"
+                title="Cerrar chat"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        
+
         <div id="student-chat-messages" class="flex-1 overflow-y-auto p-4 bg-[#f8f9fa] flex flex-col gap-1 relative">
-            <div class="absolute inset-0 opacity-5 pointer-events-none bg-[radial-gradient(#003366_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+            <div
+                class="absolute inset-0 opacity-5 pointer-events-none bg-[radial-gradient(#003366_1px,transparent_1px)] bg-[size:20px_20px]">
+            </div>
             <!-- Mensajes se inyectan aquí -->
         </div>
-        
-        <div class="bg-white border-t border-gray-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] relative z-10 flex flex-col">
-            <div id="student-quill-toolbar" class="border-b border-gray-200 bg-gray-50 p-1 flex items-center justify-between">
+
+        <div
+            class="bg-white border-t border-gray-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] relative z-10 flex flex-col">
+            <div id="student-quill-toolbar"
+                class="border-b border-gray-200 bg-gray-50 p-1 flex items-center justify-between">
                 <span class="ql-formats m-0">
                     <select class="ql-color" aria-label="Color de texto" title="Color de texto"></select>
                     <select class="ql-size" aria-label="Tamaño de texto" title="Tamaño de texto"></select>
@@ -352,38 +477,50 @@
                     <button class="ql-italic" aria-label="Cursiva" title="Cursiva"></button>
                 </span>
                 <div class="flex items-center">
-                    <button type="button" class="p-1 hover:text-voca-blue text-gray-500 transition relative" onclick="toggleEmojiPickerStudent()" title="Emojis">
+                    <button type="button" class="p-1 hover:text-voca-blue text-gray-500 transition relative"
+                        onclick="toggleEmojiPickerStudent()" title="Emojis">
                         <i class="fa-regular fa-face-smile"></i>
                         <div id="emoji-picker-container-student" class="absolute bottom-full right-0 z-50 hidden">
                             <emoji-picker class="shadow-2xl"></emoji-picker>
                         </div>
                     </button>
-                    <input type="file" id="student-chat-attachment" class="hidden" onchange="updateAttachmentLabelStudent()" title="Adjuntar archivo" aria-label="Adjuntar archivo">
-                    <button type="button" class="p-1 hover:text-voca-blue text-gray-500 transition" title="Adjuntar archivo" onclick="document.getElementById('student-chat-attachment').click()">
+                    <input type="file" id="student-chat-attachment" class="hidden"
+                        onchange="updateAttachmentLabelStudent()" title="Adjuntar archivo"
+                        aria-label="Adjuntar archivo">
+                    <button type="button" class="p-1 hover:text-voca-blue text-gray-500 transition"
+                        title="Adjuntar archivo" onclick="document.getElementById('student-chat-attachment').click()">
                         <i class="fa-solid fa-paperclip"></i>
                     </button>
                 </div>
             </div>
             <div class="relative">
                 <div id="student-chat-input" class="h-16 text-sm text-left border-none"></div>
-                <button id="send-student-btn" onclick="sendStudentMessage()" class="absolute right-2 top-2 bottom-2 bg-voca-blue hover:bg-blue-800 text-white rounded p-2 transition shadow" title="Enviar mensaje">
+                <button id="send-student-btn" onclick="sendStudentMessage()"
+                    class="absolute right-2 top-2 bottom-2 bg-voca-blue hover:bg-blue-800 text-white rounded p-2 transition shadow"
+                    title="Enviar mensaje">
                     <i class="fa-solid fa-paper-plane text-xs"></i>
                 </button>
             </div>
-            <div id="attachment-preview-student" class="hidden px-2 py-1 bg-blue-50 text-xs text-voca-blue flex items-center justify-between border-t border-blue-100">
+            <div id="attachment-preview-student"
+                class="hidden px-2 py-1 bg-blue-50 text-xs text-voca-blue flex items-center justify-between border-t border-blue-100">
                 <span id="attachment-name-student" class="truncate"></span>
-                <button class="text-red-500 hover:text-red-700" onclick="clearAttachmentStudent()" title="Quitar adjunto"><i class="fa-solid fa-xmark"></i></button>
+                <button class="text-red-500 hover:text-red-700" onclick="clearAttachmentStudent()"
+                    title="Quitar adjunto"><i class="fa-solid fa-xmark"></i></button>
             </div>
         </div>
     </div>
-    
+
     <!-- Backdrop para el chat -->
-    <div id="chat-backdrop" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden z-40 transition-opacity" onclick="toggleChatPanel()"></div>
+    <div id="chat-backdrop" class="fixed inset-0 bg-black/40 backdrop-blur-sm hidden z-40 transition-opacity"
+        onclick="toggleChatPanel()"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="src/js/supabase-client.js"></script>
+    <script src="src/js/alpha-warning.js"></script>
     <!-- Botón flotante para volver arriba -->
-    <button id="back-to-top" onclick="scrollToTop()" class="fixed bottom-6 right-6 bg-voca-blue text-white w-12 h-12 rounded-full shadow-xl flex items-center justify-center text-xl transition-all duration-300 transform translate-y-20 opacity-0 z-50 hover:bg-blue-800 hover:scale-110" title="Volver arriba">
+    <button id="back-to-top" onclick="scrollToTop()"
+        class="fixed bottom-6 right-6 bg-voca-blue text-white w-12 h-12 rounded-full shadow-xl flex items-center justify-center text-xl transition-all duration-300 transform translate-y-20 opacity-0 z-50 hover:bg-blue-800 hover:scale-110"
+        title="Volver arriba">
         <i class="fa-solid fa-arrow-up"></i>
     </button>
 
@@ -407,7 +544,7 @@
                     .select('*')
                     .eq('identificacion', studentId)
                     .single();
-                
+
                 studentRecord = checkData;
 
                 if (checkData && (!checkData.registro_completado || !checkData.centro_procedencia)) {
@@ -422,7 +559,7 @@
                         img.src = checkData.foto_url;
                         img.classList.remove('hidden');
                         document.getElementById('profile-photo-placeholder').classList.add('hidden');
-                        
+
                         // Small navbar photo
                         const headerPhoto = document.getElementById('header-photo');
                         if (headerPhoto) {
@@ -431,21 +568,21 @@
                             const initialsElement = document.getElementById('header-initials');
                             if (initialsElement) initialsElement.classList.add('hidden');
                         }
-                        
+
                         // Ocultar advertencia de foto
                         const warning = document.getElementById('photo-warning');
-                        if(warning) warning.style.display = 'none';
+                        if (warning) warning.style.display = 'none';
                     }
                     if (checkData.centro_procedencia) document.getElementById('profile-school').innerText = checkData.centro_procedencia;
                     if (checkData.encargado_nombre) document.getElementById('profile-encargado-name').innerText = checkData.encargado_nombre;
                     if (checkData.encargado_telefono) document.getElementById('profile-encargado-phone').innerText = checkData.encargado_telefono;
                     if (checkData.encargado_correo) document.getElementById('profile-encargado-email').innerText = checkData.encargado_correo;
-                    
+
                     // Nuevos campos
                     if (checkData.fecha_nacimiento) {
                         const bday = new Date(checkData.fecha_nacimiento);
                         document.getElementById('profile-birth').innerText = bday.toLocaleDateString('es-CR');
-                        
+
                         // Calcular Edad dinámicamente
                         const today = new Date();
                         let age = today.getFullYear() - bday.getFullYear();
@@ -457,7 +594,12 @@
                     }
                     if (checkData.numero_sobre) document.getElementById('profile-sobre').innerText = `#${checkData.numero_sobre}`;
                     if (checkData.estado) document.getElementById('profile-status').innerText = checkData.estado;
-                    
+
+                    if (checkData.tiene_adecuacion) {
+                        document.getElementById('profile-adecuacion-block').classList.remove('hidden');
+                        document.getElementById('profile-adecuacion-detalle').innerText = checkData.detalle_adecuacion || 'Sin detalles registrados.';
+                    }
+
                     // Cita
                     if (checkData.cita_fecha) {
                         document.getElementById('profile-cita-block').classList.remove('hidden');
@@ -474,35 +616,35 @@
                 document.getElementById('greeting').innerText = `¡Hola, ${studentName}!`;
                 document.getElementById('header-name').innerText = studentName;
                 document.getElementById('header-id').innerText = studentId || '';
-                
+
                 const initials = studentName.charAt(0).toUpperCase() + (studentLastName ? studentLastName.charAt(0).toUpperCase() : '');
                 document.getElementById('header-initials').innerText = initials;
-                
+
                 document.getElementById('profile-name').innerText = `${studentName} ${studentLastName || ''}`.trim();
                 document.getElementById('profile-id').innerText = studentId || '';
             }
-            
+
             // Inicializar Quill con tecla Enter fija
             const studentBindings = {
                 customEnter: {
                     key: 13,
                     shiftKey: false,
-                    handler: function() {
+                    handler: function () {
                         sendStudentMessage();
                         return false;
                     }
                 }
             };
-            
+
             window.studentChatEditor = new Quill('#student-chat-input', {
                 theme: 'snow',
-                modules: { 
+                modules: {
                     toolbar: '#student-quill-toolbar',
                     keyboard: { bindings: studentBindings }
                 },
                 placeholder: 'Escribe tu mensaje...'
             });
-            
+
             document.querySelector('#emoji-picker-container-student emoji-picker').addEventListener('emoji-click', event => {
                 const emoji = event.detail.unicode;
                 const range = window.studentChatEditor.getSelection(true);
@@ -513,18 +655,18 @@
             if (studentRecord) {
                 window.currentStudentId = studentRecord.id;
                 window.currentStudentData = studentRecord;
-                
+
                 // Cargar avisos inmediatamente al iniciar
                 loadAvisos();
-                
+
                 checkUnreadMessages();
-                
+
                 // Suscripción a Tiempo Real
                 supabaseClient
                     .channel('mensajes_estudiante')
-                    .on('postgres_changes', { 
-                        event: 'INSERT', 
-                        schema: 'public', 
+                    .on('postgres_changes', {
+                        event: 'INSERT',
+                        schema: 'public',
                         table: 'admisiones_mensajes',
                         filter: `aspirante_id=eq.${window.currentStudentId}`
                     }, payload => {
@@ -544,15 +686,15 @@
                     }, payload => {
                         const newData = payload.new;
                         // Notificar si se modificó la cita
-                        if (newData.cita_fecha !== window.currentStudentData.cita_fecha || 
+                        if (newData.cita_fecha !== window.currentStudentData.cita_fecha ||
                             newData.cita_hora !== window.currentStudentData.cita_hora) {
-                            
+
                             window.currentStudentData = newData;
-                            
+
                             // Reproducir sonido
                             const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
                             audio.play().catch(e => console.log('Audio error:', e));
-                            
+
                             Swal.fire({
                                 icon: 'info',
                                 title: 'Cita de Examen Asignada',
@@ -569,6 +711,49 @@
                         }
                     })
                     .subscribe();
+
+                // --- NUEVO: Suscripción a Muro de Avisos (Realtime) ---
+                // Movemos la suscripción aquí para asegurar que solo se active tras validar al estudiante
+                supabaseClient
+                    .channel('muro_avisos_realtime')
+                    .on('postgres_changes', {
+                        event: '*',
+                        schema: 'public',
+                        table: 'admisiones_avisos'
+                    }, payload => {
+                        console.log('Cambio en Avisos detectado:', payload.eventType);
+
+                        if (payload.eventType === 'INSERT') {
+                            const aviso = payload.new;
+                            const nowIso = new Date().toISOString();
+
+                            // Solo notificar si no está oculto y ya es hora de publicarlo
+                            if (!aviso.is_hidden && (!aviso.fecha_publicacion || aviso.fecha_publicacion <= nowIso)) {
+                                // Notificación sonora
+                                const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                                audio.play().catch(e => console.log('Audio notify error:', e));
+
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: 'info',
+                                    title: '¡Nuevo Comunicado!',
+                                    text: aviso.titulo,
+                                    showConfirmButton: false,
+                                    timer: 6000,
+                                    timerProgressBar: true
+                                });
+
+                                // Recargar la lista
+                                loadAvisos();
+                            }
+                        } else if (payload.eventType === 'UPDATE' || payload.eventType === 'DELETE') {
+                            // Si se edita o borra, recargamos la lista silenciosamente
+                            // (sin toast para no molestar si solo fue un cambio de formato o like)
+                            loadAvisos(true);
+                        }
+                    })
+                    .subscribe();
             }
 
             updateExamCard(studentRecord);
@@ -580,7 +765,7 @@
             const step2Text = document.getElementById('step2-text');
             const examCardContainer = document.getElementById('exam-card-container');
             const examContent = document.getElementById('exam-card-content');
-            
+
             if (!data || !data.cita_fecha) {
                 if (step2Container) {
                     step2Container.className = "bg-white p-6 rounded-xl shadow-sm border border-voca-blue flex items-start gap-4 ring-2 ring-blue-50 transition-all duration-300";
@@ -590,7 +775,7 @@
                 }
 
                 if (examCardContainer) examCardContainer.classList.add('hidden');
-                
+
                 if (examContent) {
                     examContent.innerHTML = `
                         <div class="text-center w-full py-4">
@@ -620,7 +805,7 @@
                 const [year, month, day] = data.cita_fecha.split('-');
                 const dateObj = new Date(year, month - 1, day);
                 const monthName = dateObj.toLocaleString('es-ES', { month: 'short' });
-                
+
                 examContent.innerHTML = `
                     <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
                         <div class="bg-blue-50 p-4 rounded-lg text-center min-w-[120px] w-full sm:w-auto">
@@ -657,7 +842,7 @@
 
             if (result.isConfirmed) {
                 Swal.fire({ title: 'Confirmando...', didOpen: () => Swal.showLoading() });
-                
+
                 const { error } = await supabaseClient
                     .from('admisiones_aspirantes')
                     .update({ cita_confirmada: true })
@@ -677,7 +862,7 @@
         function viewFullPhoto() {
             const photoUrl = document.getElementById('profile-photo').src;
             if (!photoUrl || photoUrl === window.location.href) return;
-            
+
             let viewer = document.getElementById('student-image-viewer');
             if (!viewer) {
                 viewer = document.createElement('div');
@@ -693,7 +878,7 @@
                 };
                 document.body.appendChild(viewer);
             }
-            
+
             document.getElementById('student-image-viewer-img').src = photoUrl;
             viewer.classList.remove('hidden');
             setTimeout(() => viewer.classList.remove('opacity-0'), 10);
@@ -701,12 +886,12 @@
 
         // --- Lógica del Chat ---
         let chatOpen = false;
-        
+
         function toggleChatPanel() {
             chatOpen = !chatOpen;
             const panel = document.getElementById('chat-offcanvas');
             const backdrop = document.getElementById('chat-backdrop');
-            if(chatOpen) {
+            if (chatOpen) {
                 panel.classList.remove('translate-x-full');
                 backdrop.classList.remove('hidden');
                 loadStudentMessages();
@@ -717,44 +902,44 @@
         }
 
         async function checkUnreadMessages() {
-            if(!window.currentStudentId) return;
+            if (!window.currentStudentId) return;
             const { count } = await supabaseClient
                 .from('admisiones_mensajes')
                 .select('*', { count: 'exact', head: true })
                 .eq('aspirante_id', window.currentStudentId)
                 .eq('remitente', 'admin')
                 .eq('leido', false);
-                
+
             const badge = document.getElementById('sidebar-msg-badge');
             const mobileBadge = document.getElementById('mobile-sidebar-msg-badge');
             const bellBadge = document.getElementById('bell-badge');
-            
-            if(count > 0) {
-                if(badge) {
+
+            if (count > 0) {
+                if (badge) {
                     badge.innerText = count;
                     badge.classList.remove('hidden');
                 }
-                if(mobileBadge) {
+                if (mobileBadge) {
                     mobileBadge.innerText = count;
                     mobileBadge.classList.remove('hidden');
                 }
-                if(bellBadge) bellBadge.classList.remove('hidden');
+                if (bellBadge) bellBadge.classList.remove('hidden');
             } else {
-                if(badge) badge.classList.add('hidden');
-                if(mobileBadge) mobileBadge.classList.add('hidden');
-                if(bellBadge) bellBadge.classList.add('hidden');
+                if (badge) badge.classList.add('hidden');
+                if (mobileBadge) mobileBadge.classList.add('hidden');
+                if (bellBadge) bellBadge.classList.add('hidden');
             }
         }
 
         async function loadStudentMessages() {
-            if(!window.currentStudentId) return;
-            
+            if (!window.currentStudentId) return;
+
             const { data: mensajes } = await supabaseClient
                 .from('admisiones_mensajes')
                 .select('*')
                 .eq('aspirante_id', window.currentStudentId)
                 .order('fecha_hora', { ascending: true });
-                
+
             // Marcar como leídos
             await supabaseClient
                 .from('admisiones_mensajes')
@@ -762,11 +947,11 @@
                 .eq('aspirante_id', window.currentStudentId)
                 .eq('remitente', 'admin')
                 .eq('leido', false);
-                
+
             checkUnreadMessages();
 
             const container = document.getElementById('student-chat-messages');
-            if(!mensajes || mensajes.length === 0) {
+            if (!mensajes || mensajes.length === 0) {
                 container.innerHTML = `
                     <div class="text-center text-gray-400 mt-16 z-10 relative">
                         <div class="w-20 h-20 bg-white rounded-full mx-auto flex items-center justify-center shadow-sm mb-4">
@@ -778,13 +963,13 @@
                     </div>`;
                 return;
             }
-            
+
             container.innerHTML = mensajes.map(m => {
                 const isAdmin = m.remitente === 'admin';
                 const alignment = isAdmin ? 'justify-start' : 'justify-end';
                 const bgColor = isAdmin ? 'bg-white text-gray-800 border border-gray-200 shadow-sm' : 'bg-voca-blue text-white shadow-md';
-                const time = new Date(m.fecha_hora).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                
+                const time = new Date(m.fecha_hora).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
                 let adjuntoHtml = '';
                 if (m.adjunto_url) {
                     if (m.adjunto_url.match(/\.(jpeg|jpg|gif|png)$/i)) {
@@ -808,7 +993,7 @@
                     </div>
                 `;
             }).join('');
-            
+
             container.scrollTop = container.scrollHeight;
         }
 
@@ -821,11 +1006,11 @@
             const input = document.getElementById('student-chat-attachment');
             const preview = document.getElementById('attachment-preview-student');
             const nameSpan = document.getElementById('attachment-name-student');
-            
+
             if (input.files && input.files.length > 0) {
                 const file = input.files[0];
                 const maxSize = 5 * 1024 * 1024; // 5MB limit
-                
+
                 if (file.size > maxSize) {
                     Swal.fire({
                         icon: 'warning',
@@ -840,7 +1025,7 @@
                     preview.classList.add('hidden');
                     return;
                 }
-                
+
                 nameSpan.innerHTML = `<i class="fa-solid fa-file-circle-check mr-1"></i> ${file.name}`;
                 preview.classList.remove('hidden');
             } else {
@@ -870,23 +1055,23 @@
             const text = window.studentChatEditor.root.innerHTML;
             const plainText = window.studentChatEditor.getText().trim();
             const file = document.getElementById('student-chat-attachment').files[0];
-            
-            if((!plainText && !file && text === '<p><br></p>') || !window.currentStudentId) return;
-            
+
+            if ((!plainText && !file && text === '<p><br></p>') || !window.currentStudentId) return;
+
             const btn = document.getElementById('send-student-btn');
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-xs"></i>';
-            
+
             let adjuntoUrl = null;
             let adjuntoNombre = null;
-            
+
             if (file) {
                 const fileExt = file.name.split('.').pop();
                 const fileName = `${window.currentStudentId}/${Date.now()}_student.${fileExt}`;
                 const { data: uploadData, error: uploadError } = await supabaseClient.storage
                     .from('admisiones_chat_adjuntos')
                     .upload(fileName, file);
-                    
+
                 if (uploadError) {
                     console.error("Error subiendo adjunto:", uploadError);
                     Swal.fire('Error', 'No se pudo subir el archivo adjunto.', 'error');
@@ -894,15 +1079,15 @@
                     btn.innerHTML = '<i class="fa-solid fa-paper-plane text-xs"></i>';
                     return;
                 }
-                
+
                 const { data: publicUrlData } = supabaseClient.storage
                     .from('admisiones_chat_adjuntos')
                     .getPublicUrl(fileName);
-                    
+
                 adjuntoUrl = publicUrlData.publicUrl;
                 adjuntoNombre = file.name;
             }
-            
+
             const { error } = await supabaseClient
                 .from('admisiones_mensajes')
                 .insert([{
@@ -912,8 +1097,8 @@
                     adjunto_url: adjuntoUrl,
                     adjunto_nombre: adjuntoNombre
                 }]);
-                
-            if(!error) {
+
+            if (!error) {
                 window.studentChatEditor.setText('');
                 clearAttachmentStudent();
                 loadStudentMessages();
@@ -921,7 +1106,7 @@
                 console.error(error);
                 Swal.fire('Error', 'No se pudo enviar el mensaje: ' + error.message, 'error');
             }
-            
+
             btn.disabled = false;
             btn.innerHTML = '<i class="fa-solid fa-paper-plane text-xs"></i>';
         }
@@ -932,17 +1117,17 @@
                 const view = document.getElementById('view-' + t);
                 if (view) view.classList.add('hidden');
             });
-            
+
             // Show selected view
             const selectedView = document.getElementById('view-' + tabId);
             if (selectedView) selectedView.classList.remove('hidden');
-            
+
             // Update tabs styling
             const tabs = ['progreso', 'datos'];
             tabs.forEach(t => {
                 const el = document.getElementById('tab-' + t);
                 if (!el) return;
-                
+
                 if (t === tabId) {
                     el.classList.add('bg-blue-800', 'text-white');
                     el.classList.remove('text-blue-200');
@@ -959,7 +1144,7 @@
         }
 
         // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             const dropdown = document.getElementById('notifications-dropdown');
             const bellButton = document.querySelector('button[title="Notificaciones"]');
             if (dropdown && !dropdown.classList.contains('hidden')) {
@@ -996,14 +1181,14 @@
 
         function renderNotificationsDropdown() {
             if (!window.currentAvisosData) return;
-            
+
             const listContainer = document.getElementById('notifications-list');
             const readIds = getReadNotifications();
             let unreadCount = 0;
             let html = '';
 
             const recentAvisos = window.currentAvisosData.slice(0, 10); // Mostrar max 10
-            
+
             if (recentAvisos.length === 0) {
                 listContainer.innerHTML = '<div class="p-6 text-center text-gray-500 text-sm">No hay notificaciones</div>';
                 document.getElementById('bell-badge').classList.add('hidden');
@@ -1013,12 +1198,12 @@
             recentAvisos.forEach(aviso => {
                 const isRead = readIds.includes(aviso.id);
                 if (!isRead) unreadCount++;
-                
+
                 const date = new Date(aviso.fecha_publicacion || aviso.created_at).toLocaleString('es-CR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
                 const bgClass = isRead ? 'bg-white' : 'bg-blue-50';
                 const dotClass = isRead ? 'hidden' : 'inline-block';
                 const textColor = isRead ? 'text-gray-500' : 'text-gray-800 font-semibold';
-                
+
                 html += `
                     <div onclick="openNotification('${aviso.id}')" class="p-3 border-b border-gray-100 ${bgClass} hover:bg-gray-50 cursor-pointer transition">
                         <div class="flex gap-3">
@@ -1034,9 +1219,9 @@
                     </div>
                 `;
             });
-            
+
             listContainer.innerHTML = html;
-            
+
             const badge = document.getElementById('bell-badge');
             if (unreadCount > 0) {
                 badge.classList.remove('hidden');
@@ -1050,7 +1235,7 @@
             markNotificationAsRead(id);
             toggleNotificationsMenu();
             scrollToAvisos();
-            
+
             setTimeout(() => {
                 const avisoElement = document.getElementById('aviso-card-' + id);
                 if (avisoElement) {
@@ -1071,9 +1256,13 @@
             }, 100); // Pequeño retraso para asegurar que el tab se renderizó
         }
 
-        async function loadAvisos() {
+        async function loadAvisos(isSilent = false) {
             const container = document.getElementById('muro-container');
-            container.innerHTML = '<div class="text-center py-10"><i class="fa-solid fa-spinner animate-spin text-3xl text-voca-blue mb-3"></i><p class="text-gray-500">Cargando avisos...</p></div>';
+
+            // Solo mostramos el spinner si no es una carga silenciosa (Realtime)
+            if (!isSilent) {
+                container.innerHTML = '<div class="text-center py-10"><i class="fa-solid fa-spinner animate-spin text-3xl text-voca-blue mb-3"></i><p class="text-gray-500">Cargando avisos...</p></div>';
+            }
 
             // Limpiar timeouts previos
             if (window.avisoTimeouts) {
@@ -1087,7 +1276,7 @@
                 .eq('is_hidden', false)
                 .order('is_pinned', { ascending: false, nullsFirst: false })
                 .order('fecha_publicacion', { ascending: false });
-                
+
             let data = [];
             if (allData) {
                 const now = new Date();
@@ -1107,15 +1296,15 @@
                     }
                 });
             }
-            
+
             // Insertar la cita personal como un "Aviso Virtual" para que aparezca en el Muro y active notificaciones
             if (window.currentStudentData && window.currentStudentData.cita_fecha) {
                 const [year, month, day] = window.currentStudentData.cita_fecha.split('-');
                 const fechaFormat = `${day}/${month}/${year}`;
                 const creationDate = window.currentStudentData.created_at || new Date().toISOString();
-                
+
                 const isConfirmed = window.currentStudentData.cita_confirmada;
-                const confirmButtonHtml = isConfirmed 
+                const confirmButtonHtml = isConfirmed
                     ? `<div class="mt-4"><button disabled class="bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm font-bold border border-green-200 cursor-default opacity-80"><i class="fa-solid fa-check-circle mr-2"></i> Asistencia Confirmada</button></div>`
                     : `<div class="mt-4"><button onclick="confirmCita()" class="bg-voca-blue hover:bg-blue-800 text-white px-4 py-2 rounded-lg text-sm font-bold shadow transition transform hover:-translate-y-0.5"><i class="fa-solid fa-clipboard-check mr-2"></i> Confirmar Asistencia al Examen</button></div>`;
 
@@ -1129,16 +1318,16 @@
                     fecha_publicacion: creationDate,
                     liked_by: []
                 };
-                
+
                 data.unshift(virtualAviso);
             }
-            
+
             // Guardamos los datos visibles globalmente para el modal de imágenes y notificaciones
             window.currentAvisosData = data;
-            
+
             // Renderizar notificaciones DESPUES de inyectar la cita personal
             renderNotificationsDropdown();
-                
+
             let html = '';
 
             if (error) {
@@ -1157,7 +1346,7 @@
             if (data && data.length > 0) {
                 data.forEach(aviso => {
                     const date = new Date(aviso.created_at).toLocaleString('es-CR');
-                    
+
                     let icon = 'fa-bullhorn';
                     let bgColor = 'bg-white';
                     let borderClass = 'border border-gray-100';
@@ -1168,7 +1357,7 @@
                     if (aviso.is_pinned) {
                         pinBadge = '<div class="absolute top-4 right-4 text-blue-400" title="Aviso fijado"><i class="fa-solid fa-thumbtack"></i></div>';
                     }
-                    
+
                     if (aviso.tipo === 'urgente') {
                         icon = 'fa-triangle-exclamation';
                         borderClass = 'border border-voca-red ring-1 ring-red-50';
@@ -1210,7 +1399,7 @@
                     const likesList = Array.isArray(aviso.liked_by) ? aviso.liked_by : [];
                     const likesCount = likesList.length;
                     const hasLiked = window.currentStudentId && likesList.includes(window.currentStudentId);
-                    
+
                     const likeButton = isVirtual ? '' : `
                         <button id="like-btn-${aviso.id}" onclick="toggleLike('${aviso.id}', ${hasLiked})" class="flex items-center gap-1.5 transition ${hasLiked ? 'text-voca-red hover:text-red-600 scale-110' : 'text-gray-400 hover:text-voca-red'} transform active:scale-125">
                             <i class="fa-${hasLiked ? 'solid' : 'regular'} fa-heart text-xl"></i>
@@ -1249,7 +1438,7 @@
 
         function showImagePreview(avisoId) {
             const aviso = window.currentAvisosData.find(a => a.id === avisoId);
-            if(!aviso) return;
+            if (!aviso) return;
 
             Swal.fire({
                 imageUrl: aviso.adjunto_url,
@@ -1278,7 +1467,7 @@
                 const icon = btn.querySelector('i');
                 const span = btn.querySelector('span');
                 let count = parseInt(span.innerText) || 0;
-                
+
                 if (currentlyLiked) {
                     count = Math.max(0, count - 1);
                     icon.classList.remove('fa-solid');
@@ -1306,7 +1495,7 @@
             if (fetchError) return;
 
             let likedBy = currentAviso.liked_by || [];
-            
+
             if (currentlyLiked) {
                 likedBy = likedBy.filter(id => id !== window.currentStudentId);
             } else {
@@ -1321,43 +1510,8 @@
                 .eq('id', avisoId);
         }
 
-        // Configurar Realtime para el muro de avisos
-        const avisosSubscription = supabaseClient
-            .channel('public:admisiones_avisos')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'admisiones_avisos' }, payload => {
-                if (payload.eventType === 'INSERT') {
-                    const aviso = payload.new;
-                    const nowIso = new Date().toISOString();
-                    if (!aviso.is_hidden) {
-                        if (!aviso.fecha_publicacion || aviso.fecha_publicacion <= nowIso) {
-                            renderNotificationsDropdown();
-                            
-                            Swal.fire({
-                                toast: true,
-                                position: 'top-end',
-                                icon: 'info',
-                                title: '¡Nuevo Comunicado Global!',
-                                text: aviso.titulo,
-                                showConfirmButton: false,
-                                timer: 6000,
-                                timerProgressBar: true,
-                                didOpen: (toast) => {
-                                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                                    toast.addEventListener('mouseleave', Swal.resumeTimer)
-                                }
-                            });
-                        }
-                        // Recargamos los avisos para que se muestre ahora o se le asigne el timer si es para el futuro
-                        loadAvisos();
-                    }
-                } else if (payload.eventType === 'DELETE') {
-                    loadAvisos();
-                } else if (payload.eventType === 'UPDATE') {
-                    // Ignoramos los updates en Realtime para evitar parpadeos y saltos 
-                    // en la pantalla cuando otras personas dan Like
-                }
-            })
-            .subscribe();
+        // La suscripción de avisos se ha movido dentro del bloque de inicialización del estudiante (DOMContentLoaded)
+        // para garantizar que solo se active para usuarios autenticados y de forma más robusta.
 
         document.addEventListener('DOMContentLoaded', () => {
             // Lógica del botón flotante para volver arriba
@@ -1403,7 +1557,7 @@
                     localStorage.removeItem('studentId');
                     localStorage.removeItem('studentPhone');
                     // Opcional: limpiar otros datos si existen
-                    
+
                     window.location.href = 'login.html';
                 }
             });
@@ -1413,7 +1567,7 @@
             const sidebar = document.getElementById('mobile-sidebar');
             const overlay = document.getElementById('mobile-sidebar-overlay');
             const isOpen = !sidebar.classList.contains('-translate-x-full');
-            
+
             if (isOpen) {
                 sidebar.classList.add('-translate-x-full');
                 overlay.classList.add('opacity-0');
@@ -1431,4 +1585,5 @@
     </script>
 
 </body>
+
 </html>

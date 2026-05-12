@@ -18,6 +18,67 @@ document.addEventListener('DOMContentLoaded', () => {
     const sobreWarning = document.getElementById('sobre-warning');
     const btnValidarSobre = document.getElementById('btnValidarSobre');
 
+    // --- NUEVO: Advertencia Invasiva de Registro ---
+    const showRegistrationWarning = () => {
+        // Eliminado el chequeo de sessionStorage por solicitud: "debe ser invasivo cada vez que se llegue ahí"
+        
+        Swal.fire({
+            title: '<span style="color: #003366; font-family: Outfit, sans-serif;">¡ACCIÓN REQUERIDA!</span>',
+            html: `
+                <div class="text-left space-y-4 font-inter">
+                    <p style="font-size: 1.1rem; color: #333; line-height: 1.6;">
+                        Está ingresando al área de registro oficial. Por favor, confirme:
+                    </p>
+                    <div style="background: #fff5f5; border-left: 4px solid #cc0000; padding: 15px; margin-top: 15px;">
+                        <p style="color: #cc0000; font-weight: bold; font-size: 1.1rem; margin-bottom: 5px;">
+                            <i class="fa-solid fa-circle-exclamation mr-2"></i> LOS DATOS DEBEN SER DEL ESTUDIANTE
+                        </p>
+                        <p style="font-size: 0.9rem; color: #444; font-weight: 500;">
+                            No use el nombre, cédula ni correo del padre/madre en los campos que siguen.
+                        </p>
+                    </div>
+                    <div style="margin-top: 15px; padding: 10px; background: #f0f7ff; border-radius: 8px; font-size: 0.85rem; color: #003366;">
+                        <i class="fa-solid fa-info-circle mr-1"></i> La información del encargado legal se solicitará en el Paso 2 dentro del portal.
+                    </div>
+                </div>
+            `,
+            icon: 'warning',
+            iconColor: '#cc0000',
+            confirmButtonText: 'ENTIENDO, USARÉ DATOS DEL ESTUDIANTE',
+            confirmButtonColor: '#003366',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            backdrop: `rgba(204,0,0,0.4)`, // Fondo rojizo más invasivo
+            showClass: { popup: 'animate__animated animate__zoomIn' }
+        }).then(() => {
+            if (identificationInput) identificationInput.focus();
+        });
+    };
+
+    // Observador para detectar cuándo el usuario llega a la sección de registro mediante scroll
+    const registrationSection = document.getElementById('registro');
+    if (registrationSection) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                // Si la sección es visible al menos un 30% y no hay otra alerta abierta
+                if (entry.isIntersecting && !Swal.isVisible()) {
+                    showRegistrationWarning();
+                }
+            });
+        }, { threshold: 0.3 });
+        
+        observer.observe(registrationSection);
+    }
+    
+    // Disparadores adicionales para asegurar que aparezca siempre
+    document.querySelectorAll('a[href="#registro"]').forEach(link => {
+        link.addEventListener('click', (e) => {
+            if (!Swal.isVisible()) {
+                setTimeout(showRegistrationWarning, 400);
+            }
+        });
+    });
+
     // Validation functions
     const isRequired = value => value.trim() !== '';
     const isLengthValid = (value, min) => value.length >= min;
